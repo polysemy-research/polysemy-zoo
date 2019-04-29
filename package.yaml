@@ -23,9 +23,25 @@ dependencies:
 - base >= 4.7 && < 5
 - polysemy
 - polysemy-plugin
+- containers
 
 ghc-options:
   - -fplugin=Polysemy.Plugin
+
+default-extensions:
+  - DataKinds
+  - DeriveFunctor
+  - FlexibleContexts
+  - GADTs
+  - LambdaCase
+  - PolyKinds
+  - RankNTypes
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - TypeApplications
+  - TypeOperators
+  - TypeFamilies
+  - UnicodeSyntax
 
 library:
   source-dirs: src
