@@ -20,6 +20,9 @@ import Polysemy.State
 import qualified Data.Map as M
 
 
+------------------------------------------------------------------------------
+-- | Models things like Redis, HTTP GET/POST, etc. Things that are keyed, have
+-- a value, and may or may not be there.
 data KVStore k v m a where
   LookupKV :: k -> KVStore k v m (Maybe v)
   UpdateKV :: k -> Maybe v -> KVStore k v m ()
