@@ -15,9 +15,9 @@ module Polysemy.KVStore
   , runKVStorePurely
   ) where
 
-import Polysemy
-import Polysemy.State
 import qualified Data.Map as M
+import           Polysemy
+import           Polysemy.State
 
 
 ------------------------------------------------------------------------------
