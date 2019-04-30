@@ -18,7 +18,7 @@ gives @Sem r@ a "MonadRandom" instance (from "random-fu"). This is an Orphan ins
 module Polysemy.RandomFu
   (
     -- * Effect
-    Random (..)
+    RandomFu (..)
 
     -- * Actions
   , sampleRVar
@@ -49,16 +49,16 @@ single random-variate of any type, @t@ with a
 @Data.Random.Prim t@ constructor, currently one of @Word8@, @Word16@,
 @Word32@, @Word64@, @Double@ or N-byte integer.
 -}
-data Random m r where
-  SampleRVar ::  R.RVar t -> Random m t
-  GetRandomPrim :: R.Prim t -> Random m t
+data RandomFu m r where
+  SampleRVar ::  R.RVar t -> RandomFu m t
+  GetRandomPrim :: R.Prim t -> RandomFu m t
 
-makeSem ''Random
+makeSem ''RandomFu
 
 ------------------------------------------------------------------------------
--- | use the 'Random` effect to sample from a "random-fu" @Distribution@.
+-- | use the 'RandomFu` effect to sample from a "random-fu" @Distribution@.
 sampleDist
-  :: (Member Random r, R.Distribution d t) => d t -> Sem r t
+  :: (Member RandomFu r, R.Distribution d t) => d t -> Sem r t
 sampleDist = sampleRVar . R.rvar
 
 ------------------------------------------------------------------------------
@@ -67,12 +67,9 @@ runRandomSource
   :: forall s r a
    . R.RandomSource (Sem r) s
   => s
-  -> Sem (Random ': r) a
+  -> Sem (RandomFu ': r) a
   -> Sem r a
-runRandomSource source = interpret f
- where
-  f :: forall m x . (Random m x -> Sem r x)
-  f r = case r of
+runRandomSource source = interpret $ \case
     SampleRVar    rv -> R.runRVar (R.sample rv) source
     GetRandomPrim pt -> R.runRVar (R.getRandomPrim pt) source
 {-# INLINE runRandomSource #-}
@@ -82,12 +79,9 @@ runRandomSource source = interpret f
 runRandomIO
   :: forall r a
    . MonadIO (Sem r)
-  => Sem (Random ': r) a
+  => Sem (RandomFu ': r) a
   -> Sem r a
-runRandomIO = interpret f
- where
-  f :: forall m x . (Random m x -> Sem r x)
-  f r = case r of
+runRandomIO = interpret $ \case
     SampleRVar    rv -> liftIO $ R.sample rv
     GetRandomPrim pt -> liftIO $ R.getRandomPrim pt
 {-# INLINE runRandomIO #-}
@@ -97,7 +91,7 @@ runRandomIO = interpret f
 runRandomIOPureMT
   :: MonadIO (Sem r)
   => R.PureMT
-  -> Sem (Random ': r) a
+  -> Sem (RandomFu ': r) a
   -> Sem r a
 runRandomIOPureMT source re =
   liftIO (newIORef source) >>= flip runRandomSource re
@@ -105,6 +99,6 @@ runRandomIOPureMT source re =
 
 -- | Orphan instance of 'R.MonadRandom'
 $(R.monadRandom [d|
-        instance Member Random r => R.MonadRandom (Sem r) where
+        instance Member RandomFu r => R.MonadRandom (Sem r) where
             getRandomPrim = getRandomPrim
     |])
