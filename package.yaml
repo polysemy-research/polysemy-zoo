@@ -24,6 +24,9 @@ dependencies:
 - polysemy
 - polysemy-plugin
 - containers
+- random
+- random-fu
+- random-source
 
 ghc-options:
   - -fplugin=Polysemy.Plugin

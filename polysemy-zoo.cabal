@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.1.
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f51dcf12760bbcef89525ecaa18e55ee18711dc8c9db83625aeba39e98c966b8
+-- hash: d636be0fa98f479625e1136abac7483d258ee88b9626ff7efd94340824ccfd10
 
 name:           polysemy-zoo
 version:        0.1.0.0
@@ -28,6 +28,8 @@ source-repository head
 library
   exposed-modules:
       Polysemy.KVStore
+      Polysemy.Random
+      Polysemy.RandomFu
   other-modules:
       Paths_polysemy_zoo
   hs-source-dirs:
@@ -39,6 +41,9 @@ library
     , containers
     , polysemy
     , polysemy-plugin
+    , random
+    , random-fu
+    , random-source
   default-language: Haskell2010
 
 test-suite polysemy-zoo-test
@@ -58,4 +63,7 @@ test-suite polysemy-zoo-test
     , polysemy
     , polysemy-plugin
     , polysemy-zoo
+    , random
+    , random-fu
+    , random-source
   default-language: Haskell2010
