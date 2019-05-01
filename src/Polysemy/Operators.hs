@@ -12,7 +12,46 @@ foo :: 'Member' ('Lift' 'IO') r => 'String' -> 'Int' -> 'Sem' r ()
 can be written simply as:
 
 @
-foo :: 'String' -> 'Int' -> 'IO' ~\@> ()
+foo :: 'String' -> 'Int' -> 'IO' '~@>' ()
+@
+
+Working example with operators:
+
+@
+import Data.Function
+import Polysemy
+import Polysemy.Operators
+import Polysemy.Random
+
+data ConsoleIO m a where
+  WriteStrLn ::           'String' -> ConsoleIO m ()
+  ReadStrLn  ::                     ConsoleIO m 'String'
+  ShowStrLn  :: 'Show' a => a      -> ConsoleIO m ()
+
+'makeSem' ''ConsoleIO
+
+-- runConsoleIO :: Member (Lift IO) r => Sem (ConsoleIO:r) a -> Sem r a
+runConsoleIO :: ConsoleIO:r '@>' a -> 'IO' '~@' r '@>' a
+runConsoleIO = 'interpret' \\case
+  WriteStrLn s -> 'sendM' '$' 'putStrLn' s
+  ReadStrLn    -> 'sendM'   'getLine'
+  ShowStrLn  v -> 'sendM' '$' 'print' v
+
+main :: 'IO' ()
+main = program
+     'Data.Function.&' runConsoleIO
+     'Data.Function.&' 'Polysemy.Random.runRandomIO'
+     'Data.Function.&' 'runM'
+
+-- program :: Members \'[Random, ConsoleIO] r => Sem r ()
+program :: \'['Polysemy.Random', ConsoleIO] '>@>' ()
+program = do
+  writeStrLn "It works! Write something:"
+  val <- readStrLn
+  writeStrLn '$' "Here it is!: " '++' val
+  num <- 'Polysemy.Random.random' \@'Int'
+  writeStrLn '$' "Some random number:"
+  showStrLn num
 @
 
 See documentation of specific operators for more details.
@@ -68,7 +107,7 @@ type family SemList s where
 -- can be written as:
 --
 -- @
--- foo :: 'Polysemy.State.State' 'Int' : r \@> ()
+-- foo :: 'Polysemy.State.State' 'Int' : r '@>' ()
 -- @
 --
 -- 'Sem' with list of one effect:
@@ -80,13 +119,13 @@ type family SemList s where
 -- can be written as both (with the latter preferred):
 --
 -- @
--- foo :: \'['Polysemy.State.State' 'Int'] \@> ()
+-- foo :: \'['Polysemy.State.State' 'Int'] '@>' ()
 -- @
 --
 -- and:
 --
 -- @
--- foo :: 'Polysemy.State.State' 'Int' \@- ()
+-- foo :: 'Polysemy.State.State' 'Int' '@-' ()
 -- @
 --
 -- where effect without list gets put into one automatically.
@@ -100,7 +139,7 @@ type family SemList s where
 -- can be written simply as:
 --
 -- @
--- foo :: 'IO' \@~ ()
+-- foo :: 'IO' '@~' ()
 -- @
 --
 -- and will be automatically lifted and put into list.
@@ -128,7 +167,7 @@ type (@~) m = Sem '[Lift m]
 -- can be written as:
 --
 -- @
--- foo :: 'Polysemy.Output.Output' ['String'] : r \@> () -> \'['Polysemy.State.State' 'Int', 'Polysemy.Input.Input' 'String'] >\@ r \@> ()
+-- foo :: 'Polysemy.Output.Output' ['String'] : r '@>' () -> \'['Polysemy.State.State' 'Int', 'Polysemy.Input.Input' 'String'] '>@' r '@>' ()
 -- @
 --
 -- One member:
@@ -140,13 +179,13 @@ type (@~) m = Sem '[Lift m]
 -- can be written as both (with the latter preferred):
 --
 -- @
--- foo :: 'Polysemy.Output.Output' ['String'] : r \@> () -> \'['Polysemy.State.State' 'Int'] >\@ r \@> ()
+-- foo :: 'Polysemy.Output.Output' ['String'] : r '@>' () -> \'['Polysemy.State.State' 'Int'] '>@' r '@>' ()
 -- @
 --
 -- and:
 --
 -- @
--- foo :: 'Polysemy.Output.Output' ['String'] : r \@> () -> 'Polysemy.State.State' 'Int' -\@ r \@> ()
+-- foo :: 'Polysemy.Output.Output' ['String'] : r '@>' () -> 'Polysemy.State.State' 'Int' '-@' r '@>' ()
 -- @
 --
 -- __Exactly__ one, lifted monad as a member:
@@ -158,7 +197,7 @@ type (@~) m = Sem '[Lift m]
 -- can be written simply as:
 --
 -- @
--- foo :: 'Polysemy.Output.Output' ['String'] : r \@> () -> 'IO' ~\@ r \@> ()
+-- foo :: 'Polysemy.Output.Output' ['String'] : r '@>' () -> 'IO' '~@' r '@>' ()
 -- @
 infix 1 >@, -@, ~@
 
@@ -182,7 +221,7 @@ type (~@) m  s = Member  (Lift m) (SemList s) => s
 -- can be written as:
 --
 -- @
--- foo :: 'String' -> 'Int' -> \'['Polysemy.State.State' 'String', 'Polysemy.Input.Input' 'Int'] >\@> ()
+-- foo :: 'String' -> 'Int' -> \'['Polysemy.State.State' 'String', 'Polysemy.Input.Input' 'Int'] '>@>' ()
 -- @
 --
 -- Single member:
@@ -194,13 +233,13 @@ type (~@) m  s = Member  (Lift m) (SemList s) => s
 -- can be written as both (with the latter preferred):
 --
 -- @
--- foo :: 'String' -> 'Int' -> \'['Polysemy.Input.Input' 'Int'] >\@> ()
+-- foo :: 'String' -> 'Int' -> \'['Polysemy.Input.Input' 'Int'] '>@>' ()
 -- @
 --
 -- and:
 --
 -- @
--- foo :: 'String' -> 'Int' -> 'Polysemy.Input.Input' 'Int' -\@> ()
+-- foo :: 'String' -> 'Int' -> 'Polysemy.Input.Input' 'Int' '-@>' ()
 -- @
 --
 -- __Exactly__ one, lifted monad as a member:
@@ -212,7 +251,7 @@ type (~@) m  s = Member  (Lift m) (SemList s) => s
 -- can be written simply as:
 --
 -- @
--- foo :: 'IO' ~\@> ()
+-- foo :: 'IO' '~@>' ()
 -- @
 infix 1 >@>, -@>, ~@>
 
