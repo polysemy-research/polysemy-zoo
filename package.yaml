@@ -24,6 +24,9 @@ dependencies:
 - polysemy
 - polysemy-plugin
 - containers
+- kind-generics
+- kind-generics-th
+- aeson
 
 ghc-options:
   - -fplugin=Polysemy.Plugin

@@ -4,11 +4,13 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f51dcf12760bbcef89525ecaa18e55ee18711dc8c9db83625aeba39e98c966b8
+-- hash: 7a64b7c54363005ffe4cd9a34f0d7b16581f385cba86e4c4d13fddab52909fa0
 
 name:           polysemy-zoo
 version:        0.1.0.0
+synopsis:       Experimental, user-contributed effects and interpreters for polysemy
 description:    Please see the README on GitHub at <https://github.com/isovector/polysemy-zoo#readme>
+category:       Polysemy
 homepage:       https://github.com/isovector/polysemy-zoo#readme
 bug-reports:    https://github.com/isovector/polysemy-zoo/issues
 author:         Sandy Maguire
@@ -28,6 +30,8 @@ source-repository head
 library
   exposed-modules:
       Polysemy.KVStore
+      Polysemy.Operators
+      Polysemy.RPC
   other-modules:
       Paths_polysemy_zoo
   hs-source-dirs:
@@ -35,8 +39,11 @@ library
   default-extensions: DataKinds DeriveFunctor FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables StandaloneDeriving TypeApplications TypeOperators TypeFamilies UnicodeSyntax
   ghc-options: -fplugin=Polysemy.Plugin
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
     , containers
+    , kind-generics
+    , kind-generics-th
     , polysemy
     , polysemy-plugin
   default-language: Haskell2010
@@ -52,9 +59,12 @@ test-suite polysemy-zoo-test
   default-extensions: DataKinds DeriveFunctor FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables StandaloneDeriving TypeApplications TypeOperators TypeFamilies UnicodeSyntax
   ghc-options: -fplugin=Polysemy.Plugin -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
     , containers
     , hspec
+    , kind-generics
+    , kind-generics-th
     , polysemy
     , polysemy-plugin
     , polysemy-zoo
