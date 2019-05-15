@@ -27,6 +27,7 @@ dependencies:
 - kind-generics
 - kind-generics-th
 - aeson
+- ghc-prim
 
 ghc-options:
   - -fplugin=Polysemy.Plugin

@@ -11,6 +11,7 @@
 
 module Polysemy.RPC where
 
+import GHC.Types
 import Control.Applicative
 import Control.Monad
 import Data.Aeson
@@ -47,25 +48,26 @@ class RPCable e where
 
   default toRPC
       :: forall m x
-       . (GenericK (e m x) LoT0, GShow (RepK (e m x)) 'LoT0)
+       . (GenericK (e m) (x :&&: LoT0), GShow (RepK (e m)) (x :&&: 'LoT0))
       => e m x
       -> Value
-  toRPC = gtoRPC . fromK @_ @(e m x) @LoT0
+  toRPC = gtoRPC . fromK @_ @(e m) @(x :&&: LoT0)
 
   fromRPC :: Value -> Result (e m x)
   default fromRPC
       :: forall m x
-       . (GenericK (e m x) LoT0, GShow (RepK (e m x)) 'LoT0)
+       . (GenericK (e m) (x :&&: LoT0), GShow (RepK (e m)) (x :&&: 'LoT0))
       => Value
       -> Result (e m x)
-  fromRPC v = parse (fmap (toK @_ @(e m x) @LoT0) . gfromRPC) v
+  fromRPC v = parse (fmap (toK @_ @(e m) @(x :&&: LoT0)) . gfromRPC) v
 
 deriving instance RPCable TTY
 
 
-class GShow (f :: LoT k -> *) (x :: LoT k) where
+class GShow (f :: LoT (* -> *) -> *) (x :: LoT (* -> *)) where
   gtoRPC :: f x -> Value
   gfromRPC :: Value -> Parser (f x)
+  -- gdict :: f x -> Dict (FromJSON :@@: (x :&&: LoT0))
 
 instance (ToJSON (Interpret t x), FromJSON (Interpret t x)) => GShow (Field t) x where
   gtoRPC (Field t) = toJSON t
@@ -110,11 +112,15 @@ instance GShow f x => GShow (M1 _2 ('MetaSel _1 _3 _4 _5) f) x where
 data Dict c where
   Dict :: c => Dict c
 
-instance ( Interpret ('Kon c) x => GShow f x
-         ) => GShow ('Kon c :=>: f) x where
+type Equality b = ('Kon (~~) :@: Var0) :@: 'Kon b
+
+instance ( Interpret (Equality b) (x :&&: LoT0) => GShow f (x :&&: LoT0)
+         ) => GShow (Equality b :=>: f) (x :&&: LoT0) where
   gtoRPC (SuchThat f) = gtoRPC f
   gfromRPC v = do
-    case unsafeCoerce (Dict @(Int ~ Int)) :: Dict (Interpret ('Kon c) x) of
+    case unsafeCoerce (Dict @(Int ~ Int))
+           :: Dict (Interpret (Equality b) (x :&&: LoT0))
+         of
       Dict -> do
         f <- gfromRPC v
         pure $ SuchThat f

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7a64b7c54363005ffe4cd9a34f0d7b16581f385cba86e4c4d13fddab52909fa0
+-- hash: 26e127baad7e76258aa41231228112ea7ce2eb41b04037a3244f933face84f3d
 
 name:           polysemy-zoo
 version:        0.1.0.0
@@ -42,6 +42,7 @@ library
       aeson
     , base >=4.7 && <5
     , containers
+    , ghc-prim
     , kind-generics
     , kind-generics-th
     , polysemy
@@ -62,6 +63,7 @@ test-suite polysemy-zoo-test
       aeson
     , base >=4.7 && <5
     , containers
+    , ghc-prim
     , hspec
     , kind-generics
     , kind-generics-th
