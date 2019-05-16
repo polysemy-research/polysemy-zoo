@@ -29,11 +29,11 @@ import Data.Type.Equality (type (==), type (~~))
 import Data.Type.Bool
 
 
-data Foo (b :: Type) (a :: Type) where
-  Bar :: Int -> Foo Int Int
-  Baz :: Foo Bool Bool
+data Foo (a :: Type) where
+  Bar :: Int -> Foo Int
+  Baz :: Foo Bool
 
-deriving instance Show (Foo b a)
+deriving instance Show (Foo a)
 deriveGenericK ''Foo
 
 class GRead f p where
@@ -46,7 +46,7 @@ data Dict c where
 class Dict1 c f where
   dict1 :: f x -> Dict (c x)
 
-instance (c Int, c Bool) => Dict1 c (Foo b) where
+instance (c Int, c Bool) => Dict1 c Foo where
   dict1 (Bar _) = Dict
   dict1 Baz     = Dict
 
@@ -120,10 +120,10 @@ gfromRPC = parse (fmap toK . gread @(RepK a) @LoT0)
 gtoRPC :: forall a. (GenericK a LoT0, GRead (RepK a) LoT0) => a -> Value
 gtoRPC = gshow @(RepK a) @LoT0 . fromK
 
-readFooInt :: Value -> Result (Foo Int Int)
+readFooInt :: Value -> Result (Foo Int)
 readFooInt = gfromRPC
 
-readFooBool :: Value -> Result (Foo Bool Bool)
+readFooBool :: Value -> Result (Foo Bool)
 readFooBool = gfromRPC
 
 
@@ -146,15 +146,14 @@ makeSem ''TTY
 
 
 class RPCable e where
-  toRPC :: e m x -> Value
-  fromRPC :: Value -> Result (e m x)
-
-
-instance RPCable TTY where
+  toRPC :: (GenericK (e m x) LoT0, GRead (RepK (e m x)) LoT0) => e m x -> Value
   toRPC = gtoRPC
-    -- case x of
-    --   WriteTTY _ -> gtoRPC x
-    --   ReadTTY -> gtoRPC x
+
+  fromRPC :: (GenericK (e m x) LoT0, GRead (RepK (e m x)) LoT0) => Value -> Result (e m x)
+  fromRPC = gfromRPC
+
+
+deriving instance RPCable TTY
 
 
 
