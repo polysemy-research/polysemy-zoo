@@ -11,122 +11,23 @@
 
 module Polysemy.RPC where
 
-import GHC.Types
+import Data.Typeable
 import Control.Applicative
 import Control.Monad
 import Data.Aeson
+import Data.Aeson.TH
 import Data.Aeson.Types
 import Data.Kind
 import Data.Proxy
 import GHC.Generics (Meta (..))
 import GHC.TypeLits
+import GHC.Types
 import Generics.Kind
 import Generics.Kind.TH
 import Polysemy
+import Polysemy.Internal
 import Polysemy.Internal.Tactics
 import Unsafe.Coerce
-import Data.Type.Equality (type (==), type (~~))
-import Data.Type.Bool
-
-
-data Foo (a :: Type) where
-  Bar :: Int -> Foo Int
-  Baz :: Foo Bool
-
-deriving instance Show (Foo a)
-deriveGenericK ''Foo
-
-class GRead f p where
-  gshow :: f p -> Value
-  gread :: Value -> Parser (f p)
-
-data Dict c where
-  Dict :: c => Dict c
-
-class Dict1 c f where
-  dict1 :: f x -> Dict (c x)
-
-instance (c Int, c Bool) => Dict1 c Foo where
-  dict1 (Bar _) = Dict
-  dict1 Baz     = Dict
-
-instance (GRead f x, KnownSymbol name) => GRead (M1 _2 ('MetaCons name _1 _3) f) x where
-  gshow (M1 f) = toJSON (symbolVal $ Proxy @name, gshow f)
-  gread v = do
-    (name, f) <- parseJSON v
-    guard $ name == symbolVal (Proxy @name)
-    f' <- gread f
-    pure $ M1 f'
-
-instance GRead f x => GRead (M1 _2 ('MetaData _1 _3 _4 _5) f) x where
-  gshow (M1 f) = gshow f
-  gread = fmap M1 . gread
-
-instance GRead f x => GRead (M1 _2 ('MetaSel _1 _3 _4 _5) f) x where
-  gshow (M1 f) = gshow f
-  gread = fmap M1 . gread
-
-instance (ToJSON (Interpret t x), FromJSON (Interpret t x)) => GRead (Field t) x where
-  gshow (Field f) = toJSON f
-  gread = fmap Field . parseJSON
-
-instance (GRead f p, GRead g p) => GRead (f :*: g) p where
-  gshow (f :*: g) = toJSON (gshow f, gshow g)
-  gread v = do
-    (f, g) <- parseJSON v
-    f' <- gread f
-    g' <- gread g
-    pure (f' :*: g')
-
-instance (GRead f p, GRead g p) => GRead (f :+: g) p where
-  gshow (L1 f) = gshow f
-  gshow (R1 f) = gshow f
-  gread s = fmap L1 (gread s) <|> fmap R1 (gread s)
-
-instance GRead U1 p where
-  gshow U1 = Null
-  gread Null = pure U1
-  gread _    = empty
-
-instance GReadCon (Sat c) c f p => GRead (c :=>: f) p where
-  gshow = gshowCon @(Sat c)
-  gread = greadCon @(Sat c)
-
-class GReadCon (b :: Bool) c f p where
-  gshowCon :: (c :=>: f) p -> Value
-  greadCon :: Value -> Parser ((c :=>: f) p)
-
-instance (Interpret c p, GRead f p) => GReadCon 'True c f p where
-  gshowCon (SuchThat f) = gshow f
-  greadCon = fmap SuchThat . gread
-
-instance GReadCon 'False c f p where
-  gshowCon (SuchThat f) = error "impossible"
-  greadCon _ = empty
-
--- Whether a constraint is satisfiable
--- Assumed to be a conjunction of type equalities
-type family Sat (c :: Atom Type Constraint) :: Bool where
-  Sat (c1 ':&: c2)    = Sat c1 && Sat c2
-  Sat ('Kon (a ~~ b)) = a == b
-  {- if you use (~) instead of (~~) here you get a "No instance" error
-     that seems to say that, paradoxically, (Sat ('Kon (Int ~ Int))) doesn't
-     reduce, but in spite of what's printed that's actually (~~).
-   -}
-
-gfromRPC :: forall a. (GenericK a LoT0, GRead (RepK a) LoT0) => Value -> Result a
-gfromRPC = parse (fmap toK . gread @(RepK a) @LoT0)
-
-gtoRPC :: forall a. (GenericK a LoT0, GRead (RepK a) LoT0) => a -> Value
-gtoRPC = gshow @(RepK a) @LoT0 . fromK
-
-readFooInt :: Value -> Result (Foo Int)
-readFooInt = gfromRPC
-
-readFooBool :: Value -> Result (Foo Bool)
-readFooBool = gfromRPC
-
-
 
 
 data RPC m a where
@@ -135,34 +36,122 @@ data RPC m a where
 makeSem ''RPC
 
 
-data TTY m a where
+data TTY (m :: * -> *) a where
   WriteTTY :: String -> TTY m ()
   ReadTTY :: TTY m String
 
 deriving instance Show (TTY m a)
 
+type family Froom f x :: [Type] where
+  Froom U1 x           = '[]
+  Froom V1 x           = '[]
+  Froom (Field _1) x   = '[]
+  Froom (M1 _1 _2 f) x = Froom f x
+  Froom (cs :=>: f) x  = GetFroom cs x ++ Froom f x
+  Froom (f :+: g) x    = Froom f x ++ Froom g x
+  Froom (f :*: g) x    = Froom f x ++ Froom g x
+
+type family GetFroom c x :: [Type] where
+  GetFroom (Kon (x ~~ b)) x = '[b]
+  GetFroom (Kon _1) x       = '[]
+  GetFroom (c1 :&: c2) x = GetFroom c1 x ++ GetFroom c2 x
+
+type family MakeConstraints
+      (c :: Type -> Constraint)
+      (base :: Type -> Type)
+      (ts :: [Type]) :: Constraint where
+  MakeConstraints c base '[] = ()
+  MakeConstraints c base (t ': ts) = (c t, c (base t), MakeConstraints c base ts)
+
+type family (xs :: [k]) ++ (ys :: [k]) :: [k] where
+  '[] ++ ys = ys
+  (x ': xs) ++ ys = x ': (xs ++ ys)
+
+
+
 deriveGenericK ''TTY
 makeSem ''TTY
 
+instance ToJSON (TTY m x) where
+  toJSON (WriteTTY msg) = toJSON ("WriteTTY", msg)
+  toJSON ReadTTY        = toJSON ("ReadTTY", Null)
 
-class RPCable e where
-  toRPC :: (GenericK (e m x) LoT0, GRead (RepK (e m x)) LoT0) => e m x -> Value
-  toRPC = gtoRPC
+instance FromJSON (TTY m ()) where
+  parseJSON v = do
+    (field, d) <- parseJSON v
+    case field of
+      "WriteTTY" -> do
+        msg <- parseJSON d
+        pure $ WriteTTY msg
+      _ -> empty
 
-  fromRPC :: (GenericK (e m x) LoT0, GRead (RepK (e m x)) LoT0) => Value -> Result (e m x)
-  fromRPC = gfromRPC
+instance FromJSON (TTY m String) where
+  parseJSON v = do
+    (field, Null) <- parseJSON v
+    case field of
+      "ReadTTY" -> do
+        pure ReadTTY
+      _ -> empty
+
+type RPCable c e = forall (m :: * -> *) x. MakeConstraints c (e m) (Froom (RepK (e m x)) x)
+
+data Dict c where
+  Dict :: c => Dict c
+
+class Dict1 c (e :: (* -> *) -> * -> *) where
+  dict1 :: e m x -> Dict (c (e m x))
+  -- dict2 :: e m x -> Dict (c x)
+
+-- instance (RPCable c TTY) => Dict1 c TTY where
+--   dict1 = \case
+--     ReadTTY -> Dict
+--     -- WriteTTY _ -> Dict
 
 
-deriving instance RPCable TTY
+-- runViaRPC
+--   :: ( Member RPC r
+--      , Dict1 ToJSON e
+--      , Dict1 FromJSON e
+--      )
+--   => Sem (e ': r) a
+--   -> Sem r a
+-- runViaRPC = interpretH $ \case
+--   e -> liftT $ do
+--     case (dict1 @ToJSON e, dict2 @FromJSON e) of
+--       (Dict, Dict) -> do
+--         r <- doRPC $ toJSON e
+--         let Success x = fromJSON r
+--         pure x
+
+
+-- -- TODO(sandy): do something with errors here
+-- eliminateRPC :: Sem (RPC ': r) a -> Sem r a
+-- eliminateRPC = interpret $ \case
+--   DoRPC m -> pure m
+
+-- -- withEffect :: Value -> (forall m x. e m x
+
+-- -- handleRPC
+-- --     :: forall e r a
+-- --      . ( Member e r
+-- --        , Member RPC r
+-- --        , forall m. Dict1 ToJSON (e m)
+-- --        )
+-- --     => Sem r a
+-- --     -> Sem r a
+-- -- handleRPC = intercept $ \case
+-- --   DoRPC msg -> do
+-- --     let Success x = fromJSON msg
+-- --     r <- send @e x
+-- --     pure $ toJSON r
 
 
 
--- hello :: Member TTY r => Sem r ()
--- hello = writeTTY "hello"
 
 
 -- -- runEffectAsRPC
 -- --     :: ( RPCable e
+-- --        , forall m. Dict1 FromJSON (e m)
 -- --        , Member (Lift IO) r
 -- --        , Member RPC r
 -- --        )
@@ -171,11 +160,13 @@ deriving instance RPCable TTY
 -- --     -> Sem r a
 -- -- runEffectAsRPC endpoint = interpretH $ \e -> do
 -- --   liftT $ do
--- --     resp <- doRPC $ toRPC e
--- --     let Success a = fromJSON resp
--- --     pure a
+-- --     resp <- doRPC $ toJSON e
+-- --     case dict1 @FromJSON e of
+-- --       Dict -> do
+-- --         let Success a = fromJSON resp
+-- --         pure a
 
 
--- -- main :: IO ()
--- -- main = runM . runEffectAsRPC @TTY () $ hello
+-- -- -- main :: IO ()
+-- -- -- main = runM . runEffectAsRPC @TTY () $ hello
 

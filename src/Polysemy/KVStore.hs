@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Polysemy.KVStore
@@ -35,8 +36,8 @@ writeKV k = updateKV k . Just
 {-# INLINE writeKV #-}
 
 
-deleteKV :: Member (KVStore k v) r => k -> Sem r ()
-deleteKV k = updateKV k Nothing
+deleteKV :: forall k v r. Member (KVStore k v) r => k -> Sem r ()
+deleteKV k = updateKV k $ Nothing @v
 {-# INLINE deleteKV #-}
 
 
