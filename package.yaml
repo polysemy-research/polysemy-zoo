@@ -28,6 +28,10 @@ dependencies:
 ghc-options:
   - -fplugin=Polysemy.Plugin
 
+  # Enable these when building haddock
+  # - -fdefer-type-errors
+  # - -fno-warn-deferred-type-errors
+
 default-extensions:
   - DataKinds
   - DeriveFunctor
