@@ -3,8 +3,10 @@
 module Polysemy.IdempotentLowering
   ( (.@!)
   , nat
+  , liftNat
   , (.@@!)
   , nat'
+  , liftNat'
   ) where
 
 import Polysemy
@@ -87,7 +89,7 @@ fi .@! gi = do
   f <- fi
   g <- gi f
   nat $ \z -> f $ g z
-infixl 9 .@!
+infixl 8 .@!
 
 
 ------------------------------------------------------------------------------
@@ -110,5 +112,24 @@ fi .@@! gi = do
   f <- fi
   g <- gi f
   nat' $ \z -> f $ g z
-infixl 9 .@@!
+infixl 8 .@@!
+
+
+------------------------------------------------------------------------------
+-- | Lift a combinator designed to be used with 'Polysemy..@' into one designed
+-- to be used with 'Polysemy..@!'.
+liftNat
+  :: Applicative base
+  => (forall x. (forall y. f y -> g y) -> m x -> n x)
+  -> (forall y. f y -> g y) -> base (forall x. m x -> n x)
+liftNat z a = nat $ z a
+
+------------------------------------------------------------------------------
+-- | Lift a combinator designed to be used with 'Polysemy..@@' into one designed
+-- to be used with 'Polysemy..@@!'.
+liftNat'
+  :: Applicative base
+  => (forall x. (forall y. f y -> g y) -> m x -> n (f x))
+  -> (forall y. f y -> g y) -> base (forall x. m x -> n (f x))
+liftNat' z a = nat' $ z a
 
