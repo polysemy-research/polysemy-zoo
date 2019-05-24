@@ -1,5 +1,6 @@
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE UndecidableInstances       #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-|
 Module      : PolySemy.RandomFu
 Description : Polysemy random-fu effect
@@ -29,6 +30,9 @@ module Polysemy.RandomFu
   , runRandomSource
   , runRandomIO
   , runRandomIOPureMT
+
+  -- * MTL helpers
+  , absorbMonadRandom
   )
 where
 
@@ -97,8 +101,14 @@ runRandomIOPureMT source re =
   liftIO (newIORef source) >>= flip runRandomSource re
 {-# INLINE runRandomIOPureMT #-}
 
--- | Orphan instance of 'R.MonadRandom'
+newtype RandomFuSem r a = RandomFuSem { unRandomFuSem :: Sem r a } deriving (Functor, Applicative, Monad)
+
 $(R.monadRandom [d|
-        instance Member RandomFu r => R.MonadRandom (Sem r) where
-            getRandomPrim = getRandomPrim
+        instance Member RandomFu r => R.MonadRandom (RandomFuSem r) where
+            getRandomPrim = RandomFuSem . getRandomPrim
     |])
+
+absorbMonadRandom
+  :: Member RandomFu r => (forall m . R.MonadRandom m => m a) -> Sem r a
+absorbMonadRandom = unRandomFuSem
+{-# INLINE absorbMonadRandom #-}
