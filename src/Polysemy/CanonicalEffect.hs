@@ -49,8 +49,8 @@ class CanonicalEffect (c :: (Type -> Type) -> Constraint) (e :: (Type -> Type) -
 newtype AbsorbReader env r a = AbsorbReader { unAbsorbReader :: Sem r a } deriving (Functor, Applicative, Monad)
 
 instance Member (Reader env) r => MTL.MonadReader env (AbsorbReader env r) where
-  ask = AbsorbReader $ ask @env
-  local f = AbsorbReader . local @env f . unAbsorbReader
+  ask = AbsorbReader ask
+  local f = AbsorbReader . local f . unAbsorbReader
 
 instance CanonicalEffect (MTL.MonadReader env) (Reader env) where
   absorb = unAbsorbReader :: AbsorbReader env r a -> Sem r a
