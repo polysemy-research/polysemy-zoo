@@ -3,3 +3,5 @@
 .ghc.environment*
 dist-newstyle
 TAGS
+.\#*
+\#*\#
