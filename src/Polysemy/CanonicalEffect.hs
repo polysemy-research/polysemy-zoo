@@ -14,7 +14,7 @@ we ought to be able to "absorb" the mtl effect, as long as it's
 specified by a typeclass constraint.  This module contains helpers
 to do just that for Reader, Writer, State and Error.
 
-See [test/CanonicalEffect.hs]() for examples of use.
+See [test/CanonicalEffect.hs](https://github.com/isovector/polysemy-zoo/tree/master/test/CanonicalEffectSpec.hs) for examples of use.
 -}
 
 module Polysemy.CanonicalEffect
@@ -32,11 +32,7 @@ import           Polysemy.Reader
 import           Polysemy.Writer
 import           Polysemy.State
 import           Polysemy.Error
-{-
-import           Data.Kind                      ( Type
-                                                , Constraint
-                                                )
--}
+
 import qualified Control.Monad.Reader          as MTL
 import qualified Control.Monad.Writer          as MTL
 import qualified Control.Monad.State           as MTL
