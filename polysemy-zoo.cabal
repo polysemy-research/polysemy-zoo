@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 433bd9ad25c1b4499da280e0a1d2519b0d9cfe1cd5e492b9ab629f49a5e194c1
+-- hash: eecd1df0f6d4e15626f905cd11993d14c6a08acd56aa27aa2d987ce63462d7c9
 
 name:           polysemy-zoo
 version:        0.1.1.0
@@ -51,6 +51,7 @@ test-suite polysemy-zoo-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
+      CanonicalEffectSpec
       IdempotentLoweringSpec
       KVStoreSpec
       Paths_polysemy_zoo
@@ -66,4 +67,5 @@ test-suite polysemy-zoo-test
     , polysemy
     , polysemy-plugin
     , polysemy-zoo
+    , text
   default-language: Haskell2010
