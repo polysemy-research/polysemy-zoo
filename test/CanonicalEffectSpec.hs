@@ -43,6 +43,16 @@ throwOnZero n = do
   when (n == 0) $ MTL.throwError "Zero!"
   return n
 
+
+someOfAll
+  :: (MTL.MonadReader T.Text m, MTL.MonadWriter [Int] m, MTL.MonadState Int m)
+  => m T.Text
+someOfAll = do
+  n <- MTL.get
+  MTL.tell [n]
+  MTL.ask
+
+
 spec :: Spec
 spec = do
   describe "CanonicalEffect" $ do
@@ -81,3 +91,37 @@ spec = do
       $ absorbError
       $ throwOnZero 0
 
+    let runRWS
+          :: T.Text
+          -> Int
+          -> Sem '[Reader T.Text, State Int, Writer [Int]] a
+          -> ([Int], (Int, a))
+        runRWS env0 s0 = run . runWriter . runState s0 . runReader env0
+
+    it "All of them, singly"
+      $ flip shouldBe ([20, 20], (10, 6))
+      $ runRWS "RunAll" 0
+      $ do
+          put 20
+          n <- absorbState $ retrieveAndUpdateN 10
+          absorbWriter $ replicateTell 2 n
+          a <- absorbReader getEnvLength
+          return a
+
+    it "All of them, one absorber"
+      $ flip shouldBe ([20, 20], (10, 6))
+      $ runRWS "RunAll" 0
+      $ do
+          put 20
+          n <- absorbRWS $ retrieveAndUpdateN 10
+          absorbRWS $ replicateTell 2 n
+          a <- absorbRWS getEnvLength
+          return a
+
+    it "absorb a stack"
+      $ flip shouldBe ([10, 20], (20, "RunAll"))
+      $ runRWS "RunAll" 0
+      $ do
+          put 20
+          tell [10]
+          absorbRWS someOfAll
