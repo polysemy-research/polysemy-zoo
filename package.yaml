@@ -24,6 +24,9 @@ dependencies:
 - polysemy
 - polysemy-plugin
 - containers
+- reflection
+- constraints
+- mtl
 
 ghc-options:
   - -fplugin=Polysemy.Plugin
