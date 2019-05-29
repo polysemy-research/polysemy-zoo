@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: eecd1df0f6d4e15626f905cd11993d14c6a08acd56aa27aa2d987ce63462d7c9
+-- hash: e12f505aa08fb7d0a966becb74be40c95419ba70c231528456ff439993d80d93
 
 name:           polysemy-zoo
 version:        0.1.1.0
@@ -29,9 +29,9 @@ source-repository head
 
 library
   exposed-modules:
-      Polysemy.CanonicalEffect
       Polysemy.IdempotentLowering
       Polysemy.KVStore
+      Polysemy.MTL
       Polysemy.Operators
   other-modules:
       Paths_polysemy_zoo
@@ -41,19 +41,21 @@ library
   ghc-options: -fplugin=Polysemy.Plugin
   build-depends:
       base >=4.7 && <5
+    , constraints
     , containers
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy
     , polysemy-plugin
+    , reflection
   default-language: Haskell2010
 
 test-suite polysemy-zoo-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      CanonicalEffectSpec
       IdempotentLoweringSpec
       KVStoreSpec
+      MTLSpec
       Paths_polysemy_zoo
   hs-source-dirs:
       test
@@ -61,11 +63,13 @@ test-suite polysemy-zoo-test
   ghc-options: -fplugin=Polysemy.Plugin -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , constraints
     , containers
     , hspec
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy
     , polysemy-plugin
     , polysemy-zoo
+    , reflection
     , text
   default-language: Haskell2010

@@ -1,12 +1,14 @@
-{-# LANGUAGE OverloadedStrings #-}
-module CanonicalEffectSpec where
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE TypeApplications    #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+module MTLSpec where
 
 import           Polysemy
 import           Polysemy.Reader
 import           Polysemy.Writer
 import           Polysemy.State
 import           Polysemy.Error
-import           Polysemy.CanonicalEffect
+import           Polysemy.MTL
 
 import qualified Data.Text                     as T
 import           Test.Hspec
@@ -14,10 +16,10 @@ import           Test.Hspec
 import           Control.Monad                  ( replicateM_
                                                 , when
                                                 )
-import qualified Control.Monad.Reader          as MTL
-import qualified Control.Monad.Writer          as MTL
-import qualified Control.Monad.State           as MTL
-import qualified Control.Monad.Except          as MTL
+import qualified Control.Monad.Reader.Class    as S
+import qualified Control.Monad.Writer.Class    as S
+import qualified Control.Monad.State.Class     as S
+import qualified Control.Monad.Error.Class     as S
 
 
 {-
@@ -25,37 +27,35 @@ We could re-write these to use polysemy directly.  Imagine, though
 that these come from external libraries so you can't so easily
 re-write them.
 -}
-getEnvLength :: MTL.MonadReader T.Text m => m Int
-getEnvLength = MTL.ask >>= return . T.length
+getEnvLength :: S.MonadReader T.Text m => m Int
+getEnvLength = S.ask >>= return . T.length
 
-replicateTell :: MTL.MonadWriter [Int] m => Int -> Int -> m ()
-replicateTell n m = replicateM_ n $ MTL.tell [m]
+replicateTell :: S.MonadWriter [Int] m => Int -> Int -> m ()
+replicateTell n m = replicateM_ n $ S.tell [m]
 
-retrieveAndUpdateN :: MTL.MonadState Int m => Int -> m Int
+retrieveAndUpdateN :: S.MonadState Int m => Int -> m Int
 retrieveAndUpdateN n = do
-  m <- MTL.get
-  MTL.put n
+  m <- S.get
+  S.put n
   return m
 
 -- this one is exceptionally boring
-throwOnZero :: MTL.MonadError T.Text m => Int -> m Int
+throwOnZero :: S.MonadError T.Text m => Int -> m Int
 throwOnZero n = do
-  when (n == 0) $ MTL.throwError "Zero!"
+  when (n == 0) $ S.throwError "Zero!"
   return n
 
-
 someOfAll
-  :: (MTL.MonadReader T.Text m, MTL.MonadWriter [Int] m, MTL.MonadState Int m)
+  :: (S.MonadReader T.Text m, S.MonadWriter [Int] m, S.MonadState Int m)
   => m T.Text
 someOfAll = do
-  n <- MTL.get
-  MTL.tell [n]
-  MTL.ask
-
+  n <- S.get
+  S.tell [n]
+  S.ask
 
 spec :: Spec
 spec = do
-  describe "CanonicalEffect" $ do
+  describe "MTL" $ do
 
     it
         "should return 10, the sum of lengths of the strings provided to run (\"Text1\") and then to local (\"Text2\")"
@@ -107,6 +107,22 @@ spec = do
           absorbWriter $ replicateTell 2 n
           a <- absorbReader getEnvLength
           return a
+
+    let
+      absorbRWS
+        :: forall env w s r a
+         . (Monoid w, Members '[Reader env, Writer w, State s] r)
+        => (  ( S.MonadReader env (Sem r)
+             , S.MonadWriter w (Sem r)
+             , S.MonadState s (Sem r)
+             )
+           => Sem r a
+           )
+        -> Sem r a
+      absorbRWS x =
+        absorb @(S.MonadReader env)
+          $ absorb @(S.MonadWriter w)
+          $ absorb @(S.MonadState s) x
 
     it "All of them, one absorber"
       $ flip shouldBe ([20, 20], (10, 6))
