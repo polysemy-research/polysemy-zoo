@@ -6,6 +6,7 @@
 {-# LANGUAGE MultiParamTypeClasses      #-}
 {-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE DerivingVia                #-}
+--{-# LANGUAGE DeriveAnyClass           #-}
 {-|
 Module      : PolySemy.CanonicalEffects
 Description : Polysemy Class for "absorbing" mtl-style constraints.
@@ -58,6 +59,14 @@ import qualified Control.Monad.Except          as MTL
 import           Data.Kind                      ( Type
                                                 , Constraint
                                                 )
+
+import qualified Data.Reflection  as RE
+import           Data.Proxy (Proxy(..))
+import           Data.Coerce (coerce)
+import qualified Data.Constraint as C
+import           Data.Constraint ((:-),(\\))
+import qualified Data.Constraint.Unsafe as C
+
 
 -- | Wrap a Sem for deriving a non-orphan 'MTL.MonadReader' instance via the polysemy 'Reader' effect
 newtype SemReader env r a = SemReader { unSemReader :: Sem r a } deriving (Functor, Applicative, Monad)
@@ -168,9 +177,9 @@ to a polysemy effect which can be used to re-interpret that constraint, e.g., 'S
 type family CanonicalEffect (c :: (Type -> Type) -> Constraint) :: (Type -> Type) -> Type -> Type
 
 type instance  CanonicalEffect (MTL.MonadReader env) = Reader env
-type instance  CanonicalEffect (MTL.MonadWriter w) = Writer w
-type instance  CanonicalEffect (MTL.MonadState s ) = State s
-type instance  CanonicalEffect (MTL.MonadError e)  = Error e
+type instance  CanonicalEffect (MTL.MonadWriter w)   = Writer w
+type instance  CanonicalEffect (MTL.MonadState s)    = State s
+type instance  CanonicalEffect (MTL.MonadError e)    = Error e
 
 {- | General absorber function, re-interpreting mtl-style constraints via
 polysemy effects given a suitable newtype wrapper of Sem.
@@ -181,7 +190,116 @@ absorbVia
   => (n a -> Sem r a)
   -> (forall m . ConstrainAllM cs m => m a)
   -> Sem r a
-absorbVia unWrap ma = unWrap ma
+absorbVia unWrap = unWrap
+
+{-
+newtype SemRasa r s a = SemRasa { unSemRasa :: Sem r a } deriving (Functor, Applicative, Monad)
+
+reflectSemRasa :: Proxy s -> Sem r a -> SemRasa r s a
+reflectSemRasa _ = SemRasa
+
+unReflectedSemRasa :: SemRasa r s a -> Proxy s -> SemRasa r s a
+unReflectedSemRasa x _ = x
+
+data ReaderDict env m  = ReaderDict {
+    _ask :: m env
+  , _local :: forall a. (env -> env) -> m a -> m a
+  }
+
+instance (Member (Reader env) r, RE.Reifies s (ReaderDict env (Sem r))) => MTL.MonadReader env (SemRasa r s) where
+  ask = SemRasa $ _ask (RE.reflect (Proxy :: Proxy s))
+  local f (SemRasa sa) = SemRasa $ _local (RE.reflect (Proxy :: Proxy s)) f sa  
+                         
+absorbReaderR :: Member (Reader env) r => ReaderDict env (Sem r) -> (forall m. MTL.MonadReader env m => m a) -> Sem r a
+absorbReaderR d cma = RE.reify d $ unSemRasa . unReflectedSemRasa cma --(unSemRasa . asProxyOf cma)
+
+data StateDict s m  = StateDict {
+    _get :: m s
+  , _put :: s -> m ()
+  }  
+
+instance (Member (State x) r, RE.Reifies s (StateDict x (Sem r))) => MTL.MonadState x (SemRasa r s) where
+  get = SemRasa $ _get (RE.reflect (Proxy :: Proxy s))
+  put x = SemRasa $ _put (RE.reflect (Proxy :: Proxy s)) x
 
 
+absorbStateR :: Member (State s) r => StateDict s (Sem r) -> (forall m. MTL.MonadState s m => m a) -> Sem r a
+absorbStateR d cma = RE.reify d $ unSemRasa . unReflectedSemRasa cma --(unSemRasa . asProxyOf cma)
+
+
+newtype MTLWrapper c r a = MTLWrapper { unMTLWrapper :: Sem r a } deriving (Functor, Applicative, Monad)
+
+instance Member (Reader env) r => MTL.MonadReader env (MTLWrapper (MTL.MonadReader env) r) where
+  ask = MTLWrapper $ ask
+  local f ma = MTLWrapper $ local f (unMTLWrapper ma)
+
+absorbReader2 :: forall env r a. Member (Reader env) r => (MTL.MonadReader env (Sem r) => Sem r a) -> Sem r a
+absorbReader2 ma = ma \\ C.trans (C.unsafeCoerceConstraint :: (MTL.MonadReader env (MTLWrapper (MTL.MonadReader env) r) :- MTL.MonadReader env (Sem r)))
+-}
+
+{-
+absorbRS :: Members [State s, Reader env] r
+  => StateDict s (Sem r)
+  -> ReaderDict env (Sem r)
+  -> (forall m. (MTL.MonadState s m, MTL.MonadReader env m) => m a) -> Sem r a
+absorbRS sd rd cma = RE.reify sd $ RE.reify rd $ unReflectedSem cma
+-}
+
+{-
+-- reify a set of constraints satisfied by the action (m a)
+data MApply c m a where
+  MApply :: c m => m a -> MApply c m a
+
+
+data MApply2 c n a where
+  MApply2 :: ((forall m. c m => m a) -> n a) 
+-}
+{-
+dischargeOne :: Member (CanonicalEffect c) r => (forall m. c m => m a) -> Sem r a
+dischargeOne ma = unSemRasa $ 
+-}
+{-
+f :: forall c cs r a. (Member (CanonicalEffect c) r, Members (CanonicalEffects cs) r)
+  => MApply cs (SemRasa r) a -> MApply (cs, c) (SemRasa r) a 
+f (MApply sra) = MApply $
+-}
+{-
+
+data WrappedSem (cs :: [(Type ->Type) -> Constraint]) r a where
+  JustSem :: Sem r a -> WrappedSem cs r a
+  WrappedSem :: (cs ~ (c ': ds), ConstrainAllM cs (WrappedSem cs r)) => WrappedSem ds r a -> WrappedSem cs r a
+
+deriving instance Functor (WrappedSem cs r)
+
+instance Applicative (WrappedSem cs r) where
+  pure = JustSem . pure
+  (JustSem f) <*> (JustSem a) = JustSem (f <*> a)
+  (JustSem f) <*> (WrappedSem ws) = WrappedSem (f <*> ws)
+  (WrappedSem f) <*> (JustSem a) = WrappedSem (f <*> a)
+--deriving instance Monad (WrappedSem cs r)
+-}
+{-
+instance Functor (WrappedSem cs r) where
+  fmap f (JustSem x) = JustSem (fmap f x)
+  fmap f (WrappedSem sw) = WrappedSem (fmap f sw)
+-}
+
+
+{-
+
+type family WrappedSem ls r a :: Type where
+  WrappedSem '[] r a = Sem r a
+  WrappedSem (l ': ls') = WrappedSem
+
+dischargeOne :: forall c cs r n p a . ( Members (CanonicalEffects (c ': cs)) r
+                                      , ConstrainAllM (c ': cs) n
+                                      , ConstrainAllM cs (p r)
+                                      )
+                => (n a -> p r a)
+                -> (forall m. ConstrainAllM (c ': cs) m => m a)
+                -> p r a
+dischargeOne unwrap = unwrap
+
+
+-}
 
