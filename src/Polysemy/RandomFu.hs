@@ -1,7 +1,8 @@
-{-# LANGUAGE TemplateHaskell            #-}
-{-# LANGUAGE UndecidableInstances       #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UndecidableInstances       #-}
 {-|
 Module      : PolySemy.RandomFu
 Description : Polysemy random-fu effect
@@ -46,7 +47,7 @@ import qualified Data.Random.Source            as R
 import           Data.Random.Source.Std         (StdRandom(..))
 import qualified Data.Random.Internal.Source   as R
 import qualified Data.Random.Source.PureMT     as R
-import qualified Data.Reflection               as RE
+--import qualified Data.Reflection               as RE
 import qualified System.Random                 as SR
 import           Control.Monad.IO.Class         ( MonadIO(..) )
 
@@ -111,18 +112,18 @@ absorbMonadRandom = absorb @R.MonadRandom
 {-# INLINE absorbMonadRandom #-}
 
 instance ReifiableConstraint1 (R.MonadRandom) where
-  data Dict R.MonadRandom m = MonadRandom
+  data Dict1 R.MonadRandom m = MonadRandom
     {
       getRandomPrim_ :: forall t. R.Prim t -> m t
     }
-  reifiedInstance = RE.Sub RE.Dict
+  reifiedInstance = Sub Dict
 
 
 $(R.monadRandom [d|
         instance ( Monad m
-                 , RE.Reifies s' (Dict R.MonadRandom m)
+                 , Reifies s' (Dict1 R.MonadRandom m)
                  ) => R.MonadRandom (ConstrainedAction R.MonadRandom m s') where
-            getRandomPrim = ConstrainedAction . getPrim_
+            getRandomPrim t = ConstrainedAction $ getRandomPrim_ (reflect $ Proxy @s') t
     |])
 
 instance Member RandomFu r => IsCanonicalEffect R.MonadRandom r where
