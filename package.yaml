@@ -27,6 +27,9 @@ dependencies:
 - containers
 - reflection
 - constraints
+- random
+- random-fu
+- random-source
 
 ghc-options:
   - -fplugin=Polysemy.Plugin
