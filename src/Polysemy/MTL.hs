@@ -14,8 +14,8 @@ module Polysemy.MTL
     -- * Types
     CanonicalEffect
   , ConstrainedAction
-  , ReifiableConstraint1
-  , IsCanonicalEffect
+  , ReifiableConstraint1 (..)
+  , IsCanonicalEffect (..)
 
     -- * constraint-polymorphic absorber
   , absorb
@@ -25,6 +25,9 @@ module Polysemy.MTL
   , absorbState
   , absorbWriter
   , absorbError
+
+    -- * Re-exports
+  , Reifies
   )
 where
 
@@ -38,6 +41,7 @@ import           Data.Constraint ((:-),(\\))
 import qualified Data.Constraint.Unsafe as C
 import           Data.Proxy (Proxy (..))
 import qualified Data.Reflection as R
+import           Data.Reflection (Reifies) 
 import           Data.Kind (Type, Constraint)
 
 import           Polysemy
