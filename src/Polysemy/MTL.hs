@@ -81,11 +81,10 @@ class ReifiableConstraint1 p where
   reifiedInstance :: Monad m => R.Reifies s (Dict p m) :- p (ConstrainedAction p m s)
 
 -- | This class contains an instance of the dictionary for some set of effects
--- parameterized by a polysemt effect list @r@.
+-- parameterized by a polysemy effect list @r@.
 -- Typically, you would write this instance for any @r@
 -- satisfying the constraint that the "canonical" effect is a member.  But you
 -- could also use it to discharge constraints which require multiple polysemy effects.
-
 class ReifiableConstraint1 p => IsCanonicalEffect p r where
   canonicalDictionary :: Dict p (Sem r)
 
@@ -130,7 +129,7 @@ instance Member (Reader i) r => IsCanonicalEffect (S.MonadReader i) r where
 ------------------------------------------------------------------------------
 absorbState :: Member (State s) r
   => (S.MonadState s (Sem r) => Sem r a) -> Sem r a
-absorbState = absorb @(S.MonadState _) -- using (MonadState get put) f
+absorbState = absorb @(S.MonadState _)
 {-# INLINEABLE absorbState #-}
 
 instance ReifiableConstraint1 (S.MonadState s) where
