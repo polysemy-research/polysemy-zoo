@@ -30,6 +30,8 @@ module Polysemy.MTL
   , Reifies
   , (:-)(Sub)
   , Dict(Dict)
+  , reflect
+  , Proxy (Proxy)
   )
 where
 
@@ -43,7 +45,7 @@ import           Data.Constraint (Dict(Dict),(:-)(Sub),(\\))
 import qualified Data.Constraint.Unsafe as C
 import           Data.Proxy (Proxy (..))
 import qualified Data.Reflection as R
-import           Data.Reflection (Reifies) 
+import           Data.Reflection (Reifies, reflect) 
 import           Data.Kind (Type, Constraint)
 
 import           Polysemy
