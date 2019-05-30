@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.1.
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1c51b9ddcd467cc5950fc9a4c63030c540dc98d4a3f594ef63ac0a3a95d7fc41
+-- hash: e12f505aa08fb7d0a966becb74be40c95419ba70c231528456ff439993d80d93
 
 name:           polysemy-zoo
 version:        0.1.1.0
@@ -31,6 +31,7 @@ library
   exposed-modules:
       Polysemy.IdempotentLowering
       Polysemy.KVStore
+      Polysemy.MTL
       Polysemy.Operators
   other-modules:
       Paths_polysemy_zoo
@@ -40,9 +41,12 @@ library
   ghc-options: -fplugin=Polysemy.Plugin
   build-depends:
       base >=4.7 && <5
+    , constraints
     , containers
+    , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy
     , polysemy-plugin
+    , reflection
   default-language: Haskell2010
 
 test-suite polysemy-zoo-test
@@ -51,6 +55,7 @@ test-suite polysemy-zoo-test
   other-modules:
       IdempotentLoweringSpec
       KVStoreSpec
+      MTLSpec
       Paths_polysemy_zoo
   hs-source-dirs:
       test
@@ -58,9 +63,13 @@ test-suite polysemy-zoo-test
   ghc-options: -fplugin=Polysemy.Plugin -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , constraints
     , containers
     , hspec
+    , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy
     , polysemy-plugin
     , polysemy-zoo
+    , reflection
+    , text
   default-language: Haskell2010
