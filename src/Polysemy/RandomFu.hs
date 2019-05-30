@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-|
 Module      : PolySemy.RandomFu
 Description : Polysemy random-fu effect
@@ -114,7 +115,7 @@ instance ReifiableConstraint1 (R.MonadRandom) where
     {
       getRandomPrim_ :: forall t. R.Prim t -> m t
     }
-  reifiedInstance = C.Sub C.Dict
+  reifiedInstance = RE.Sub RE.Dict
 
 
 $(R.monadRandom [d|

@@ -12,10 +12,10 @@
 module Polysemy.MTL
   (
     -- * Types
-    CanonicalEffect
-  , ConstrainedAction
-  , ReifiableConstraint1
-  , IsCanonicalEffect
+    CanonicalEffect 
+  , ConstrainedAction (..)
+  , ReifiableConstraint1 (..)
+  , IsCanonicalEffect (..)
 
     -- * constraint-polymorphic absorber
   , absorb
