@@ -106,6 +106,10 @@ runRandomIOPureMT source re =
 {-# INLINEABLE runRandomIOPureMT #-}
 
 ------------------------------------------------------------------------------
+-- | "Absorb" an 'R.MonadRandom' constraint.
+-- That is, use a @Member RandomFu r@ constraint to satisfy  the @MonadRandom@
+-- constraint in a @(forall m. MonadRandom m => m a), returning a @Sem r a@.
+-- See 'Polysemy.MTL' for details.
 absorbMonadRandom
   :: Member RandomFu r => (R.MonadRandom (Sem r) => Sem r a) -> Sem r a
 absorbMonadRandom = absorb @R.MonadRandom

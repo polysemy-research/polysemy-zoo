@@ -21,6 +21,18 @@ getRandomIntsMR :: R.MonadRandom m => Int -> m [Int]
 getRandomIntsMR nDraws =
   R.sample $ M.replicateM nDraws (R.uniform 0 (100 :: Int))
 
+randomListsDifferent :: Member RandomFu r => Int -> Sem r Bool
+randomListsDifferent nDraws = do
+  a <- getRandomInts nDraws
+  b <- getRandomInts nDraws
+  return (a /= b)
+
+randomListsDifferentMR :: R.MonadRandom m => Int -> m Bool
+randomListsDifferentMR nDraws = do
+  a <- getRandomIntsMR nDraws
+  b <- getRandomIntsMR nDraws
+  return (a /= b)
+
 ------------------------------------------------------------------------------
 
 spec :: Spec
@@ -41,19 +53,11 @@ spec = describe "RandomFu" $ do
 
 
   it "Should produce two distinct sets of psuedo-random Ints."
-    $   (runM . runRandomIO $ do
-          a <- getRandomInts 5
-          b <- getRandomInts 5
-          return (a /= b)
-        )
+    $   (runM . runRandomIO $ randomListsDifferent 5)
     >>= (`shouldBe` True)
 
   it
       "Should produce two distinct sets of psuedo-random Ints (absorber version)."
-    $   (runM . runRandomIO $ absorbMonadRandom $ do
-          a <- getRandomIntsMR 5
-          b <- getRandomIntsMR 5
-          return (a /= b)
-        )
+    $   (runM . runRandomIO $ absorbMonadRandom $ randomListsDifferentMR 5)
     >>= (`shouldBe` True)
 
