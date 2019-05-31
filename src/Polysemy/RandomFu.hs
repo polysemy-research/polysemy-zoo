@@ -1,21 +1,22 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TemplateHaskell            #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE UndecidableInstances       #-}
+{-# LANGUAGE TemplateHaskell       #-}
+{-# LANGUAGE TypeApplications      #-}
+{-# LANGUAGE UndecidableInstances  #-}
 {-|
-Module      : PolySemy.RandomFu
+Module      : Polysemy.RandomFu
 Description : Polysemy random-fu effect
 
 Polysemy "random-fu" effect.
 This can be run in a few ways:
 1. Directly in 'IO'
 2. Using any 'Data.Random.RandomSource' from "random-fu"
-3. In 'IO', using a given 'Data.Random.Source.PureMT' source. ('IO' is used to put the source in an 'IORef')
+3. In 'IO', using a given 'Data.Random.Source.PureMT' source.
+('IO' is used to put the source in an 'IORef')
 
-
-Also, its presence in the Polysemy Union @r@,
-gives @Sem r@ a "MonadRandom" instance (from "random-fu"). This is an Orphan instance.
+This module also contains the type-class instances to enable "absorbing"
+MonadRandom, ala Polysemy.MTL.  See the tests for MTL or RandomFu for
+examples of that in use.
 -}
 
 module Polysemy.RandomFu
@@ -28,12 +29,12 @@ module Polysemy.RandomFu
   , getRandomPrim
   , sampleDist
 
-  -- * Interpretations
+    -- * Interpretations
   , runRandomSource
   , runRandomIO
   , runRandomIOPureMT
 
-  -- * MTL helpers
+    -- * Constraint absorber
   , absorbMonadRandom
   )
 where
@@ -44,11 +45,9 @@ import           Polysemy.MTL
 import           Data.IORef                     ( newIORef )
 import qualified Data.Random                   as R
 import qualified Data.Random.Source            as R
-import           Data.Random.Source.Std         (StdRandom(..))
 import qualified Data.Random.Internal.Source   as R
 import qualified Data.Random.Source.PureMT     as R
---import qualified Data.Reflection               as RE
-import qualified System.Random                 as SR
+import qualified System.Random                 as R
 import           Control.Monad.IO.Class         ( MonadIO(..) )
 
 
@@ -106,6 +105,7 @@ runRandomIOPureMT source re =
   liftIO (newIORef source) >>= flip runRandomSource re
 {-# INLINE runRandomIOPureMT #-}
 
+------------------------------------------------------------------------------
 absorbMonadRandom
   :: Member RandomFu r => (R.MonadRandom (Sem r) => Sem r a) -> Sem r a
 absorbMonadRandom = absorb @R.MonadRandom
@@ -123,7 +123,8 @@ $(R.monadRandom [d|
         instance ( Monad m
                  , Reifies s' (Dict1 R.MonadRandom m)
                  ) => R.MonadRandom (ConstrainedAction R.MonadRandom m s') where
-            getRandomPrim t = ConstrainedAction $ getRandomPrim_ (reflect $ Proxy @s') t
+            getRandomPrim t = ConstrainedAction
+              $ getRandomPrim_ (reflect $ Proxy @s') t
     |])
 
 instance Member RandomFu r => IsCanonicalEffect R.MonadRandom r where
