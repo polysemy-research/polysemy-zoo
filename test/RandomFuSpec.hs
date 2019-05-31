@@ -40,7 +40,20 @@ spec = describe "RandomFu" $ do
     >>= (`shouldBe` [3, 78, 53, 41, 56])
 
 
-  it "Should produce 5 psuedo-random Ints."
-    $   (fmap length . runM . runRandomIO $ getRandomInts 5)
-    >>= (`shouldBe` 5)
+  it "Should produce two distinct sets of psuedo-random Ints."
+    $   (runM . runRandomIO $ do
+          a <- getRandomInts 5
+          b <- getRandomInts 5
+          return (a /= b)
+        )
+    >>= (`shouldBe` True)
+
+  it
+      "Should produce two distinct sets of psuedo-random Ints (absorber version)."
+    $   (runM . runRandomIO $ absorbMonadRandom $ do
+          a <- getRandomIntsMR 5
+          b <- getRandomIntsMR 5
+          return (a /= b)
+        )
+    >>= (`shouldBe` True)
 

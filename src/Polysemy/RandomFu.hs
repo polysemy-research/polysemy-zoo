@@ -47,7 +47,6 @@ import qualified Data.Random                   as R
 import qualified Data.Random.Source            as R
 import qualified Data.Random.Internal.Source   as R
 import qualified Data.Random.Source.PureMT     as R
-import qualified System.Random                 as R
 import           Control.Monad.IO.Class         ( MonadIO(..) )
 
 
@@ -68,6 +67,7 @@ makeSem ''RandomFu
 sampleDist
   :: (Member RandomFu r, R.Distribution d t) => d t -> Sem r t
 sampleDist = sampleRVar . R.rvar
+{-# INLINEABLE sampleDist #-}
 
 ------------------------------------------------------------------------------
 -- | Run a 'Random' effect using a given 'R.RandomSource'
@@ -80,7 +80,7 @@ runRandomSource
 runRandomSource source = interpret $ \case
     SampleRVar    rv -> R.runRVar (R.sample rv) source
     GetRandomPrim pt -> R.runRVar (R.getRandomPrim pt) source
-{-# INLINE runRandomSource #-}
+{-# INLINEABLE runRandomSource #-}
 
 ------------------------------------------------------------------------------
 -- | Run a 'Random` effect by using the default "random-fu" 'IO' source
@@ -92,7 +92,7 @@ runRandomIO
 runRandomIO = interpret $ \case
     SampleRVar    rv -> liftIO $ R.sample rv
     GetRandomPrim pt -> liftIO $ R.getRandomPrim pt
-{-# INLINE runRandomIO #-}
+{-# INLINEABLE runRandomIO #-}
 
 ------------------------------------------------------------------------------
 -- | Run in 'IO', using the given 'R.PureMT' source, stored in an 'IORef'
@@ -103,13 +103,13 @@ runRandomIOPureMT
   -> Sem r a
 runRandomIOPureMT source re =
   liftIO (newIORef source) >>= flip runRandomSource re
-{-# INLINE runRandomIOPureMT #-}
+{-# INLINEABLE runRandomIOPureMT #-}
 
 ------------------------------------------------------------------------------
 absorbMonadRandom
   :: Member RandomFu r => (R.MonadRandom (Sem r) => Sem r a) -> Sem r a
 absorbMonadRandom = absorb @R.MonadRandom
-{-# INLINE absorbMonadRandom #-}
+{-# INLINEABLE absorbMonadRandom #-}
 
 instance ReifiableConstraint1 (R.MonadRandom) where
   data Dict1 R.MonadRandom m = MonadRandom
@@ -120,12 +120,14 @@ instance ReifiableConstraint1 (R.MonadRandom) where
 
 
 $(R.monadRandom [d|
-        instance ( Monad m
-                 , Reifies s' (Dict1 R.MonadRandom m)
-                 ) => R.MonadRandom (ConstrainedAction R.MonadRandom m s') where
-            getRandomPrim t = ConstrainedAction
-              $ getRandomPrim_ (reflect $ Proxy @s') t
-    |])
+      instance ( Monad m
+               , Reifies s' (Dict1 R.MonadRandom m)
+               ) => R.MonadRandom (ConstrainedAction R.MonadRandom m s') where
+          getRandomPrim t = ConstrainedAction
+            $ getRandomPrim_ (reflect $ Proxy @s') t
+          {-# INLINEABLE getRandomPrim #-}
+  |])
 
 instance Member RandomFu r => IsCanonicalEffect R.MonadRandom r where
   canonicalDictionary = MonadRandom getRandomPrim
+  {-# INLINEABLE canonicalDictionary #-}
