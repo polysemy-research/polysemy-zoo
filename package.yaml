@@ -23,12 +23,13 @@ dependencies:
 - base >= 4.7 && < 5
 - polysemy
 - polysemy-plugin
-- mtl >= 2.0.1.0 && < 3.0.0.0
-- containers
-- reflection
 - constraints
+- containers
+- mtl >= 2.0.1.0 && < 3.0.0.0
+- random >= 1.1 && <1.2
 - random-fu
 - random-source
+- reflection
 
 ghc-options:
   - -fplugin=Polysemy.Plugin
