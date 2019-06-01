@@ -39,25 +39,30 @@ spec :: Spec
 spec = describe "RandomFu" $ do
   it
       "Should produce [3, 78, 53, 41, 56], 5 psuedo-random Ints seeded from the same seed on each test."
-    $   (runM . runRandomIOPureMT (R.pureMT 1) $ getRandomInts 5)
-    >>= (`shouldBe` [3, 78, 53, 41, 56])
+    $ do
+        result <- runM . runRandomIOPureMT (R.pureMT 1) $ getRandomInts 5
+        result `shouldBe` [3, 78, 53, 41, 56]
 
   it
       "Should produce [3, 78, 53, 41, 56], 5 psuedo-random Ints seeded from the same seed on each test. Absorbing MonadRandom."
-    $   ( runM
-        . runRandomIOPureMT (R.pureMT 1)
-        $ absorbMonadRandom
-        $ getRandomIntsMR 5
-        )
-    >>= (`shouldBe` [3, 78, 53, 41, 56])
+    $ do
+        result <-
+          runM
+          . runRandomIOPureMT (R.pureMT 1)
+          $ absorbMonadRandom
+          $ getRandomIntsMR 5
+
+        result `shouldBe` [3, 78, 53, 41, 56]
 
 
-  it "Should produce two distinct sets of psuedo-random Ints."
-    $   (runM . runRandomIO $ randomListsDifferent 5)
-    >>= (`shouldBe` True)
+  it "Should produce two distinct sets of psuedo-random Ints." $ do
+    result <- runM . runRandomIO $ randomListsDifferent 5
+    result `shouldBe` True
 
   it
       "Should produce two distinct sets of psuedo-random Ints (absorber version)."
-    $   (runM . runRandomIO $ absorbMonadRandom $ randomListsDifferentMR 5)
-    >>= (`shouldBe` True)
+    $ do
+        result <-
+          runM . runRandomIO $ absorbMonadRandom $ randomListsDifferentMR 5
+        result `shouldBe` True
 
