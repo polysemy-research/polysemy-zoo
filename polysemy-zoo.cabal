@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e12f505aa08fb7d0a966becb74be40c95419ba70c231528456ff439993d80d93
+-- hash: 1c348373403ce42a6aa71fe73e5deff22e96214945316dcd946a4ef98a6e00ee
 
 name:           polysemy-zoo
 version:        0.1.1.0
@@ -33,6 +33,7 @@ library
       Polysemy.KVStore
       Polysemy.MTL
       Polysemy.Operators
+      Polysemy.RandomFu
   other-modules:
       Paths_polysemy_zoo
   hs-source-dirs:
@@ -46,6 +47,8 @@ library
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy
     , polysemy-plugin
+    , random-fu
+    , random-source
     , reflection
   default-language: Haskell2010
 
@@ -56,6 +59,7 @@ test-suite polysemy-zoo-test
       IdempotentLoweringSpec
       KVStoreSpec
       MTLSpec
+      RandomFuSpec
       Paths_polysemy_zoo
   hs-source-dirs:
       test
@@ -70,6 +74,8 @@ test-suite polysemy-zoo-test
     , polysemy
     , polysemy-plugin
     , polysemy-zoo
+    , random-fu
+    , random-source
     , reflection
     , text
   default-language: Haskell2010
