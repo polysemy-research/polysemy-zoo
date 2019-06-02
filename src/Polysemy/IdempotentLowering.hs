@@ -4,9 +4,11 @@ module Polysemy.IdempotentLowering
   ( (.@!)
   , nat
   , liftNat
+  , fixedNat
   , (.@@!)
   , nat'
   , liftNat'
+  , fixedNat'
   ) where
 
 import Polysemy
@@ -132,4 +134,38 @@ liftNat'
   => (forall x. (forall y. f y -> g y) -> m x -> n (f x))
   -> (forall y. f y -> g y) -> base (forall x. m x -> n (f x))
 liftNat' z a = nat' $ z a
+
+
+------------------------------------------------------------------------------
+-- | Like 'nat', but for higher-order interpreters that need access to
+-- themselves.
+--
+-- For example:
+--
+-- @
+-- 'fixedNat' $ \me -> 'Polysemy.interpretH' $ \case
+--   SomeEffect -> ...
+-- @
+fixedNat
+    :: forall m n base
+     . Applicative base
+    => ((forall x. m x -> n x) -> (forall x. m x -> n x))
+    -> base (forall x. m x -> n x)
+fixedNat f =
+  let x :: (forall x. m x -> n x)
+      x = f x
+   in nat x
+
+
+------------------------------------------------------------------------------
+-- | 'fixedNat'' is to 'fixedNat' as 'nat'' is to 'nat'.
+fixedNat'
+    :: forall m n f base
+     . Applicative base
+    => ((forall x. m x -> n (f x)) -> (forall x. m x -> n (f x)))
+    -> base (forall x. m x -> n (f x))
+fixedNat' f =
+  let x :: (forall x. m x -> n (f x))
+      x = f x
+   in nat' x
 
