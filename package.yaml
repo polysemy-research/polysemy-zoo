@@ -1,5 +1,5 @@
 name:                polysemy-zoo
-version:             0.1.1.0
+version:             0.1.2.0
 github:              "isovector/polysemy-zoo"
 license:             BSD3
 author:              "Sandy Maguire"
@@ -21,7 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/isov
 
 dependencies:
 - base >= 4.7 && < 5
-- polysemy
+- polysemy >= 0.3
 - polysemy-plugin
 - constraints
 - containers

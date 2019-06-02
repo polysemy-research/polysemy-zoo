@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.31.1.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1c348373403ce42a6aa71fe73e5deff22e96214945316dcd946a4ef98a6e00ee
+-- hash: 07f2fe507c2afe8ef70bcc42b26d3eaa3541eee97656ce45a5afa9ea207334cc
 
 name:           polysemy-zoo
-version:        0.1.1.0
+version:        0.1.2.0
 synopsis:       Experimental, user-contributed effects and interpreters for polysemy
 description:    Please see the README on GitHub at <https://github.com/isovector/polysemy-zoo#readme>
 category:       Polysemy
@@ -33,6 +33,7 @@ library
       Polysemy.KVStore
       Polysemy.MTL
       Polysemy.Operators
+      Polysemy.Random
       Polysemy.RandomFu
   other-modules:
       Paths_polysemy_zoo
@@ -45,8 +46,9 @@ library
     , constraints
     , containers
     , mtl >=2.0.1.0 && <3.0.0.0
-    , polysemy
+    , polysemy >=0.3
     , polysemy-plugin
+    , random >=1.1 && <1.2
     , random-fu
     , random-source
     , reflection
@@ -71,9 +73,10 @@ test-suite polysemy-zoo-test
     , containers
     , hspec
     , mtl >=2.0.1.0 && <3.0.0.0
-    , polysemy
+    , polysemy >=0.3
     , polysemy-plugin
     , polysemy-zoo
+    , random >=1.1 && <1.2
     , random-fu
     , random-source
     , reflection
