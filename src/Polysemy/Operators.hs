@@ -1,62 +1,75 @@
-{-|
-
-Operators meant as replacements for traditional 'Sem' type and 'Member' /
-'Members' constraints, that allow you to specify types of your actions and
-interpreters in more concise way, e.g. without mentioning unnecessary
-details:
-
-@
-foo :: 'Member' ('Lift' 'IO') r => 'String' -> 'Int' -> 'Sem' r ()
-@
-
-can be written simply as:
-
-@
-foo :: 'String' -> 'Int' -> 'IO' '~@>' ()
-@
-
-Working example with operators:
-
-@
-import Data.Function
-import Polysemy
-import Polysemy.Operators
-import Polysemy.Random
-
-data ConsoleIO m a where
-  WriteStrLn ::           'String' -> ConsoleIO m ()
-  ReadStrLn  ::                     ConsoleIO m 'String'
-  ShowStrLn  :: 'Show' a => a      -> ConsoleIO m ()
-
-'makeSem' ''ConsoleIO
-
--- runConsoleIO :: Member (Lift IO) r => Sem (ConsoleIO:r) a -> Sem r a
-runConsoleIO :: ConsoleIO:r '@>' a -> 'IO' '~@' r '@>' a
-runConsoleIO = 'interpret' \\case
-  WriteStrLn s -> 'sendM' '$' 'putStrLn' s
-  ReadStrLn    -> 'sendM'   'getLine'
-  ShowStrLn  v -> 'sendM' '$' 'print' v
-
-main :: 'IO' ()
-main = program
-     'Data.Function.&' runConsoleIO
-     'Data.Function.&' 'Polysemy.Random.runRandomIO'
-     'Data.Function.&' 'runM'
-
--- program :: Members \'[Random, ConsoleIO] r => Sem r ()
-program :: \'['Polysemy.Random', ConsoleIO] '>@>' ()
-program = do
-  writeStrLn "It works! Write something:"
-  val <- readStrLn
-  writeStrLn '$' "Here it is!: " '++' val
-  num <- 'Polysemy.Random.random' \@'Int'
-  writeStrLn '$' "Some random number:"
-  showStrLn num
-@
-
-See documentation of specific operators for more details.
-
--}
+-- | Operators meant as replacements for traditional 'Sem' type and 'Member' /
+-- 'Members' constraints, that allow you to specify types of your actions and
+-- interpreters in more concise way, without mentioning unnecessary details:
+--
+-- @
+-- foo :: 'Member' ('Lift' 'IO') r => 'String' -> 'Int' -> 'Sem' r ()
+-- @
+--
+-- can be written simply as:
+--
+-- @
+-- foo :: 'String' -> 'Int' -> 'IO' '~@>' ()
+-- @
+--
+-- Working example with operators:
+--
+-- @
+-- import Data.Function
+-- import Polysemy
+-- import Polysemy.Operators
+-- import Polysemy.Random
+--
+-- data ConsoleIO m a where
+--   WriteStrLn ::           'String' -> ConsoleIO m ()
+--   ReadStrLn  ::                     ConsoleIO m 'String'
+--   ShowStrLn  :: 'Show' a => a      -> ConsoleIO m ()
+--
+-- 'makeSem' ''ConsoleIO
+--
+-- -- runConsoleIO :: Member (Lift IO) r => Sem (ConsoleIO : r) a -> Sem r a
+-- runConsoleIO :: ConsoleIO : r '@>' a -> 'IO' '~@' r '@>' a
+-- runConsoleIO = 'interpret' \\case
+--   WriteStrLn s -> 'sendM' '$' 'putStrLn' s
+--   ReadStrLn    -> 'sendM'   'getLine'
+--   ShowStrLn  v -> 'sendM' '$' 'print' v
+--
+-- main :: 'IO' ()
+-- main = program
+--      'Data.Function.&' runConsoleIO
+--      'Data.Function.&' 'Polysemy.Random.runRandomIO'
+--      'Data.Function.&' 'runM'
+--
+-- -- program :: Members \'[Random, ConsoleIO] r => Sem r ()
+-- program :: \'['Polysemy.Random', ConsoleIO] '>@>' ()
+-- program = do
+--   writeStrLn "It works! Write something:"
+--   val <- readStrLn
+--   writeStrLn '$' "Here it is!: " '++' val
+--   num <- 'Polysemy.Random.random' \@'Int'
+--   writeStrLn '$' "Some random number:"
+--   showStrLn num
+-- @
+--
+-- Please keep in mind that constraints created through these operators are
+-- limited to the action they are being used on, for example:
+--
+-- @
+-- foo :: (forall x. r '@>' x -> 'IO' x)
+--     -> 'IO' (forall a. Foo : r '@>' a -> 'IO' '~@' r '@>' a)
+-- @
+--
+-- The first argument in the signature above won't have access to the
+-- @('IO' ~\@)@ constraint in the result - in such cases, use a normal
+-- constraint instead:
+--
+-- @
+-- foo :: 'Member' ('Lift' 'IO') r
+--     => (forall x. r '@>' x -> 'IO' x)
+--     -> 'IO' (forall a. Foo : r '@>' a -> r '@>' a)
+-- @
+--
+-- See the documentation of specific operators for more details.
 
 module Polysemy.Operators
   ( -- * 'Sem' operators
@@ -80,16 +93,13 @@ module Polysemy.Operators
 
 import Polysemy
 
-------------------------------------------------------------------------------
 -- Miscellaneous -------------------------------------------------------------
-------------------------------------------------------------------------------
 -- | Gets list of effects from 'Sem'.
 type family SemList s where
   SemList (Sem r _) = r
 
-------------------------------------------------------------------------------
 -- Operators -----------------------------------------------------------------
-------------------------------------------------------------------------------
+
 -- $SemOperators
 -- Infix equivalents of 'Sem' with versions for specifiying list of effects
 -- ('@>'), single effect ('@-') and single monad ('@~') as effects of union.
