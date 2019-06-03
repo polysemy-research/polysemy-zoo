@@ -3,6 +3,7 @@ module HListSpec where
 import           Polysemy
 import           Polysemy.State
 import           Polysemy.Reader
+import           Polysemy.Input
 import           Polysemy.HList
 import           Test.Hspec
 
@@ -33,6 +34,18 @@ stateProgram = do
   c <- get @Bool
   pure $ (a, b, c)
 
+inputProgram :: ( Member (Input String) r
+                , Member (Input Int) r
+                , Member (Input Bool) r
+                , Members [Input String, Input Int, Input Bool] r
+                    ~ Members (Inputs [String, Int, Bool]) r
+                ) => Sem r (Int, String, Bool)
+inputProgram = do
+  a <- input @Int
+  b <- input @String
+  c <- input @Bool
+  pure $ (a, b, c)
+
 spec :: Spec
 spec = do
   describe "runReaders" $ do
@@ -48,4 +61,12 @@ spec = do
         new = runStates (True ::: "test" ::: 5 ::: HNil) stateProgram
 
     it "should be equivalent to composed runState" $ do
+      run original `shouldBe` run new
+
+  describe "runConstInput" $ do
+    let original = runConstInput 5 . runConstInput "test"
+                                   . runConstInput True $ inputProgram
+        new = runConstInputs (True ::: "test" ::: 5 ::: HNil) inputProgram
+
+    it "should be equivalent to composed runConstInput" $ do
       run original `shouldBe` run new
