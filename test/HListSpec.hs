@@ -12,7 +12,7 @@ readerProgram :: ( Member (Reader String) r
                  , Member (Reader Int) r
                  , Member (Reader Bool) r
                  , Members [Reader String, Reader Int, Reader Bool] r
-                     ~ Members (Readers [String, Int, Bool]) r
+                     ~ Members (TypeMap Reader [String, Int, Bool]) r
                  ) => Sem r (Int, String, Bool)
 readerProgram = do
   a <- ask @Int
@@ -24,7 +24,7 @@ stateProgram :: ( Member (State String) r
                 , Member (State Int) r
                 , Member (State Bool) r
                 , Members [State String, State Int, State Bool] r
-                    ~ Members (States [String, Int, Bool]) r
+                    ~ Members (TypeMap State [String, Int, Bool]) r
                 ) => Sem r (Int, String, Bool)
 stateProgram = do
   put @Int 5
@@ -38,7 +38,7 @@ inputProgram :: ( Member (Input String) r
                 , Member (Input Int) r
                 , Member (Input Bool) r
                 , Members [Input String, Input Int, Input Bool] r
-                    ~ Members (Inputs [String, Int, Bool]) r
+                    ~ Members (TypeMap Input [String, Int, Bool]) r
                 ) => Sem r (Int, String, Bool)
 inputProgram = do
   a <- input @Int
@@ -46,7 +46,13 @@ inputProgram = do
   c <- input @Bool
   pure $ (a, b, c)
 
-spec :: Spec
+
+runReaders = runSeveral runReader
+
+runStates = runSeveral (fmap (fmap snd) . runState)
+
+runConstInputs = runSeveral runConstInput
+
 spec = do
   describe "runReaders" $ do
     let original = runReader 5 . runReader "test" . runReader True $ readerProgram
