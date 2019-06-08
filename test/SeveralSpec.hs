@@ -1,10 +1,10 @@
-module HListSpec where
+module SeveralSpec where
 
 import           Polysemy
 import           Polysemy.State
 import           Polysemy.Reader
 import           Polysemy.Input
-import           Polysemy.HList
+import           Polysemy.Several
 import           Test.Hspec
 
 

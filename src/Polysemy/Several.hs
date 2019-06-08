@@ -1,7 +1,7 @@
 {-# LANGUAGE BlockArguments  #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Polysemy.HList
+module Polysemy.Several
         ( -- * Data
           HList(..)
         , TypeMap
