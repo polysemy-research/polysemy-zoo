@@ -115,6 +115,8 @@ absorbMonadRandom
 absorbMonadRandom = absorb @R.MonadRandom
 {-# INLINEABLE absorbMonadRandom #-}
 
+type instance  CanonicalEffect R.MonadRandom = RandomFu
+
 instance ReifiableConstraint1 (R.MonadRandom) where
   data Dict1 R.MonadRandom m = MonadRandom
     {
