@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 07f2fe507c2afe8ef70bcc42b26d3eaa3541eee97656ce45a5afa9ea207334cc
+-- hash: 61174fc64dcfe6c013b395f3269a1763a3d3459d02b5df2c630bbfd3f57e2c52
 
 name:           polysemy-zoo
 version:        0.1.2.0
@@ -35,6 +35,7 @@ library
       Polysemy.Operators
       Polysemy.Random
       Polysemy.RandomFu
+      Polysemy.Several
   other-modules:
       Paths_polysemy_zoo
   hs-source-dirs:
@@ -62,6 +63,7 @@ test-suite polysemy-zoo-test
       KVStoreSpec
       MTLSpec
       RandomFuSpec
+      SeveralSpec
       Paths_polysemy_zoo
   hs-source-dirs:
       test
