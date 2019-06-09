@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications    #-}
+
 module MTLSpec where
 
 import           Polysemy
@@ -70,7 +71,7 @@ spec = describe "MTL" $ do
       ++ " In this case, 16, the sum of \"init [1,5,5,5,5]\""
       )
     $ do
-        flip shouldBe 16 . sum . fst . run . runWriter $ do
+        flip shouldBe 16 . sum @[] . fst . run . runWriter $ do
           tell [1]
           absorbWriter $ replicateTell 2 5
           censor init $ absorbWriter $ replicateTell 2 5
