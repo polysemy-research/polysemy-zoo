@@ -1,5 +1,5 @@
 name:                polysemy-zoo
-version:             0.1.2.0
+version:             0.1.2.1
 github:              "isovector/polysemy-zoo"
 license:             BSD3
 author:              "Sandy Maguire"
@@ -65,6 +65,7 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - polysemy >= 0.4
     - polysemy-zoo
     - hspec
     - text

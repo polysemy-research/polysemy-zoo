@@ -32,7 +32,7 @@ test = do
 spec :: Spec
 spec = describe "Idempotent Lowering" $ do
   it "should persist an IORef through a bracket" $ do
-    runIt <- nat runM .@! const (runStateInIO 0) .@! liftNat runResource
+    runIt <- nat runM .@! const (runStateInIO 0) .@! liftNat runResourceInIO
     result <- runIt test
     result `shouldBe` (3 :: Int)
 
