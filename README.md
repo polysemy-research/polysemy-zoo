@@ -20,3 +20,11 @@ Particularly successful contributions here will be migrated into either
 `polysemy` proper, or `polysemy-contrib` (the less experimental version of the
 zoo.)
 
+
+## Polysemy in the Wild
+
+The Zoo isn't the only place to find great user-contributions to `polysemy`!
+Here is a curated list of other great effects and interops:
+
+* [kowainik/co-log](https://github.com/kowainik/co-log/tree/master/co-log-polysemy)
+
