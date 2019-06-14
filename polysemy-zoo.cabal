@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b8422eaa237bad8199d235d37dd432322f191094275f7e61d94fb38fb030d101
+-- hash: be5a00f62e6365b8c06031d6b6bba39891290626e69ab7d0a78f1861f2dd035d
 
 name:           polysemy-zoo
-version:        0.1.2.1
+version:        0.2.0.0
 synopsis:       Experimental, user-contributed effects and interpreters for polysemy
 description:    Please see the README on GitHub at <https://github.com/isovector/polysemy-zoo#readme>
 category:       Polysemy
@@ -34,7 +34,6 @@ library
       Polysemy.MTL
       Polysemy.Operators
       Polysemy.Random
-      Polysemy.RandomFu
       Polysemy.Several
   other-modules:
       Paths_polysemy_zoo
@@ -44,15 +43,13 @@ library
   ghc-options: -fplugin=Polysemy.Plugin
   build-depends:
       base >=4.7 && <5
-    , constraints
-    , containers
+    , constraints >=0.10.1 && <0.12
+    , containers >=0.6 && <0.7
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy >=0.3
     , polysemy-plugin
     , random >=1.1 && <1.2
-    , random-fu
-    , random-source
-    , reflection
+    , reflection >=2.1.4 && <3.0.0
   default-language: Haskell2010
 
 test-suite polysemy-zoo-test
@@ -62,7 +59,6 @@ test-suite polysemy-zoo-test
       IdempotentLoweringSpec
       KVStoreSpec
       MTLSpec
-      RandomFuSpec
       SeveralSpec
       Paths_polysemy_zoo
   hs-source-dirs:
@@ -71,16 +67,14 @@ test-suite polysemy-zoo-test
   ghc-options: -fplugin=Polysemy.Plugin -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
-    , constraints
-    , containers
+    , constraints >=0.10.1 && <0.12
+    , containers >=0.6 && <0.7
     , hspec
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy >=0.4
     , polysemy-plugin
     , polysemy-zoo
     , random >=1.1 && <1.2
-    , random-fu
-    , random-source
-    , reflection
+    , reflection >=2.1.4 && <3.0.0
     , text
   default-language: Haskell2010

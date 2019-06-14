@@ -1,9 +1,13 @@
 # Changelog for polysemy-zoo
 
+## 0.2.0.0 (2019-06-14)
+
+- Remove `Polysemy.RandomFu`, which is moving to its own package
+- Add explicit cabal bounds for dependencies of `polysemy-zoo`
+
 ## 0.1.2.1 (2019-06-12)
 
 - Update the tests to run against `polysemy-0.4.0.0`
-
 
 ## 0.1.2.0 (2019-06-01)
 
