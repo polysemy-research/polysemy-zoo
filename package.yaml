@@ -62,6 +62,8 @@ tests:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    build-tools:
+    - hspec-discover  >= 2.0
     dependencies:
     - polysemy >= 0.4
     - polysemy-zoo
