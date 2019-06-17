@@ -1,6 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes         #-}
 {-# LANGUAGE ConstraintKinds             #-}
-{-# OPTIONS_GHC -fplugin=Polysemy.Plugin #-}
 
 module Polysemy.ConstraintAbsorber
   (
@@ -28,11 +27,12 @@ import           Data.Kind (Type, Constraint)
 
 ------------------------------------------------------------------------------
 -- | Given a reifiable constraint @p,
--- discharge the constraint by providing a dictionary, and a "reified instance"
+-- discharge the constraint by providing a dictionary
+-- and a "reified instance"
 -- (often @Sub Dict@ will do)
 -- Specialized to the case when m ~ Sem r
 absorbWithSem :: forall (p :: (Type -> Type) -> Constraint) -- ^ Monadic Constraint to be absorbed
-                        (x :: (Type -> Type) -> Type -> Type ->Type) -- ^ wrapper to avoid orphan instances
+                        (x :: (Type -> Type) -> Type -> Type -> Type) -- ^ wrapper to avoid orphan instances
                         (d :: Type) -- ^ dictionary
                         (r :: [(Type -> Type) -> Type -> Type]) -- ^ Sem effect list
                         (a :: Type) 

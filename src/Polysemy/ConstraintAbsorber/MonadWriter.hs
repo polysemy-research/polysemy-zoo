@@ -2,7 +2,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving  #-}
 {-# LANGUAGE MultiParamTypeClasses       #-}
 {-# LANGUAGE UndecidableInstances        #-}
-{-# OPTIONS_GHC -fplugin=Polysemy.Plugin #-}
 
 module Polysemy.ConstraintAbsorber.MonadWriter
   (
