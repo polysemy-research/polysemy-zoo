@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleInstances           #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving  #-}
 {-# LANGUAGE MultiParamTypeClasses       #-}
-{-# LANGUAGE ScopedTypeVariables         #-}
 {-# LANGUAGE UndecidableInstances        #-}
 {-# OPTIONS_GHC -fplugin=Polysemy.Plugin #-}
 
@@ -28,8 +27,7 @@ absorbState = absorbWithSem @(S.MonadState _) @Action
 -- | A Dictionary of the functions we need to supply
 -- to make an instance of State
 data StateDict s m = StateDict
-  {
-    get_ :: m s
+  { get_ :: m s
   , put_ :: s -> m ()
   }
 

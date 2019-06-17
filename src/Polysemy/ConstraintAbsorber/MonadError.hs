@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleInstances           #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving  #-}
 {-# LANGUAGE MultiParamTypeClasses       #-}
-{-# LANGUAGE ScopedTypeVariables         #-}
 {-# LANGUAGE UndecidableInstances        #-}
 {-# OPTIONS_GHC -fplugin=Polysemy.Plugin #-}
 
@@ -28,8 +27,7 @@ absorbError = absorbWithSem @(S.MonadError _) @Action
 -- | A dictionary of the functions we need to supply
 -- to make an instance of Error
 data ErrorDict e m = ErrorDict
-  {
-    throwError_ :: forall a. e -> m a
+  { throwError_ :: forall a. e -> m a
   , catchError_ :: forall a. m a -> (e -> m a) -> m a
   }
 
@@ -38,7 +36,8 @@ data ErrorDict e m = ErrorDict
 -- Locally defined so that the instance we are going
 -- to build with reflection must be coherent, that is
 -- there cannot be orphans.
-newtype Action m s' a = Action { action :: m a } deriving (Functor, Applicative, Monad)
+newtype Action m s' a = Action { action :: m a }
+  deriving (Functor, Applicative, Monad)
 
 -- | Given a reifiable mtl Error dictionary,
 -- we can make an instance of @MonadError@ for the action

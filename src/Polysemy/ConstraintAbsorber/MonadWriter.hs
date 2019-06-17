@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleInstances           #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving  #-}
 {-# LANGUAGE MultiParamTypeClasses       #-}
-{-# LANGUAGE ScopedTypeVariables         #-}
 {-# LANGUAGE UndecidableInstances        #-}
 {-# OPTIONS_GHC -fplugin=Polysemy.Plugin #-}
 
@@ -37,8 +36,7 @@ absorbWriter =
 -- | A dictionary of the functions we need to supply
 -- to make an instance of Writer
 data WriterDict w m = WriterDict
-  {
-    tell_ :: w -> m ()
+  { tell_ :: w -> m ()
   , listen_ :: forall a. m a -> m (a, w)
   , pass_ :: forall a. m (a, w -> w) -> m a 
   }
@@ -48,7 +46,8 @@ data WriterDict w m = WriterDict
 -- Locally defined so that the instance we are going
 -- to build with reflection must be coherent, that is
 -- there cannot be orphans.
-newtype Action m s' a = Action { action :: m a } deriving (Functor, Applicative, Monad)
+newtype Action m s' a = Action { action :: m a }
+  deriving (Functor, Applicative, Monad)
 
 -- | Given a reifiable mtl Writer dictionary,
 -- we can make an instance of @MonadWriter@ for the action

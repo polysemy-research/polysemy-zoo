@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleInstances           #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving  #-}
 {-# LANGUAGE MultiParamTypeClasses       #-}
-{-# LANGUAGE ScopedTypeVariables         #-}
 {-# LANGUAGE UndecidableInstances        #-}
 {-# OPTIONS_GHC -fplugin=Polysemy.Plugin #-}
 
@@ -28,8 +27,7 @@ absorbReader = absorbWithSem @(S.MonadReader _) @Action
 -- | A dictionary of the functions we need to supply
 -- to make an instance of Reader
 data ReaderDict i m = ReaderDict
-  {
-    ask_ :: m i
+  { ask_ :: m i
   , local_ :: forall a. (i -> i) -> m a -> m a
   }
 
