@@ -97,11 +97,27 @@ class ReifiableConstraint1 p => IsCanonicalEffect p r where
   canonicalDictionary :: Dict1 p (Sem r)
 
 -- | Given a reifiable constraint, and a dictionary to use, discharge the constraint.
+using' :: forall (d :: Type)
+                 (x :: ((Type -> Type) -> Constraint) -> (Type -> Type) -> Type -> Type -> Type)
+                 (p :: (Type -> Type) -> Constraint)
+                 (m :: Type -> Type)
+                 (a :: Type) . Monad m
+  => d
+  -> (forall s. R.Reifies s d :- p (x p m s))
+  -> (p m => m a)
+  -> m a
+using' d i m =
+  R.reify d $ \(_ :: Proxy (s :: Type)) -> m \\ C.trans
+  (C.unsafeCoerceConstraint :: ((p (x p m s) :- p m))) i
+{-# INLINEABLE using' #-}
+  
 using :: forall p m a. (Monad m, ReifiableConstraint1 p)
   => Dict1 p m -> (p m => m a) -> m a
-using d m =
+using d m = using' d reifiedInstance m
+{-
   R.reify d $ \(_ :: Proxy s) -> m \\ C.trans
   (C.unsafeCoerceConstraint :: ((p (ConstrainedAction p m s) :- p m))) reifiedInstance
+-}
 {-# INLINEABLE using #-}
 
 -- | Given a "canonical" dictionary for @p@ using the polysemy effects in @r@,
