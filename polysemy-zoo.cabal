@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ba5bfe9516931b18e9d5b0379d9a499b641b8f9bc03ed1fbf3c67f7ba65b1719
+-- hash: 892643da57c25d792790c678eaa06138c20ecbf766503b6ee8de3ce46c8ddc97
 
 name:           polysemy-zoo
 version:        0.2.0.0
@@ -29,9 +29,13 @@ source-repository head
 
 library
   exposed-modules:
+      Polysemy.ConstraintAbsorber
+      Polysemy.ConstraintAbsorber.MonadError
+      Polysemy.ConstraintAbsorber.MonadReader
+      Polysemy.ConstraintAbsorber.MonadState
+      Polysemy.ConstraintAbsorber.MonadWriter
       Polysemy.IdempotentLowering
       Polysemy.KVStore
-      Polysemy.MTL
       Polysemy.Operators
       Polysemy.Random
       Polysemy.Several
@@ -56,9 +60,9 @@ test-suite polysemy-zoo-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
+      ConstraintAbsorberSpec
       IdempotentLoweringSpec
       KVStoreSpec
-      MTLSpec
       SeveralSpec
       Paths_polysemy_zoo
   hs-source-dirs:

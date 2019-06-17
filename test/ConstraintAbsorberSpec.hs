@@ -2,14 +2,18 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications    #-}
 
-module MTLSpec where
+module ConstraintAbsorberSpec where
 
 import           Polysemy
 import           Polysemy.Reader
 import           Polysemy.Writer
 import           Polysemy.State
 import           Polysemy.Error
-import           Polysemy.MTL
+
+import           Polysemy.ConstraintAbsorber.MonadReader
+import           Polysemy.ConstraintAbsorber.MonadState
+import           Polysemy.ConstraintAbsorber.MonadWriter
+import           Polysemy.ConstraintAbsorber.MonadError
 
 import qualified Data.Text                     as T
 import           Test.Hspec
@@ -54,7 +58,7 @@ someOfAll = do
 ------------------------------------------------------------------------------
 
 spec :: Spec
-spec = describe "MTL" $ do
+spec = describe "ConstraintAbsorber" $ do
   it
       (  "should absorb reader twice, thus returning 9, "
       ++ "the sum of lengths of the strings provided to run (\"Text\")"
