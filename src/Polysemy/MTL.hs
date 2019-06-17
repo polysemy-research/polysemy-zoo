@@ -97,18 +97,18 @@ class ReifiableConstraint1 p => IsCanonicalEffect p r where
   canonicalDictionary :: Dict1 p (Sem r)
 
 -- | Given a reifiable constraint, and a dictionary to use, discharge the constraint.
-using' :: forall (d :: Type)
-                 (x :: ((Type -> Type) -> Constraint) -> (Type -> Type) -> Type -> Type -> Type)
-                 (p :: (Type -> Type) -> Constraint)
-                 (m :: Type -> Type)
+using' :: forall (d :: Type)  -- ^ dictionary
+                 (x :: (Type -> Type) -> Type -> Type -> Type) -- ^ wrapper of constrained action
+                 (p :: (Type -> Type) -> Constraint) -- ^ Monadic constraint          
+                 (m :: Type -> Type) 
                  (a :: Type) . Monad m
   => d
-  -> (forall s. R.Reifies s d :- p (x p m s))
+  -> (forall s. R.Reifies s d :- p (x m s))
   -> (p m => m a)
   -> m a
 using' d i m =
   R.reify d $ \(_ :: Proxy (s :: Type)) -> m \\ C.trans
-  (C.unsafeCoerceConstraint :: ((p (x p m s) :- p m))) i
+  (C.unsafeCoerceConstraint :: ((p (x m s) :- p m))) i
 {-# INLINEABLE using' #-}
   
 using :: forall p m a. (Monad m, ReifiableConstraint1 p)
@@ -122,6 +122,12 @@ using d m = using' d reifiedInstance m
 
 -- | Given a "canonical" dictionary for @p@ using the polysemy effects in @r@,
 -- discharge the constraint @p@.
+absorb' :: forall d p x r a. (x ~ ConstrainedAction p)
+  => d
+  -> (forall s. R.Reifies s d :- p (x (Sem r) s))
+  -> (p (Sem r) => Sem r a) -> Sem r a
+absorb' d i = using' @d @(ConstrainedAction p) d i
+
 absorb :: forall p r a. IsCanonicalEffect p r => (p (Sem r) => Sem r a) -> Sem r a
 absorb = using @p canonicalDictionary
 {-# INLINEABLE absorb #-}
