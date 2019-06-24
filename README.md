@@ -1,6 +1,6 @@
 # polysemy-zoo
 
-[![Build Status](https://api.travis-ci.org/isovector/polysemy-zoo.svg?branch=master)](https://travis-ci.org/isovector/polysemy-zoo)
+[![Build Status](https://api.travis-ci.org/polysemy-research/polysemy-zoo.svg?branch=master)](https://travis-ci.org/polysemy-research/polysemy-zoo)
 [![Hackage](https://img.shields.io/hackage/v/polysemy-zoo.svg?logo=haskell)](https://hackage.haskell.org/package/polysemy-zoo)
 
 ## Dedication
