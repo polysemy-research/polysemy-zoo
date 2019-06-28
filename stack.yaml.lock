@@ -5,12 +5,12 @@
 
 packages:
 - completed:
-    hackage: polysemy-0.4.0.0@sha256:6dfd2070c9f1f8e64ba9fbeee2af59e2893cac8acb066c2c80cf6428e2ddcef9,4004
+    hackage: polysemy-0.5.0.1@sha256:69b346f91ba880f31171b3cc0d3821a05a7354f17e1fa48c484f7480a7cf8d4b,4929
     pantry-tree:
-      size: 2393
-      sha256: a68185ec207fcb34a9065171ff364427cfb76e006545fb363ca3da870d5ba792
+      size: 2838
+      sha256: 1cf67479cb2bd2bcf95a4527bdee019f1c57fd286e58b56c85446f13652dc071
   original:
-    hackage: polysemy-0.4.0.0
+    hackage: polysemy-0.5.0.1
 - completed:
     hackage: polysemy-plugin-0.2.1.0@sha256:db5aa30eb9610c6c7aca782f68a128fef4656c867ed29ad328eb1322d8d9b414,2516
     pantry-tree:
@@ -32,6 +32,20 @@ packages:
       sha256: f103d638e096ace87e5db5f0f4562be7563002fe61eb1390377f8af03518e81d
   original:
     hackage: bifunctors-5.5.4
+- completed:
+    hackage: first-class-families-0.5.0.0@sha256:6e1488c502d5b1e780739a53edab65a307c6bf94d4232fab70e696e87f0fa087,1290
+    pantry-tree:
+      size: 847
+      sha256: 9289ea3bef39f4aae774cfe466810ee55989b1ef58de33a7c9668df8b0657b1d
+  original:
+    hackage: first-class-families-0.5.0.0
+- completed:
+    hackage: unagi-chan-0.4.1.0@sha256:2fe7e9e4fd4bda0e42762824ecd9059f20069939774406ddd54f9989b47b3e1a,8653
+    pantry-tree:
+      size: 2286
+      sha256: 1ad7dc27bf42375ffede50d01d4e00189aa427c51ccd117049759c867401bc0c
+  original:
+    hackage: unagi-chan-0.4.1.0
 snapshots:
 - completed:
     size: 491155
