@@ -16,12 +16,18 @@ module Polysemy.KVStore
     -- * Interpretations
   , runKVStoreAsState
   , runKVStorePurely
+  , runKVStoreInRedis
   ) where
 
+import           Control.Monad
+import           Data.Binary (Binary)
+import           Data.ByteString (ByteString)
 import qualified Data.Map as M
 import           Data.Maybe (isJust)
+import qualified Database.Redis as R
 import           Polysemy
 import           Polysemy.Error
+import           Polysemy.Redis.Utils
 import           Polysemy.State
 
 
@@ -98,4 +104,31 @@ runKVStorePurely
     -> Sem r (M.Map k v, a)
 runKVStorePurely m = runState m . runKVStoreAsState
 {-# INLINE runKVStorePurely #-}
+
+
+runKVStoreInRedis
+    :: ( Member (Lift R.Redis) r
+       , Member (Error R.Reply) r
+       , Binary k
+       , Binary v
+       )
+    => (k -> ByteString)
+    -> Sem (KVStore k v ': r) a
+    -> Sem r a
+runKVStoreInRedis pf = interpret $ \case
+  LookupKV k -> do
+    res <- fromEitherM $ R.hget (pf k) $ putForRedis k
+    pure $ fmap getFromRedis res
+
+  UpdateKV k Nothing ->
+    void . fromEitherM
+         . R.hdel (pf k)
+         . pure
+         $ putForRedis k
+
+  UpdateKV k (Just v) ->
+    void . fromEitherM
+         . R.hset (pf k) (putForRedis k)
+         $ putForRedis v
+{-# INLINE runKVStoreInRedis #-}
 

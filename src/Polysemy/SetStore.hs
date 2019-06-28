@@ -2,11 +2,17 @@
 
 module Polysemy.SetStore where
 
+import           Control.Monad
+import           Data.Binary (Binary)
 import           Data.Foldable
 import qualified Data.Set as S
+import qualified Database.Redis as R
 import           Polysemy
 import           Polysemy.Alias
+import           Polysemy.Error
 import           Polysemy.KVStore
+import           Polysemy.Redis.Utils
+
 
 
 data SetStore k v m a where
@@ -32,4 +38,30 @@ runSetStoreAsKVStore = interpret $ \case
     for_ ms $ writeKV k . S.delete v
   MemberS k v ->
     pure . maybe False (S.member v) =<< lookupKV k
+{-# INLINE runSetStoreAsKVStore #-}
+
+
+runSetStoreInRedis
+    :: ( Member (Lift R.Redis) r
+       , Member (Error R.Reply) r
+       , Binary k
+       , Binary v
+       )
+    => (k -> Path)
+    -> InterpreterOf (SetStore k v) r
+runSetStoreInRedis pf = interpret $ \case
+  AddS k v -> void
+            . fromEitherM
+            . R.sadd (getPath $ pf k)
+            . pure
+            $ putForRedis v
+  DelS k v -> void
+            . fromEitherM
+            . R.srem (getPath $ pf k)
+            . pure
+            $ putForRedis v
+  MemberS k v -> fromEitherM
+               . R.sismember (getPath $ pf k)
+               $ putForRedis v
+{-# INLINE runSetStoreInRedis #-}
 

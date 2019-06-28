@@ -29,6 +29,10 @@ dependencies:
 - random >= 1.1 && <1.2
 - reflection >= 2.1.4 && < 3.0.0
 - ghc-prim >= 0.5.2 && < 0.6
+- hedis >= 0.10 && < 0.13
+- binary
+- bytestring
+
 
 ghc-options:
   - -fplugin=Polysemy.Plugin
