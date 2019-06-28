@@ -44,7 +44,7 @@ data StateDict s m = StateDict
 
 -- Locally defined so that the instance we are going to build with reflection
 -- must be coherent, that is there cannot be orphans.
-newtype Action m s' a = Action { action :: m a }
+newtype Action m s' a = Action (m a)
   deriving (Functor, Applicative, Monad)
 
 
