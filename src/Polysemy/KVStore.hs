@@ -6,9 +6,12 @@ module Polysemy.KVStore
 
     -- * Actions
   , lookupKV
+  , lookupOrThrowKV
+  , existsKV
   , writeKV
   , deleteKV
   , updateKV
+  , modifyKV
 
     -- * Interpretations
   , runKVStoreAsState
@@ -16,7 +19,9 @@ module Polysemy.KVStore
   ) where
 
 import qualified Data.Map as M
+import           Data.Maybe (isJust)
 import           Polysemy
+import           Polysemy.Error
 import           Polysemy.State
 
 
@@ -38,6 +43,45 @@ writeKV k = updateKV k . Just
 deleteKV :: Member (KVStore k v) r => k -> Sem r ()
 deleteKV k = updateKV k Nothing
 {-# INLINE deleteKV #-}
+
+
+------------------------------------------------------------------------------
+-- |
+--
+-- @since 0.3.1.0
+lookupOrThrowKV
+    :: Members '[ KVStore k v
+                , Error e
+                ] r
+    => (k -> e)
+    -> k
+    -> Sem r v
+lookupOrThrowKV f k =
+  fromEither . maybe (Left $ f k) Right =<< lookupKV k
+
+
+------------------------------------------------------------------------------
+-- |
+--
+-- @since 0.3.1.0
+existsKV :: Member (KVStore k v) r => k -> Sem r Bool
+existsKV = fmap isJust . lookupKV
+
+
+------------------------------------------------------------------------------
+-- |
+--
+-- @since 0.3.1.0
+modifyKV
+    :: Member (KVStore k v) r
+    => v  -- ^ Default value if the key isn't present
+    -> (v -> v)
+    -> k
+    -> Sem r ()
+modifyKV d f k =
+  lookupKV k >>= \case
+    Just v  -> writeKV k $ f v
+    Nothing -> writeKV k $ f d
 
 
 runKVStoreAsState :: Ord k => Sem (KVStore k v ': r) a -> Sem (State (M.Map k v) ': r) a
