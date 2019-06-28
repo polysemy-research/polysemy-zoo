@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 973d46d5e0ade54b28515006ad81356053019a3cda2c4acd485dd104965721e6
+-- hash: bb2933738ae705725880aa246e42f2010c771e23a0a866ccf43d60250511fa56
 
 name:           polysemy-zoo
 version:        0.3.0.0
@@ -40,6 +40,7 @@ library
       Polysemy.KVStore
       Polysemy.Operators
       Polysemy.Random
+      Polysemy.Redis.Utils
       Polysemy.SetStore
       Polysemy.Several
   other-modules:
@@ -50,9 +51,12 @@ library
   ghc-options: -fplugin=Polysemy.Plugin -Wall
   build-depends:
       base >=4.9 && <5
+    , binary
+    , bytestring
     , constraints >=0.10.1 && <0.12
     , containers >=0.5 && <0.7
     , ghc-prim >=0.5.2 && <0.6
+    , hedis >=0.10 && <0.13
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy >=0.5.1.0
     , polysemy-plugin >=0.2
@@ -78,9 +82,12 @@ test-suite polysemy-zoo-test
       hspec-discover:hspec-discover >=2.0
   build-depends:
       base >=4.9 && <5
+    , binary
+    , bytestring
     , constraints >=0.10.1 && <0.12
     , containers >=0.5 && <0.7
     , ghc-prim >=0.5.2 && <0.6
+    , hedis >=0.10 && <0.13
     , hspec >=2.6.0 && <3
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy >=0.5.1.0
