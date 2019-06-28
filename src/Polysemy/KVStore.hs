@@ -45,6 +45,10 @@ deleteKV k = updateKV k Nothing
 {-# INLINE deleteKV #-}
 
 
+------------------------------------------------------------------------------
+-- |
+--
+-- @since 0.3.1.0
 lookupOrThrowKV
     :: Members '[ KVStore k v
                 , Error e
@@ -53,13 +57,21 @@ lookupOrThrowKV
     -> k
     -> Sem r v
 lookupOrThrowKV f k =
-  hoistError . maybe (Left $ f k) Right =<< lookupKV k
+  fromEither . maybe (Left $ f k) Right =<< lookupKV k
 
 
+------------------------------------------------------------------------------
+-- |
+--
+-- @since 0.3.1.0
 existsKV :: Member (KVStore k v) r => k -> Sem r Bool
 existsKV = fmap isJust . lookupKV
 
 
+------------------------------------------------------------------------------
+-- |
+--
+-- @since 0.3.1.0
 modifyKV
     :: Member (KVStore k v) r
     => v  -- ^ Default value if the key isn't present

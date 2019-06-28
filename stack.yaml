@@ -4,7 +4,7 @@ packages:
 - .
 
 extra-deps:
-- polysemy-0.5.0.1
+- polysemy-0.5.1.0
 - polysemy-plugin-0.2.1.0
 - th-abstraction-0.3.1.0
 - bifunctors-5.5.4

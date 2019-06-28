@@ -1,6 +1,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Polysemy.Floodgate where
+module Polysemy.Floodgate
+  ( -- * Effect
+    Floodgate (..)
+    -- * Actions
+  , hold
+  , release
+
+    -- * Interpretations
+  , runFloodgate
+  , runFloodgateDry
+  ) where
 
 import Control.Monad
 import GHC.Types
@@ -8,6 +18,10 @@ import Polysemy
 import Polysemy.State
 import Unsafe.Coerce
 
+------------------------------------------------------------------------------
+-- |
+--
+-- @since 0.3.1.0
 data Floodgate m a where
   Hold    :: m () -> Floodgate m ()
   Release :: Floodgate m ()
@@ -15,6 +29,10 @@ data Floodgate m a where
 makeSem ''Floodgate
 
 
+------------------------------------------------------------------------------
+-- |
+--
+-- @since 0.3.1.0
 runFloodgate
     :: Sem (Floodgate ': r) a
     -> Sem r a
@@ -37,6 +55,8 @@ runFloodgate = fmap snd . runState @[Any] [] . reinterpretH
 ------------------------------------------------------------------------------
 -- | Like 'runFloodgate', but will do a final flush to 'release' anything that
 -- might still be behind the floodgate.
+--
+-- @since 0.3.1.0
 runFloodgateDry
     :: Sem (Floodgate ': r) a
     -> Sem r a
