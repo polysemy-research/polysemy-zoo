@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: adb0dfd07f5fa1318a78d287662137ce78ea18db4077191a49c68d37032c1aac
+-- hash: e070c95c72080908d498d6ca46fba7e851be4946aa0bb35eb7f758a1220e11f2
 
 name:           polysemy-zoo
 version:        0.3.0.0
@@ -48,7 +48,7 @@ library
   default-extensions: DataKinds DeriveFunctor FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables StandaloneDeriving TypeApplications TypeOperators TypeFamilies UnicodeSyntax
   ghc-options: -fplugin=Polysemy.Plugin -Wall
   build-depends:
-      base >=4.7 && <5
+      base >=4.9 && <5
     , constraints >=0.10.1 && <0.12
     , containers >=0.5 && <0.7
     , mtl >=2.0.1.0 && <3.0.0.0
@@ -74,7 +74,7 @@ test-suite polysemy-zoo-test
   build-tool-depends:
       hspec-discover:hspec-discover >=2.0
   build-depends:
-      base >=4.7 && <5
+      base >=4.9 && <5
     , constraints >=0.10.1 && <0.12
     , containers >=0.5 && <0.7
     , hspec >=2.6.0 && <3
