@@ -47,12 +47,16 @@ inputProgram = do
   pure $ (a, b, c)
 
 
+runReaders :: HList t -> Sem (TypeConcat (TypeMap Reader t) r) a -> Sem r a
 runReaders = runSeveral runReader
 
+runStates :: HList t -> Sem (TypeConcat (TypeMap State t) r) a -> Sem r a
 runStates = runSeveral (fmap (fmap snd) . runState)
 
+runConstInputs :: HList t -> Sem (TypeConcat (TypeMap Input t) r) a -> Sem r a
 runConstInputs = runSeveral runConstInput
 
+spec :: Spec
 spec = do
   describe "runReaders" $ do
     let original = runReader 5 . runReader "test" . runReader True $ readerProgram
@@ -76,3 +80,4 @@ spec = do
 
     it "should be equivalent to composed runConstInput" $ do
       run original `shouldBe` run new
+
