@@ -20,15 +20,15 @@ category:            Polysemy
 description:         Please see the README on GitHub at <https://github.com/isovector/polysemy-zoo#readme>
 
 dependencies:
-- base >= 4.7 && < 5
-- polysemy >= 0.4
-- polysemy-plugin
+- base >= 4.9 && < 5
 - constraints >= 0.10.1 && < 0.12
-- containers >= 0.6 && < 0.7
+- containers >= 0.5 && < 0.7
 - mtl >= 2.0.1.0 && < 3.0.0.0
+- polysemy >= 0.4
+- polysemy-plugin >= 0.2
 - random >= 1.1 && <1.2
 - reflection >= 2.1.4 && < 3.0.0
-- ghc-prim
+- ghc-prim >= 0.5.2 && < 0.6
 
 ghc-options:
   - -fplugin=Polysemy.Plugin
@@ -69,5 +69,5 @@ tests:
     dependencies:
     - polysemy >= 0.5
     - polysemy-zoo
-    - hspec
-    - text
+    - hspec >= 2.6.0 && < 3
+

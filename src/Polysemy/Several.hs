@@ -1,14 +1,12 @@
-{-# LANGUAGE BlockArguments  #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Polysemy.Several
-        ( -- * Data
-          HList(..)
-        , TypeMap
-        , TypeConcat
-        , runSeveral
-        )
-where
+  ( -- * Data
+    HList(..)
+  , TypeMap
+  , TypeConcat
+  , runSeveral
+  ) where
 
 import Polysemy
 import Data.Kind
@@ -70,3 +68,4 @@ runSeveral
     -> Sem r a
 runSeveral f (a ::: as) = runSeveral f as . f a
 runSeveral _ HNil       = id
+

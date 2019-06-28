@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications    #-}
 
@@ -15,7 +14,6 @@ import           Polysemy.ConstraintAbsorber.MonadState
 import           Polysemy.ConstraintAbsorber.MonadWriter
 import           Polysemy.ConstraintAbsorber.MonadError
 
-import qualified Data.Text                     as T
 import           Test.Hspec
 import           Control.Monad                 as M
 
@@ -30,8 +28,8 @@ We could re-write these to use polysemy directly.  Imagine, though
 that these come from external libraries so you can't so easily
 re-write them.
 -}
-getEnvLength :: S.MonadReader T.Text m => m Int
-getEnvLength = S.ask >>= return . T.length
+getEnvLength :: S.MonadReader String m => m Int
+getEnvLength = S.ask >>= return . length
 
 replicateTell :: S.MonadWriter [Int] m => Int -> Int -> m ()
 replicateTell n m = M.replicateM_ n $ S.tell [m]
@@ -43,14 +41,14 @@ retrieveAndUpdateN n = do
   return m
 
 -- this one is exceptionally boring
-throwOnZero :: S.MonadError T.Text m => Int -> m Int
+throwOnZero :: S.MonadError String m => Int -> m Int
 throwOnZero n = do
   M.when (n == 0) $ S.throwError "Zero!"
   return n
 
 someOfAll
-  :: (S.MonadReader T.Text m, S.MonadWriter [Int] m, S.MonadState Int m)
-  => m T.Text
+  :: (S.MonadReader String m, S.MonadWriter [Int] m, S.MonadState Int m)
+  => m String
 someOfAll = do
   n <- S.get
   S.tell [n]
@@ -99,9 +97,9 @@ spec = describe "ConstraintAbsorber" $ do
     flip shouldBe (Left "Zero!") . run . runError $ absorbError $ throwOnZero 0
 
   let runRWS
-        :: T.Text
+        :: String
         -> Int
-        -> Sem '[Reader T.Text, State Int, Writer [Int]] a
+        -> Sem '[Reader String, State Int, Writer [Int]] a
         -> ([Int], (Int, a))
       runRWS env0 s0 = run . runWriter . runState s0 . runReader env0
 

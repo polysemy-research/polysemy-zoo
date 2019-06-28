@@ -1,4 +1,3 @@
-{-# LANGUAGE BlockArguments  #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Polysemy.Random
@@ -35,7 +34,7 @@ runRandom
     => q
     -> Sem (Random ': r) a
     -> Sem r (q, a)
-runRandom q = runState q . reinterpret \case
+runRandom q = runState q . reinterpret (\case
   Random -> do
     ~(a, q') <- gets @q R.random
     put q'
@@ -44,6 +43,7 @@ runRandom q = runState q . reinterpret \case
     ~(a, q') <- gets @q $ R.randomR r
     put q'
     pure a
+                                       )
 {-# INLINE runRandom #-}
 
 
