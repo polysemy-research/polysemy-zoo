@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b7bb1c26954020d9594c439f99ccef857ecb2796eefffd91463170d18817d593
+-- hash: 8bed81b72e79271356bc1a05e5ce861e71c14a5f6b35de0700cab462c80bc1f0
 
 name:           polysemy-zoo
 version:        0.3.0.0
@@ -35,6 +35,7 @@ library
       Polysemy.ConstraintAbsorber.MonadReader
       Polysemy.ConstraintAbsorber.MonadState
       Polysemy.ConstraintAbsorber.MonadWriter
+      Polysemy.Floodgate
       Polysemy.IdempotentLowering
       Polysemy.KVStore
       Polysemy.Operators
@@ -48,12 +49,13 @@ library
   default-extensions: DataKinds DeriveFunctor FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables StandaloneDeriving TypeApplications TypeOperators TypeFamilies UnicodeSyntax
   ghc-options: -fplugin=Polysemy.Plugin -Wall
   build-depends:
-      base >=4.7 && <5
+      base >=4.9 && <5
     , constraints >=0.10.1 && <0.12
-    , containers >=0.6 && <0.7
+    , containers >=0.5 && <0.7
+    , ghc-prim >=0.5.2 && <0.6
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy >=0.4
-    , polysemy-plugin
+    , polysemy-plugin >=0.2
     , random >=1.1 && <1.2
     , reflection >=2.1.4 && <3.0.0
   default-language: Haskell2010
@@ -63,6 +65,7 @@ test-suite polysemy-zoo-test
   main-is: Main.hs
   other-modules:
       ConstraintAbsorberSpec
+      FloodgateSpec
       IdempotentLoweringSpec
       KVStoreSpec
       SeveralSpec
@@ -74,15 +77,15 @@ test-suite polysemy-zoo-test
   build-tool-depends:
       hspec-discover:hspec-discover >=2.0
   build-depends:
-      base >=4.7 && <5
+      base >=4.9 && <5
     , constraints >=0.10.1 && <0.12
-    , containers >=0.6 && <0.7
-    , hspec
+    , containers >=0.5 && <0.7
+    , ghc-prim >=0.5.2 && <0.6
+    , hspec >=2.6.0 && <3
     , mtl >=2.0.1.0 && <3.0.0.0
-    , polysemy >=0.4
-    , polysemy-plugin
+    , polysemy >=0.5
+    , polysemy-plugin >=0.2
     , polysemy-zoo
     , random >=1.1 && <1.2
     , reflection >=2.1.4 && <3.0.0
-    , text
   default-language: Haskell2010
