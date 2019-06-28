@@ -24,7 +24,6 @@ data HList a where
     HNil  :: HList '[]
     (:::) :: a -> HList (b :: [Type]) -> HList (a ': b)
 
-type Eff = (Type -> Type) -> Type -> Type
 ------------------------------------------------------------------------------
 -- | A map function over type level lists. For example, the following two
 -- lines are equivalent:
@@ -65,7 +64,7 @@ type family TypeConcat (a :: [t]) (b :: [t]) where
 -- > runStates :: HList t -> Sem (TypeConcat (TypeMap State t) r) a -> Sem r a
 -- > runStates = runSeveral (fmap (fmap snd) . runState)
 runSeveral
-    :: (forall r k x. k -> Sem (e k ': r) x -> Sem r x)
+    :: (forall r' k x. k -> Sem (e k ': r') x -> Sem r' x)
     -> HList t
     -> Sem (TypeConcat (TypeMap e t) r) a
     -> Sem r a
