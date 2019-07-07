@@ -35,6 +35,7 @@ library
       Polysemy.ConstraintAbsorber.MonadReader
       Polysemy.ConstraintAbsorber.MonadState
       Polysemy.ConstraintAbsorber.MonadWriter
+      Polysemy.Final
       Polysemy.Floodgate
       Polysemy.IdempotentLowering
       Polysemy.KVStore
