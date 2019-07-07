@@ -28,6 +28,7 @@ module Polysemy.Final
   , Strategic
   , WithStrategy
   , pureS
+  , liftS
   , runS
   , bindS
   , getInspectorS
@@ -192,6 +193,13 @@ pureS a = do
   s <- getInitialStateS
   pure (pure (a <$ s))
 {-# INLINE pureS #-}
+
+------------------------------------------------------------------------------
+-- Lifts an action of the base monad into 'Strategic'.
+liftS :: Monad m => m a -> Strategic m n a
+liftS m = do
+  s <- getInitialStateS
+  pure $ fmap (<$ s) m
 
 ------------------------------------------------------------------------------
 -- | Lifts a monadic action into the stateful environment, in terms
