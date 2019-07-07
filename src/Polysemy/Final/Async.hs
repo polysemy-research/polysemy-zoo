@@ -13,7 +13,7 @@ import Polysemy.Final
 -- | Run an 'Async' effect through final 'IO'
 --
 -- Unlike 'runAsync', this is not consistent with 'Polysemy.State.State'
--- unless 'runStateInIORef' is used. Use 'runAsyncFinal' only
+-- unless 'Polysemy.State.runStateInIORef' is used. Use 'runAsyncFinal' only
 -- if 'runAsync' is unsafe in the context of your application.
 runAsyncFinal :: Member (Final IO) r
               => Sem (Async ': r) a
