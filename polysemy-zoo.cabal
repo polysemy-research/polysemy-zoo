@@ -36,6 +36,10 @@ library
       Polysemy.ConstraintAbsorber.MonadState
       Polysemy.ConstraintAbsorber.MonadWriter
       Polysemy.Final
+      Polysemy.Final.Async
+      Polysemy.Final.Error
+      Polysemy.Final.Fixpoint
+      Polysemy.Final.MTL
       Polysemy.Floodgate
       Polysemy.IdempotentLowering
       Polysemy.KVStore
@@ -51,7 +55,8 @@ library
   default-extensions: DataKinds DeriveFunctor FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables StandaloneDeriving TypeApplications TypeOperators TypeFamilies UnicodeSyntax
   ghc-options: -fplugin=Polysemy.Plugin -Wall
   build-depends:
-      base >=4.9 && <5
+      async >=2.2 && <3
+    , base >=4.9 && <5
     , binary
     , bytestring
     , constraints >=0.10.1 && <0.12
@@ -82,7 +87,8 @@ test-suite polysemy-zoo-test
   build-tool-depends:
       hspec-discover:hspec-discover >=2.0
   build-depends:
-      base >=4.9 && <5
+      async >=2.2 && <3
+    , base >=4.9 && <5
     , binary
     , bytestring
     , constraints >=0.10.1 && <0.12
