@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bb2933738ae705725880aa246e42f2010c771e23a0a866ccf43d60250511fa56
+-- hash: 27207dd15d0438072aeecdea7183218f0255ed8f35dfe056f3b34dc5cdbb8de0
 
 name:           polysemy-zoo
 version:        0.3.0.0
@@ -35,6 +35,7 @@ library
       Polysemy.ConstraintAbsorber.MonadReader
       Polysemy.ConstraintAbsorber.MonadState
       Polysemy.ConstraintAbsorber.MonadWriter
+      Polysemy.Final
       Polysemy.Floodgate
       Polysemy.IdempotentLowering
       Polysemy.KVStore
