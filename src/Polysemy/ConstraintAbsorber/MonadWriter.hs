@@ -28,13 +28,12 @@ absorbWriter
        -- 'Sem'. This might be something with type @'S.MonadWriter' w m => m a@.
     -> Sem r a
 absorbWriter =
-  let semTell = tell
+  let swapTuple (x,y) = (y,x)
+      semTell = tell
       semListen :: Member (Writer w) r => Sem r b -> Sem r (b, w)
-      semListen = fmap (\(x,y) -> (y,x)) . listen @w
-      semPass ::  Member (Writer w) r => Sem r (b, w -> w) -> Sem r b
-      semPass x = do
-        (w, (a, f)) <- listen x
-        censor f (tell w >> pure a)
+      semListen = fmap swapTuple . listen @w
+      semPass :: Member (Writer w) r => Sem r (b, w -> w) -> Sem r b
+      semPass = pass @w . fmap swapTuple
   in absorbWithSem @(S.MonadWriter _) @Action
      (WriterDict semTell semListen semPass)
      (Sub Dict)

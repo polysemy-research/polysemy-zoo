@@ -31,3 +31,5 @@
 
 ## Unreleased changes
 
+* In AbsorbMonadWriter, re-implemented mtl pass in terms of the new Polysemy.Writer
+pass and confirmed all tests.

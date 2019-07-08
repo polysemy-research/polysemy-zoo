@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bb2933738ae705725880aa246e42f2010c771e23a0a866ccf43d60250511fa56
+-- hash: 5e7e604713b76afb30b40be80fb19ff270ad13bac7ad7729bd59a4dceb8849a6
 
 name:           polysemy-zoo
 version:        0.3.0.0
@@ -58,7 +58,7 @@ library
     , ghc-prim >=0.5.2 && <0.6
     , hedis >=0.10 && <0.13
     , mtl >=2.0.1.0 && <3.0.0.0
-    , polysemy >=0.5.1.0
+    , polysemy >=0.7.0.0
     , polysemy-plugin >=0.2
     , random >=1.1 && <1.2
     , reflection >=2.1.4 && <3.0.0
