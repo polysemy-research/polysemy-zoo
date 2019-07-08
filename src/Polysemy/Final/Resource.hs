@@ -22,7 +22,7 @@ import           Polysemy.Final
 --
 -- Notably, unlike 'runResourceBase', this is not consistent with
 -- 'Polysemy.State.State' unless 'Polysemy.State.runStateInIORef' is used.
--- State that seems like it should be threaded globally throughout the `Bracket`
+-- State that seems like it should be threaded globally throughout 'bracket's
 -- /will not be./
 --
 -- Prefer 'runResourceBase' unless its unsafe or inefficient in the context of
