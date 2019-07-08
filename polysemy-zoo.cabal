@@ -75,6 +75,8 @@ test-suite polysemy-zoo-test
   main-is: Main.hs
   other-modules:
       ConstraintAbsorberSpec
+      FinalIOSpec
+      FinalMTLSpec
       FloodgateSpec
       IdempotentLoweringSpec
       KVStoreSpec
