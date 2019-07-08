@@ -1,4 +1,4 @@
-module Polysemy.Final.Async
+module Polysemy.Final.Resource
   (
     module Polysemy.Resource
   , module Polysemy.Final
