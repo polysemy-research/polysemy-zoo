@@ -15,6 +15,8 @@ import           Polysemy.Error
 ------------------------------------------------------------------------------
 -- | Run an 'Error' effect as an 'IO' 'Exception'.
 --
+-- This can be used as an alternative to 'runErrorInIO'
+--
 -- /Beware/: Effects that aren't interpreted in terms of 'IO'
 -- will have local state semantics in regards to 'Error' effects
 -- interpreted this way. See 'interpretFinal'.
