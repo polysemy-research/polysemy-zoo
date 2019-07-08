@@ -7,20 +7,20 @@ module Polysemy.Final
     -- * Actions
   , withWeaving
   , withStrategic
-  , sendM'
+  , embedFinal
 
     -- * Combinators for Interpreting to the Final Monad
-  , interpretHFinal
+  , interpretFinal
 
     -- * Strategy
     -- | Strategy is a domain-specific language very similar to @Tactics@
     -- (see 'Tactical'), and is used to describe how higher-order effects
-    -- are threaded
-    -- down to the final monad.
+    -- are threaded down to the final monad.
     --
     -- Much like @Tactics@, computations can be run and threaded
     -- through the use of 'runS' and 'bindS', and first-order constructors
-    -- may use 'pureS'.
+    -- may use 'pureS'. In addition, 'liftS' may be used to
+    -- lift actions of the final monad.
     --
     -- Unlike @Tactics@, the final return value within a `Strategic`
     -- must be a monadic value of the target monad
@@ -33,7 +33,6 @@ module Polysemy.Final
   , bindS
   , getInspectorS
   , getInitialStateS
-  , runStrategy
 
     -- * Interpretations
   , runFinal
@@ -58,7 +57,7 @@ import Control.Monad.IO.Class
 -- This is very useful for writing interpreters that interpret higher-order
 -- effects in terms of the final monad - however, these interpreters
 -- are subject to very different semantics than regular ones.
--- For more information, see ''interpretHFinal'.
+-- For more information, see 'interpretFinal'.
 data Final m z a where
   WithWeaving :: (forall f.
                       Functor f
@@ -78,7 +77,7 @@ makeSem_ ''Final
 -- as it provides a more user-friendly interface to the same power.
 --
 -- You are discouraged from using 'withWeaving' directly in application code,
--- as it ties your application code directly to the underlying result.
+-- as it ties your application code directly to the underlying monad.
 withWeaving :: forall m a r
             .   Member (Final m) r
             => (forall f.
@@ -91,13 +90,11 @@ withWeaving :: forall m a r
             -> Sem r a
 
 -----------------------------------------------------------------------------
--- | 'withWeaving' admits an implementation of 'sendM'
--- by providing the means of threading effects through 'Sem r x'
--- to the final monad.
+-- | 'withWeaving' admits an implementation of 'sendM'.
 --
 -- Just like 'sendM', you are discouraged from using this in application code.
-sendM' :: Monad m => Member (Final m) r => m a -> Sem r a
-sendM' m = withWeaving $ \s _ _ -> (<$ s) <$> m
+embedFinal :: Functor m => Member (Final m) r => m a -> Sem r a
+embedFinal m = withWeaving $ \s _ _ -> (<$ s) <$> m
 
 
 -----------------------------------------------------------------------------
@@ -106,8 +103,8 @@ sendM' m = withWeaving $ \s _ _ -> (<$ s) <$> m
 -- to the final monad. This is done through the use of the 'Strategic'
 -- environment.
 --
--- You are discouraged from using 'withStrategic' directly in application code,
--- as it ties your application code directly to the underlying result.
+-- You are discouraged from using 'withStrategic' in application code,
+-- as it ties your application code directly to the underlying monad.
 withStrategic :: Member (Final m) r => Strategic m (Sem r) a -> Sem r a
 withStrategic strat = withWeaving $ \s wv ins -> runStrategy s wv ins strat
 
@@ -115,11 +112,10 @@ withStrategic strat = withWeaving $ \s wv ins -> runStrategy s wv ins strat
 -- | Like 'interpretH', but may be used to
 -- interpret higher-order effects in terms of the final monad.
 --
--- _Beware_: Any interpreters built using this (or 'Final' in general)
+-- /Beware/: Any interpreters built using this (or 'Final' in general)
 -- will _not_ respect local/global state semantics based on the order of
--- interpreters run. You are therefore encouraged to use the "-Final" suffix
--- when naming interpreters that make use of 'Final', in order to signal that
--- fact.
+-- interpreters run. You should signal interpreters that make use of
+-- 'Final' by adding a "-Final" suffix to the names of these.
 --
 -- State semantics of effects that are _not_
 -- interpreted in terms of the final monad will always
@@ -128,13 +124,13 @@ withStrategic strat = withWeaving $ \s wv ins -> runStrategy s wv ins strat
 -- State semantics between effects that are interpreted in terms of the final monad
 -- depend on the final monad. I.e. if the final monad is a monad transformer stack,
 -- then state semantics will depend on the order monad transformers are stacked.
-interpretHFinal
+interpretFinal
     :: forall e m r a
-    .  (Member (Final m) r, Monad m)
+    .  (Member (Final m) r, Functor m)
     => (forall x n. e n x -> Strategic m n x)
     -> Sem (e ': r) a
     -> Sem r a
-interpretHFinal n =
+interpretFinal n =
   let
     go :: Sem (e ': r) x -> Sem r x
     go (Sem sem) = sem $ \u -> case decomp u of
@@ -143,18 +139,14 @@ interpretHFinal n =
           -> fmap getCompose $
                 runStrategy
                   (Compose (s <$ s'))
-                  (fmap Compose . wv' . fmap (go_b . wv) . getCompose)
+                  (fmap Compose . wv' . fmap (go . wv) . getCompose)
                   (ins' . getCompose >=> ins)
                   (n e)
-      Left g -> liftSem (hoist go_b g)
+      Left g -> liftSem (hoist go g)
     {-# INLINE go #-}
-
-    go_b :: Sem (e ': r) x -> Sem r x
-    go_b = go
-    {-# NOINLINE go_b #-}
   in
     go
-{-# INLINE interpretHFinal #-}
+{-# INLINE interpretFinal #-}
 
 ------------------------------------------------------------------------------
 -- | 'Strategic' is an environment in which you're capable of explicitly
@@ -188,18 +180,23 @@ getInitialStateS = getInitialStateT
 
 ------------------------------------------------------------------------------
 -- Lift a value into 'Strategic'.
-pureS :: Monad m => a -> Strategic m n a
-pureS a = do
-  s <- getInitialStateS
-  pure (pure (a <$ s))
+pureS :: Applicative m => a -> Strategic m n a
+pureS = fmap pure . pureT
 {-# INLINE pureS #-}
 
 ------------------------------------------------------------------------------
--- Lifts an action of the base monad into 'Strategic'.
-liftS :: Monad m => m a -> Strategic m n a
+-- Lifts an action of the final monad into 'Strategic'.
+--
+-- Note: you don't need to use this function if you already have a monadic
+-- action with the functorial state woven into it, by the use of
+-- 'runS' or 'bindS'.
+-- In these cases, you need only use 'pure' to embed the action into the
+-- 'Strategic' environment.
+liftS :: Functor m => m a -> Strategic m n a
 liftS m = do
   s <- getInitialStateS
   pure $ fmap (<$ s) m
+{-# INLINE liftS #-}
 
 ------------------------------------------------------------------------------
 -- | Lifts a monadic action into the stateful environment, in terms
@@ -213,9 +210,9 @@ runS = fmap runM . runT
 
 ------------------------------------------------------------------------------
 -- | Lift a kleisli action into the stateful environment, in terms of the final
--- monad. You can use 'bindS' to get an effect parameter of the form @a -> m b@
+-- monad. You can use 'bindS' to get an effect parameter of the form @a -> n b@
 -- into something that can be used after calling 'runS' on an effect parameter
--- @m a@.
+-- @n a@.
 bindS :: Monad m => (a -> n b) -> Sem (WithStrategy m f n) (f a -> m (f b))
 bindS = fmap (runM .) . bindT
 {-# INLINE bindS #-}
@@ -253,7 +250,7 @@ runFinal (Sem sem) = sem $ \u -> case decomp u of
 -- This allows for the use of operations that rely on a @'LastMember' ('Lift' m)@
 -- constraint, as long as @m@ can be transformed to the final monad;
 -- but be warned, this breaks the implicit contract of @'LastMember' ('Lift' m)@
--- that @m@ truly _is_ the final monad, so depending on the final monad and operations
+-- that @m@ _is_ the final monad, so depending on the final monad and operations
 -- used, 'runFinalTrans' may become _unsafe_.
 --
 -- For example, 'runFinalTrans' is unsafe with 'runAsync' if

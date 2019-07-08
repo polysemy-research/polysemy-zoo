@@ -1,6 +1,8 @@
 module Polysemy.Final.Fixpoint
   (
-    runFixpointFinal
+    module Polysemy.Fixpoint
+  , module Polysemy.Final
+  , runFixpointFinal
   ) where
 
 import Polysemy
@@ -14,7 +16,7 @@ import Control.Monad.Fix
 runFixpointFinal :: (Member (Final m) r, MonadFix m)
                  => Sem (Fixpoint ': r) a
                  -> Sem r a
-runFixpointFinal = interpretHFinal $ \case
+runFixpointFinal = interpretFinal $ \case
   Fixpoint f -> do
     f' <- bindS f
     pure $ mfix f'

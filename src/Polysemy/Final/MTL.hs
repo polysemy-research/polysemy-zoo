@@ -1,6 +1,7 @@
 module Polysemy.Final.MTL
   (
-    runErrorFinal
+    module Polysemy.Final
+  , runErrorFinal
   , runReaderFinal
   , runStateFinal
   , runWriterFinal
@@ -20,10 +21,14 @@ import Polysemy.Writer hiding (tell, listen, censor)
 
 -----------------------------------------------------------------------------
 -- | Run an 'Error' effect through a final 'MonadError'
+--
+-- /Beware/: Effects that aren't interpreted in terms of the final
+-- monad will have local state semantics in regards to 'Error' effects
+-- interpreted this way. See 'interpretFinal'.
 runErrorFinal :: (Member (Final m) r, MonadError e m)
               => Sem (Error e ': r) a
               -> Sem r a
-runErrorFinal = interpretHFinal $ \case
+runErrorFinal = interpretFinal $ \case
   Throw e   -> pure $ throwError e
   Catch m h -> do
     m' <- runS m
@@ -33,11 +38,15 @@ runErrorFinal = interpretHFinal $ \case
 
 
 -----------------------------------------------------------------------------
--- | Run a 'Error' effect through a final 'MonadReader'
+-- | Run a 'Reader' effect through a final 'MonadReader'
+--
+-- /Beware/: Effects that aren't interpreted in terms of the final
+-- monad will have local state semantics in regards to 'Reader' effects
+-- interpreted this way. See 'interpretFinal'.
 runReaderFinal :: (Member (Final m) r, MonadReader i m)
                => Sem (Reader i ': r) a
                -> Sem r a
-runReaderFinal = interpretHFinal $ \case
+runReaderFinal = interpretFinal $ \case
   Ask       -> liftS ask
   Local f m -> do
     m' <- runS m
@@ -50,6 +59,10 @@ runReaderFinal = interpretHFinal $ \case
 -- monad. The "-Final" suffix reflects that this interpreter
 -- has the unusual semantics of interpreters that runs
 -- effects by embedding them into another monad.
+--
+-- /Beware/: Effects that aren't interpreted in terms of the final
+-- monad will have local state semantics in regards to 'State' effects
+-- interpreted this way. See 'interpretFinal'.
 runStateFinal :: (Member (Lift m) r, MonadState s m)
                => Sem (State s ': r) a
                -> Sem r a
@@ -59,10 +72,14 @@ runStateFinal = interpret $ \case
 
 -----------------------------------------------------------------------------
 -- | Run a 'Writer' effect through a final 'MonadWriter'
+--
+-- /Beware/: Effects that aren't interpreted in terms of the final
+-- monad will have local state semantics in regards to 'Writer' effects
+-- interpreted this way. See 'interpretFinal'.
 runWriterFinal :: (Member (Final m) r, MonadWriter o m)
                => Sem (Writer o ': r) a
                -> Sem r a
-runWriterFinal = interpretHFinal $ \case
+runWriterFinal = interpretFinal $ \case
   Tell s    -> liftS (tell s)
   Listen m -> do
     m' <- runS m
