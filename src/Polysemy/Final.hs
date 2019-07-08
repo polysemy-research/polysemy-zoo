@@ -237,7 +237,7 @@ runStrategy s wv ins (Sem m) = runIdentity $ m $ \u -> case extract u of
 -- is to allow the use of operations that rely on a @'LastMember' ('Lift' m)@
 -- constraint.
 runFinal :: Monad m => Sem '[Final m, Lift m] a -> m a
-runFinal (Sem sem) = sem $ \u -> case decomp u of
+runFinal = usingSem $ \u -> case decomp u of
   Right (Yo (WithWeaving wav) s wv ex ins) ->
     ex <$> wav s (runFinal . wv) ins
   Left g -> case extract g of
@@ -260,7 +260,7 @@ runFinalLift :: Monad m
               => (forall x. n x -> m x)
               -> Sem [Final m, Lift m, Lift n] a
               -> m a
-runFinalLift nat (Sem sem) = sem $ \u -> case decomp u of
+runFinalLift nat = usingSem $ \u -> case decomp u of
   Right (Yo (WithWeaving wav) s wv ex ins) ->
     ex <$> wav s (runFinalLift nat . wv) ins
   Left g -> case decomp g of
