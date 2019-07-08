@@ -17,7 +17,7 @@ import Polysemy.Final
 import Polysemy.Error hiding (throw, catch)
 import Polysemy.Reader hiding (ask, local)
 import Polysemy.State hiding (get, put)
-import Polysemy.Writer hiding (tell, listen, censor)
+import Polysemy.Writer hiding (tell, listen, pass)
 
 -----------------------------------------------------------------------------
 -- | Run an 'Error' effect through a final 'MonadError'
@@ -85,6 +85,10 @@ runWriterFinal = interpretFinal $ \case
     m' <- runS m
     pure $
       (\ ~(s, o) -> (,) o <$> s) <$> listen m'
-  Censor f m -> do
-    m' <- runS m
-    pure $ censor f m'
+  Pass m -> do
+    m'  <- runS m
+    ins <- getInspectorS
+    pure $ pass $ do
+      t <- m'
+      let f = maybe id fst (inspect ins t)
+      pure (fmap snd t, f)
