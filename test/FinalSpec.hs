@@ -120,9 +120,9 @@ test3 i =
 spec :: Spec
 spec = do
   describe "Final on IO" $ do
-    res1 <- runIO test1
     it "should terminate successfully, with no exceptions,\
         \ and have global state semantics on State." $ do
+      res1 <- test1
       res1 `shouldSatisfy` isRight
       case res1 of
         Right (s, i, j) -> do
@@ -131,8 +131,8 @@ spec = do
           s `shouldBe` "abrahadabra"
         _ -> pure ()
 
-    res2 <- runIO test2
     it "should treat trace with local state semantics" $ do
+      res2 <- test2
       res2 `shouldBe` (["Nothing at all."], Right ())
 
   describe "Final with MTL" $ do
