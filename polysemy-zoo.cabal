@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5e7e604713b76afb30b40be80fb19ff270ad13bac7ad7729bd59a4dceb8849a6
+-- hash: 853248501e190a7cff9a2ce31223771713fb4659cc261d33594e82528f2cbff7
 
 name:           polysemy-zoo
 version:        0.3.0.0
@@ -35,6 +35,12 @@ library
       Polysemy.ConstraintAbsorber.MonadReader
       Polysemy.ConstraintAbsorber.MonadState
       Polysemy.ConstraintAbsorber.MonadWriter
+      Polysemy.Final
+      Polysemy.Final.Async
+      Polysemy.Final.Error
+      Polysemy.Final.Fixpoint
+      Polysemy.Final.MTL
+      Polysemy.Final.Resource
       Polysemy.Floodgate
       Polysemy.IdempotentLowering
       Polysemy.KVStore
@@ -50,7 +56,8 @@ library
   default-extensions: DataKinds DeriveFunctor FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables StandaloneDeriving TypeApplications TypeOperators TypeFamilies UnicodeSyntax
   ghc-options: -fplugin=Polysemy.Plugin -Wall
   build-depends:
-      base >=4.9 && <5
+      async >=2.2 && <3
+    , base >=4.9 && <5
     , binary
     , bytestring
     , constraints >=0.10.1 && <0.12
@@ -69,6 +76,7 @@ test-suite polysemy-zoo-test
   main-is: Main.hs
   other-modules:
       ConstraintAbsorberSpec
+      FinalSpec
       FloodgateSpec
       IdempotentLoweringSpec
       KVStoreSpec
@@ -81,7 +89,8 @@ test-suite polysemy-zoo-test
   build-tool-depends:
       hspec-discover:hspec-discover >=2.0
   build-depends:
-      base >=4.9 && <5
+      async >=2.2 && <3
+    , base >=4.9 && <5
     , binary
     , bytestring
     , constraints >=0.10.1 && <0.12
