@@ -134,7 +134,7 @@ interpretFinal n =
   let
     go :: Sem (e ': r) x -> Sem r x
     go (Sem sem) = sem $ \u -> case decomp u of
-      Right (Yo e s wv ex ins) ->
+      Right (Weaving e s wv ex ins) ->
         fmap ex $ withWeaving $ \s' wv' ins'
           -> fmap getCompose $
                 runStrategy
@@ -226,7 +226,7 @@ runStrategy :: Functor f
             -> Sem (WithStrategy m f n) a
             -> a
 runStrategy s wv ins (Sem m) = runIdentity $ m $ \u -> case extract u of
-  Yo e s' _ ex' _ -> Identity $ ex' $ (<$ s') $ case e of
+  Weaving e s' _ ex' _ -> Identity $ ex' $ (<$ s') $ case e of
     GetInitialState -> s
     HoistInterpretation na -> sendM . wv . fmap na
     GetInspector -> Inspector ins
@@ -238,10 +238,10 @@ runStrategy s wv ins (Sem m) = runIdentity $ m $ \u -> case extract u of
 -- constraint.
 runFinal :: Monad m => Sem '[Final m, Lift m] a -> m a
 runFinal = usingSem $ \u -> case decomp u of
-  Right (Yo (WithWeaving wav) s wv ex ins) ->
+  Right (Weaving (WithWeaving wav) s wv ex ins) ->
     ex <$> wav s (runFinal . wv) ins
   Left g -> case extract g of
-    Yo (Lift m) s _ ex _ -> ex . (<$ s) <$> m
+    Weaving (Lift m) s _ ex _ -> ex . (<$ s) <$> m
 
 ------------------------------------------------------------------------------
 -- Lower a 'Sem' containing two lifted monad into the final monad,
@@ -261,12 +261,12 @@ runFinalLift :: Monad m
               -> Sem [Final m, Lift m, Lift n] a
               -> m a
 runFinalLift nat = usingSem $ \u -> case decomp u of
-  Right (Yo (WithWeaving wav) s wv ex ins) ->
+  Right (Weaving (WithWeaving wav) s wv ex ins) ->
     ex <$> wav s (runFinalLift nat . wv) ins
   Left g -> case decomp g of
-    Right (Yo (Lift m) s _ ex _) -> ex . (<$ s) <$> m
+    Right (Weaving (Lift m) s _ ex _) -> ex . (<$ s) <$> m
     Left g' -> case extract g' of
-      Yo (Lift n) s _ ex _ -> ex . (<$ s) <$> nat n
+      Weaving (Lift n) s _ ex _ -> ex . (<$ s) <$> nat n
 
 ------------------------------------------------------------------------------
 -- | 'runFinalTrans', specialized to transform 'IO' to a 'MonadIO'.
