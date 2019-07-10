@@ -38,23 +38,25 @@ import Polysemy.Cont
 import Polysemy.Cont.Internal
 import Polysemy.Shift.Internal
 import Polysemy.Final
+import Control.Monad.Cont (ContT(..))
 
 import Polysemy.Internal
 import Polysemy.Internal.Union
 
-import Control.Monad.Cont (ContT(..))
 
 -----------------------------------------------------------------------------
 -- | A variant of 'callCC'.
 -- Executing the provided continuation will not abort execution.
 --
--- Higher-order effects do not interact with the continuation in any meaningful
--- way; i.e. 'Polysemy.Reader.local' or 'Polysemy.Writer.censor' does not affect
--- it, 'Polysemy.Error.catch' will fail to catch any of its exceptions,
+-- Any effectful state of effects which have been run before the interpreter for
+-- 'Shift' will be embedded in the return value of the continuation,
+-- and therefore the continuation won't have any apparent effects unless these
+-- effects are interpreted in the final monad.
+--
+-- Any higher-order actions will also not interact with the continuation in any
+-- meaningful way; i.e. 'Polysemy.Reader.local' or 'Polysemy.Writer.censor' does
+-- not affect it, 'Polysemy.Error.catch' will fail to catch any of its exceptions,
 -- and 'Polysemy.Writer.listen' will always return 'mempty'.
--- The only exception to this is if you interpret such effects /and/ 'Cont'
--- in terms of the final monad, and the final monad can perform such interactions
--- in a meaningful manner.
 --
 -- The provided continuation may fail locally in its subcontinuations.
 -- It may sometimes become necessary to handle such cases, in
@@ -67,7 +69,7 @@ shift cc = trap $ \ref -> cc (invoke ref)
 {-# INLINE shift #-}
 
 -----------------------------------------------------------------------------
--- | Runs a 'Shift' effect by providing 'pure '.' Just' as the final
+-- | Runs a 'Shift' effect by providing @'pure' '.' 'Just'@ as the final
 -- continuation.
 --
 -- The final return type is wrapped in a 'Maybe' due to the fact that
@@ -81,7 +83,7 @@ runShiftPure = runShiftUnsafe
 {-# INLINE runShiftPure #-}
 
 -----------------------------------------------------------------------------
--- | Runs a 'Shift' effect by providing 'pure '.' Just' as the final
+-- | Runs a 'Shift' effect by providing @'pure' '.' 'Just'@ as the final
 -- continuation.
 --
 -- The final return type is wrapped in a 'Maybe' due to the fact that

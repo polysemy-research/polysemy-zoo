@@ -34,6 +34,13 @@ import qualified Control.Monad.Cont as C (callCC)
 -- | Call with current continuation.
 -- Executing the provided continuation will abort execution.
 --
+-- Using the provided continuation
+-- will rollback all effectful state back to the point where 'callCC' was invoked,
+-- unless such state is interpreted in terms of the final
+-- monad, /or/ the associated interpreter of the effectful state
+-- is run after 'runContUnsafe', which may be done if the effect isn't
+-- higher-order.
+--
 -- Higher-order effects do not interact with the continuation in any meaningful
 -- way; i.e. 'Polysemy.Reader.local' or 'Polysemy.Writer.censor' does not affect
 -- it, and 'Polysemy.Error.catch' will fail to catch any of its exceptions.
@@ -100,4 +107,3 @@ runContFinal = interpretFinal $ \case
 runContUnsafe :: Sem (Cont (Ref (Sem r) a) ': r) a -> Sem r a
 runContUnsafe = runContWithCUnsafe pure
 {-# INLINE runContUnsafe #-}
-

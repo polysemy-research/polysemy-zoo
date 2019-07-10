@@ -23,7 +23,7 @@ data Shift ref s m a where
 makeSem_ ''Shift
 
 -----------------------------------------------------------------------------
--- Reifies the current continuation in the form of a prompt, and passes it to
+-- | Reifies the current continuation in the form of a prompt, and passes it to
 -- the first argument. Unlike 'subst', control will never return to the current
 -- continuation unless the prompt is invoked via 'release'.
 trap :: forall ref s a r
@@ -32,9 +32,19 @@ trap :: forall ref s a r
      -> Sem r a
 
 -----------------------------------------------------------------------------
--- Provide an answer to a prompt, jumping to its reified continuation.
+-- | Provide an answer to a prompt, jumping to its reified continuation.
 -- Unlike 'jump', this will not abort the current continuation, and the
 -- reified computation will instead return its final result when finished.
+--
+-- Any effectful state of effects which have been run before the interpreter for
+-- 'Shift' will be embedded in the return value, and therefore the invocation
+-- won't have any apparent effects unless these are interpreted in the final
+-- monad.
+--
+-- Any higher-order actions will also not interact with the continuation in any
+-- meaningful way; i.e. 'Polysemy.Reader.local' or 'Polysemy.Writer.censor' does
+-- not affect it, 'Polysemy.Error.catch' will fail to catch any of its exceptions,
+-- and 'Polysemy.Writer.listen' will always return 'mempty'.
 --
 -- The provided continuation may fail locally in its subcontinuations.
 -- It may sometimes become necessary to handle such cases. To do so,
@@ -54,14 +64,14 @@ abort :: forall ref s a r
       -> Sem r a
 
 -----------------------------------------------------------------------------
--- Delimits any continuations and calls to 'abort'.
+-- | Delimits any continuations and calls to 'abort'.
 reset :: forall ref a r
       .  Member (Shift ref a) r
       => Sem r a
       -> Sem r a
 
 -----------------------------------------------------------------------------
--- Delimits any continuations and calls to 'abort', and detects if
+-- | Delimits any continuations and calls to 'abort', and detects if
 -- any subcontinuation has failed locally.
 reset' :: forall ref s r
        .  Member (Shift ref s) r

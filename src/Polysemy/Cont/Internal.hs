@@ -19,8 +19,14 @@ data Cont ref m a where
 makeSem_ ''Cont
 
 -----------------------------------------------------------------------------
--- Provide an answer to a prompt, jumping to its reified continuation,
+-- | Provide an answer to a prompt, jumping to its reified continuation,
 -- and aborting the current continuation.
+--
+-- Using 'jump' will rollback all effectful state back to the point where the
+-- prompt was created, unless such state is interpreted in terms of the final
+-- monad, /or/ the associated interpreter of the effectful state
+-- is run after 'runContUnsafe', which may be done if the effect isn't
+-- higher-order.
 --
 -- Higher-order effects do not interact with the continuation in any meaningful
 -- way; i.e. 'Polysemy.Reader.local' or 'Polysemy.Writer.censor' does not affect
@@ -35,7 +41,7 @@ jump :: forall ref x a r.
      -> Sem r a
 
 -----------------------------------------------------------------------------
--- Reifies the current continuation in the form of a prompt, and passes it to
+-- | Reifies the current continuation in the form of a prompt, and passes it to
 -- the first argument. If the prompt becomes invoked via 'jump', then the
 -- second argument will be run before the reified continuation, and otherwise
 -- will not be called at all.

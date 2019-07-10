@@ -32,6 +32,9 @@ import Polysemy.Cont.Internal(Ref(..))
 -- safely. Unlike 'Shift', continuations can't leave the scope in which
 -- they are provided.
 --
+-- __Note__: Any computation used in a higher-order effect will
+-- be delimited.
+--
 -- Activating polysemy-plugin is highly recommended when using this effect
 -- in order to avoid ambiguous types.
 data Capture ref m a where
