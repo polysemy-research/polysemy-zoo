@@ -122,5 +122,5 @@ spec = do
 
   describe "runShiftUnsafe" $ do
     it "should modify multiple times with runState\
-        \ runState run after it" $
+        \ run after it" $
       test6 `shouldBe` (4, Just 4)

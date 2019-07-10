@@ -104,7 +104,7 @@ spec = do
         \ 'censor' should delimit the continuation" $
       test3 `shouldBe` ("important!1", Just ())
 
-    it "should treat writer with local state semantics, but \
+    it "should treat writer with local state semantics, but\
        \ reader with global state semantics." $
       test4 `shouldBe` Just ("4", ())
 
