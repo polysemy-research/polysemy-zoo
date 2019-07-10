@@ -20,3 +20,4 @@ runFixpointFinal = interpretFinal $ \case
   Fixpoint f -> do
     f' <- bindS f
     pure $ mfix f'
+{-# INLINE runFixpointFinal #-}

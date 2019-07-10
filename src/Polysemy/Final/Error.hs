@@ -34,6 +34,7 @@ runErrorInIOFinal sem = withStrategic $ do
       ((<$ s) . Left . unwrapExc)
       (fmap Right)
     <$> try m'
+{-# INLINE runErrorInIOFinal #-}
 
 runErrorAsExcFinal
     :: forall e r a
@@ -50,6 +51,7 @@ runErrorAsExcFinal = interpretFinal $ \case
     s  <- getInitialStateS
     pure $ X.catch m' $ \(se :: WrappedExc e) ->
       h' (unwrapExc se <$ s)
+{-# INLINE runErrorAsExcFinal #-}
 
 
 newtype WrappedExc e = WrappedExc { unwrapExc :: e }
