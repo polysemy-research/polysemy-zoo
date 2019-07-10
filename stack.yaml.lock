@@ -5,12 +5,19 @@
 
 packages:
 - completed:
-    hackage: polysemy-0.5.1.0@sha256:13c2e38af018294532325a0323915c599a3dc8d022b201df819682094411d57a,4929
+    hackage: polysemy-0.7.0.0@sha256:e080487a6f923d91fe8363cb901770c38ce96c2011f79cae9c5bc5a2e23eb454,5362
     pantry-tree:
-      size: 2838
-      sha256: 120b91ce637b30870b3c9e092d68ecd7e8443d735d50912f5564f71c4ce9c8e1
+      size: 2985
+      sha256: e0662eeb77b93e0a96f3841003602513ab6e06278cb06327a5422dffa7cbb935
   original:
-    hackage: polysemy-0.5.1.0
+    hackage: polysemy-0.7.0.0
+- completed:
+    hackage: type-errors-0.2.0.0@sha256:b8f97a0cf72f4fcdc9bfd02d753f84e65e5e5d165d53f82947a95cdcbd7f2945,2082
+    pantry-tree:
+      size: 368
+      sha256: 0ca254a77a52915d71ce1dc3927caa1b8166dec162932a65314c2bc2af296200
+  original:
+    hackage: type-errors-0.2.0.0
 - completed:
     hackage: polysemy-plugin-0.2.1.0@sha256:db5aa30eb9610c6c7aca782f68a128fef4656c867ed29ad328eb1322d8d9b414,2516
     pantry-tree:
