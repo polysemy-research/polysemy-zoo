@@ -1,5 +1,18 @@
 # Changelog for polysemy-zoo
 
+## 0.4.0.0 (2019-07-10)
+
+### Breaking Changes
+
+- The semantics of `absorbWriter` are now aligned with the `MTL` implementation
+
+### New Effects and Interpreters
+
+- Added `SetStore` effect
+- Added `Floodgate` effect
+- Added `lookupOrThrowKV`, `existsKV` and `modifyKV` actions to `KVStore`
+- Added Redis interpretations of `SetStore` and `KVStore`
+
 ## 0.3.0.0 (2019-06-17)
 
 - Removed `Polysemy.MTL`

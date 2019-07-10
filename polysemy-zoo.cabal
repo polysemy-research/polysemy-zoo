@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 853248501e190a7cff9a2ce31223771713fb4659cc261d33594e82528f2cbff7
+-- hash: 054ec2cf0a1dabd07c085a818fbb07bae16e6b7f6ca575f47d284c1aecdd10f3
 
 name:           polysemy-zoo
-version:        0.3.0.0
+version:        0.4.0.0
 synopsis:       Experimental, user-contributed effects and interpreters for polysemy
 description:    Please see the README on GitHub at <https://github.com/isovector/polysemy-zoo#readme>
 category:       Polysemy
