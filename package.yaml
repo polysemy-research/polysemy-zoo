@@ -1,5 +1,5 @@
 name:                polysemy-zoo
-version:             0.3.0.0
+version:             0.4.0.0
 github:              "isovector/polysemy-zoo"
 license:             BSD3
 author:              "Sandy Maguire"
@@ -31,8 +31,8 @@ dependencies:
 - ghc-prim >= 0.5.2 && < 0.6
 - hedis >= 0.10 && < 0.13
 - async >= 2.2 && < 3
-- binary
-- bytestring
+- binary >= 0.8.5.1 && < 0.9
+- bytestring >= 0.10.8.2 && < 0.11
 
 
 ghc-options:
@@ -72,7 +72,7 @@ tests:
     build-tools:
     - hspec-discover  >= 2.0
     dependencies:
-    - polysemy >= 0.5.1.0
+    - polysemy >= 0.7.0.0
     - polysemy-zoo
     - hspec >= 2.6.0 && < 3
 
