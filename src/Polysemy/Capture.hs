@@ -46,7 +46,7 @@ data Capture ref m a where
 makeSem_ ''Capture
 
 -----------------------------------------------------------------------------
--- Reifies the current continuation in the form of a prompt, and passes it to
+-- | Reifies the current continuation in the form of a prompt, and passes it to
 -- the first argument.
 reify :: forall ref a r
       .  Member (Capture ref) r
@@ -54,7 +54,7 @@ reify :: forall ref a r
       -> Sem r a
 
 -----------------------------------------------------------------------------
--- Provide an answer to a prompt, jumping to its reified continuation.
+-- | Provide an answer to a prompt, jumping to its reified continuation.
 -- This will not abort the current continuation, and the
 -- reified computation will return its final result when finished.
 --
@@ -69,14 +69,14 @@ reflect :: forall ref a x r
         -> Sem r a
 
 -----------------------------------------------------------------------------
--- Delimits any continuations
+-- | Delimits any continuations
 delimit :: forall ref a r
         .  Member (Capture ref) r
         => Sem r a
         -> Sem r a
 
 -----------------------------------------------------------------------------
--- Delimits any continuations, and detects if any subcontinuation
+-- | Delimits any continuations, and detects if any subcontinuation
 -- has failed locally.
 delimit' :: forall ref a r
          .  Member (Capture ref) r
