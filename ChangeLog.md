@@ -10,6 +10,7 @@
 
 - Added `SetStore` effect
 - Added `Floodgate` effect
+- Added `Final` effect, together with submodules of interpreters using it 
 - Added `lookupOrThrowKV`, `existsKV` and `modifyKV` actions to `KVStore`
 - Added Redis interpretations of `SetStore` and `KVStore`
 

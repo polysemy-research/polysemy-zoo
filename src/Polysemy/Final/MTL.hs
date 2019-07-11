@@ -35,7 +35,7 @@ runErrorFinal = interpretFinal $ \case
     h' <- bindS h
     s <- getInitialStateS
     pure $ m' `catchError` (h' . (<$ s))
-
+{-# INLINE runErrorFinal #-}
 
 -----------------------------------------------------------------------------
 -- | Run a 'Reader' effect through a final 'MonadReader'
@@ -51,6 +51,7 @@ runReaderFinal = interpretFinal $ \case
   Local f m -> do
     m' <- runS m
     pure $ local f m'
+{-# INLINE runReaderFinal #-}
 
 -----------------------------------------------------------------------------
 -- | Run a 'State' effect through a 'MonadState'
@@ -69,6 +70,7 @@ runStateFinal :: (Member (Lift m) r, MonadState s m)
 runStateFinal = interpret $ \case
   Get   -> sendM get
   Put s -> sendM (put s)
+{-# INLINE runStateFinal #-}
 
 -----------------------------------------------------------------------------
 -- | Run a 'Writer' effect through a final 'MonadWriter'
@@ -92,3 +94,4 @@ runWriterFinal = interpretFinal $ \case
       t <- m'
       let f = maybe id fst (inspect ins t)
       pure (fmap snd t, f)
+{-# INLINE runWriterFinal #-}

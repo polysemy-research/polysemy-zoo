@@ -57,6 +57,7 @@ import Control.Monad.IO.Class
 -- This is very useful for writing interpreters that interpret higher-order
 -- effects in terms of the final monad - however, these interpreters
 -- are subject to very different semantics than regular ones.
+--
 -- For more information, see 'interpretFinal'.
 data Final m z a where
   WithWeaving :: (forall f.
@@ -113,11 +114,11 @@ withStrategic strat = withWeaving $ \s wv ins -> runStrategy s wv ins strat
 -- interpret higher-order effects in terms of the final monad.
 --
 -- /Beware/: Any interpreters built using this (or 'Final' in general)
--- will _not_ respect local/global state semantics based on the order of
+-- will /not/ respect local/global state semantics based on the order of
 -- interpreters run. You should signal interpreters that make use of
 -- 'Final' by adding a "-Final" suffix to the names of these.
 --
--- State semantics of effects that are _not_
+-- State semantics of effects that are /not/
 -- interpreted in terms of the final monad will always
 -- appear local to effects that are interpreted in terms of the final monad.
 --
@@ -170,6 +171,7 @@ getInspectorS :: Sem (WithStrategy m f n) (Inspector f)
 getInspectorS = getInspectorT
 {-# INLINE getInspectorS #-}
 
+------------------------------------------------------------------------------
 -- | Get the stateful environment of the world at the moment the
 -- target monad is to be run.
 -- Prefer 'pureS', 'runS' or 'bindS' instead of using this function
@@ -179,13 +181,13 @@ getInitialStateS = getInitialStateT
 {-# INLINE getInitialStateS #-}
 
 ------------------------------------------------------------------------------
--- Lift a value into 'Strategic'.
+-- | Lift a value into 'Strategic'.
 pureS :: Applicative m => a -> Strategic m n a
 pureS = fmap pure . pureT
 {-# INLINE pureS #-}
 
 ------------------------------------------------------------------------------
--- Lifts an action of the final monad into 'Strategic'.
+-- | Lifts an action of the final monad into 'Strategic'.
 --
 -- Note: you don't need to use this function if you already have a monadic
 -- action with the functorial state woven into it, by the use of
@@ -230,9 +232,10 @@ runStrategy s wv ins (Sem m) = runIdentity $ m $ \u -> case extract u of
     GetInitialState -> s
     HoistInterpretation na -> sendM . wv . fmap na
     GetInspector -> Inspector ins
+{-# INLINE runStrategy #-}
 
 ------------------------------------------------------------------------------
--- Lower a 'Sem' containing only a lifted, final monad into that monad.
+-- | Lower a 'Sem' containing only a lifted, final monad into that monad.
 -- The appearance of 'Lift' as the final effect
 -- is to allow the use of operations that rely on a @'LastMember' ('Lift' m)@
 -- constraint.
@@ -242,16 +245,17 @@ runFinal = usingSem $ \u -> case decomp u of
     ex <$> wav s (runFinal . wv) ins
   Left g -> case extract g of
     Weaving (Lift m) s _ ex _ -> ex . (<$ s) <$> m
+{-# INLINE runFinal #-}
 
 ------------------------------------------------------------------------------
--- Lower a 'Sem' containing two lifted monad into the final monad,
+-- | Lower a 'Sem' containing two lifted monad into the final monad,
 -- by interpreting one of the monads in terms of the other one.
 --
 -- This allows for the use of operations that rely on a @'LastMember' ('Lift' m)@
 -- constraint, as long as @m@ can be transformed to the final monad;
 -- but be warned, this breaks the implicit contract of @'LastMember' ('Lift' m)@
--- that @m@ _is_ the final monad, so depending on the final monad and operations
--- used, 'runFinalTrans' may become _unsafe_.
+-- that @m@ /is/ the final monad, so depending on the final monad and operations
+-- used, 'runFinalTrans' may become /unsafe/.
 --
 -- For example, 'runFinalTrans' is unsafe with 'runAsync' if
 -- the final monad is non-deterministic, or a continuation
@@ -267,10 +271,12 @@ runFinalLift nat = usingSem $ \u -> case decomp u of
     Right (Weaving (Lift m) s _ ex _) -> ex . (<$ s) <$> m
     Left g' -> case extract g' of
       Weaving (Lift n) s _ ex _ -> ex . (<$ s) <$> nat n
+{-# INLINE runFinalLift #-}
 
 ------------------------------------------------------------------------------
--- | 'runFinalTrans', specialized to transform 'IO' to a 'MonadIO'.
+-- | 'runFinalLift', specialized to transform 'IO' to a 'MonadIO'.
 runFinalLiftIO :: MonadIO m
                => Sem [Final m, Lift m, Lift IO] a
                -> m a
 runFinalLiftIO = runFinalLift liftIO
+{-# INLINE runFinalLiftIO #-}
