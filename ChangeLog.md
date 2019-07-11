@@ -1,5 +1,9 @@
 # Changelog for polysemy-zoo
 
+## 0.4.0.1 (2019-07-10)
+
+- Fixed an erroneous lower bound in the tests
+
 ## 0.4.0.0 (2019-07-10)
 
 ### Breaking Changes
@@ -10,7 +14,8 @@
 
 - Added `SetStore` effect
 - Added `Floodgate` effect
-- Added `Final` effect, together with submodules of interpreters using it 
+- Added `Final` effect, together with submodules of interpreters using it
+    (thanks to @KingoftheHomeless)
 - Added `lookupOrThrowKV`, `existsKV` and `modifyKV` actions to `KVStore`
 - Added Redis interpretations of `SetStore` and `KVStore`
 
@@ -44,6 +49,3 @@
 
 
 ## Unreleased changes
-
-* In AbsorbMonadWriter, re-implemented mtl pass in terms of the new Polysemy.Writer
-pass and confirmed all tests.
