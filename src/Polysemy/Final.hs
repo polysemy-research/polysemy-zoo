@@ -73,8 +73,10 @@ makeSem_ ''Final
 
 -----------------------------------------------------------------------------
 -- | Allows for embedding higher-order actions of the final monad
--- by providing the means of explicitly threading effects through 'Sem r'
--- to the final monad. Consider using 'withStrategic' instead,
+-- by providing the means of explicitly threading effects through @'Sem' r@
+-- to the final monad.
+--
+-- Consider using 'withStrategic' instead,
 -- as it provides a more user-friendly interface to the same power.
 --
 -- You are discouraged from using 'withWeaving' directly in application code,
@@ -255,9 +257,9 @@ runFinal = usingSem $ \u -> case decomp u of
 -- constraint, as long as @m@ can be transformed to the final monad;
 -- but be warned, this breaks the implicit contract of @'LastMember' ('Lift' m)@
 -- that @m@ /is/ the final monad, so depending on the final monad and operations
--- used, 'runFinalTrans' may become /unsafe/.
+-- used, 'runFinalLift' may become /unsafe/.
 --
--- For example, 'runFinalTrans' is unsafe with 'runAsync' if
+-- For example, 'runFinalLift' is unsafe with 'Polysemy.Async.runAsync' if
 -- the final monad is non-deterministic, or a continuation
 -- monad.
 runFinalLift :: Monad m
