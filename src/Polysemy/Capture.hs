@@ -28,9 +28,9 @@ import Polysemy.Internal.Union
 import Polysemy.Cont.Internal(Ref(..))
 
 -----------------------------------------------------------------------------
--- | A less powerful variant of 'Shift' that may always be interpreted
--- safely. Unlike 'Shift', continuations can't leave the scope in which
--- they are provided.
+-- | A less powerful variant of 'Polysemy.Shift.Shift' that may always be
+-- interpreted safely. Unlike 'Polysemy.Shift.Shift',
+-- continuations can't leave the scope in which they are provided.
 --
 -- __Note__: Any computation used in a higher-order effect will
 -- be delimited.
@@ -84,7 +84,7 @@ delimit' :: forall ref a r
          -> Sem r (Maybe a)
 
 -----------------------------------------------------------------------------
--- | A restricted version of 'shift'.
+-- | A restricted version of 'Polysemy.Shift.shift'.
 -- Executing the provided continuation will not abort execution.
 --
 -- The provided continuation may fail locally in its subcontinuations.
