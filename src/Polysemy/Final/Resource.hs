@@ -25,7 +25,7 @@ import           Polysemy.Final
 -- State that seems like it should be threaded globally throughout 'bracket's
 -- /will not be./
 --
--- Prefer 'runResourceBase' unless its unsafe or inefficient in the context of
+-- Prefer 'runResourceBase' unless it's unsafe or inefficient in the context of
 -- your application.
 runResourceFinal :: Member (Final IO) r
                  => Sem (Resource ': r) a

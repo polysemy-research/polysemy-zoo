@@ -8,8 +8,8 @@ import Control.Monad.Cont (ContT(..))
 
 -----------------------------------------------------------------------------
 -- | An effect for delimited continuations, formulated algebraically
--- through a variant of the 'Jump'/'Subst' formulation of abortive
--- continuations.
+-- through a variant of the 'Polysemy.Cont.Jump/'Polysemy.Cont.Subst'
+-- formulation of abortive continuations.
 --
 -- Activating polysemy-plugin is highly recommended when using this effect
 -- in order to avoid ambiguous types.
