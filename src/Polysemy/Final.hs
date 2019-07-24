@@ -158,7 +158,7 @@ interpretFinal n =
 -- is extremely similar.
 type Strategic m n a = forall f. Functor f => Sem (WithStrategy m f n) (m (f a))
 
-type WithStrategy m f n = WithTactics (Lift m) f n '[]
+type WithStrategy m f n = WithTactics (Embed m) f n '[]
 
 ------------------------------------------------------------------------------
 -- | Get a natural transformation capable of potentially inspecting values
@@ -183,7 +183,7 @@ getInitialStateS = getInitialStateT
 {-# INLINE getInitialStateS #-}
 
 ------------------------------------------------------------------------------
--- | Lift a value into 'Strategic'.
+-- | Embed a value into 'Strategic'.
 pureS :: Applicative m => a -> Strategic m n a
 pureS = fmap pure . pureT
 {-# INLINE pureS #-}
@@ -213,7 +213,7 @@ runS = fmap runM . runT
 {-# INLINE runS #-}
 
 ------------------------------------------------------------------------------
--- | Lift a kleisli action into the stateful environment, in terms of the final
+-- | Embed a kleisli action into the stateful environment, in terms of the final
 -- monad. You can use 'bindS' to get an effect parameter of the form @a -> n b@
 -- into something that can be used after calling 'runS' on an effect parameter
 -- @n a@.
@@ -232,7 +232,7 @@ runStrategy :: Functor f
 runStrategy s wv ins (Sem m) = runIdentity $ m $ \u -> case extract u of
   Weaving e s' _ ex' _ -> Identity $ ex' $ (<$ s') $ case e of
     GetInitialState -> s
-    HoistInterpretation na -> sendM . wv . fmap na
+    HoistInterpretation na -> embed . wv . fmap na
     GetInspector -> Inspector ins
 {-# INLINE runStrategy #-}
 
@@ -241,12 +241,12 @@ runStrategy s wv ins (Sem m) = runIdentity $ m $ \u -> case extract u of
 -- The appearance of 'Lift' as the final effect
 -- is to allow the use of operations that rely on a @'LastMember' ('Lift' m)@
 -- constraint.
-runFinal :: Monad m => Sem '[Final m, Lift m] a -> m a
+runFinal :: Monad m => Sem '[Final m, Embed m] a -> m a
 runFinal = usingSem $ \u -> case decomp u of
   Right (Weaving (WithWeaving wav) s wv ex ins) ->
     ex <$> wav s (runFinal . wv) ins
   Left g -> case extract g of
-    Weaving (Lift m) s _ ex _ -> ex . (<$ s) <$> m
+    Weaving (Embed m) s _ ex _ -> ex . (<$ s) <$> m
 {-# INLINE runFinal #-}
 
 ------------------------------------------------------------------------------
@@ -259,26 +259,26 @@ runFinal = usingSem $ \u -> case decomp u of
 -- that @m@ /is/ the final monad, so depending on the final monad and operations
 -- used, 'runFinalLift' may become /unsafe/.
 --
--- For example, 'runFinalLift' is unsafe with 'Polysemy.Async.runAsync' if
+-- For example, 'runFinalLift' is unsafe with 'Polysemy.Async.asyncToIO' if
 -- the final monad is non-deterministic, or a continuation
 -- monad.
 runFinalLift :: Monad m
               => (forall x. n x -> m x)
-              -> Sem [Final m, Lift m, Lift n] a
+              -> Sem [Final m, Embed m, Embed n] a
               -> m a
 runFinalLift nat = usingSem $ \u -> case decomp u of
   Right (Weaving (WithWeaving wav) s wv ex ins) ->
     ex <$> wav s (runFinalLift nat . wv) ins
   Left g -> case decomp g of
-    Right (Weaving (Lift m) s _ ex _) -> ex . (<$ s) <$> m
+    Right (Weaving (Embed m) s _ ex _) -> ex . (<$ s) <$> m
     Left g' -> case extract g' of
-      Weaving (Lift n) s _ ex _ -> ex . (<$ s) <$> nat n
+      Weaving (Embed n) s _ ex _ -> ex . (<$ s) <$> nat n
 {-# INLINE runFinalLift #-}
 
 ------------------------------------------------------------------------------
 -- | 'runFinalLift', specialized to transform 'IO' to a 'MonadIO'.
 runFinalLiftIO :: MonadIO m
-               => Sem [Final m, Lift m, Lift IO] a
+               => Sem [Final m, Embed m, Embed IO] a
                -> m a
 runFinalLiftIO = runFinalLift liftIO
 {-# INLINE runFinalLiftIO #-}

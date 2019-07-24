@@ -49,9 +49,9 @@ runRandom q = runState q . reinterpret (\case
 
 ------------------------------------------------------------------------------
 -- | Run a 'Random' effect by using the 'IO' random generator.
-runRandomIO :: Member (Lift IO) r => Sem (Random ': r) a -> Sem r a
+runRandomIO :: Member (Embed IO) r => Sem (Random ': r) a -> Sem r a
 runRandomIO m = do
-  q <- sendM R.newStdGen
+  q <- embed R.newStdGen
   snd <$> runRandom q m
 {-# INLINE runRandomIO #-}
 

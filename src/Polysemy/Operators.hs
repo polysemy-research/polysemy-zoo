@@ -3,7 +3,7 @@
 -- interpreters in more concise way, without mentioning unnecessary details:
 --
 -- @
--- foo :: 'Member' ('Lift' 'IO') r => 'String' -> 'Int' -> 'Sem' r ()
+-- foo :: 'Member' ('Embed' 'IO') r => 'String' -> 'Int' -> 'Sem' r ()
 -- @
 --
 -- can be written simply as:
@@ -27,7 +27,7 @@
 --
 -- 'makeSem' ''ConsoleIO
 --
--- -- runConsoleIO :: Member (Lift IO) r => Sem (ConsoleIO : r) a -> Sem r a
+-- -- runConsoleIO :: Member (Embed IO) r => Sem (ConsoleIO : r) a -> Sem r a
 -- runConsoleIO :: ConsoleIO : r '@>' a -> 'IO' '~@' r '@>' a
 -- runConsoleIO = 'interpret' \\case
 --   WriteStrLn s -> 'sendM' '$' 'putStrLn' s
@@ -64,7 +64,7 @@
 -- constraint instead:
 --
 -- @
--- foo :: 'Member' ('Lift' 'IO') r
+-- foo :: 'Member' ('Embed' 'IO') r
 --     => (forall x. r '@>' x -> 'IO' x)
 --     -> 'IO' (forall a. Foo : r '@>' a -> r '@>' a)
 -- @
@@ -143,7 +143,7 @@ type family SemList s where
 -- 'Sem' with __exactly__ one, lifted monad:
 --
 -- @
--- foo :: 'Sem' \'['Lift' 'IO'] ()
+-- foo :: 'Sem' \'['Embed' 'IO'] ()
 -- @
 --
 -- can be written simply as:
@@ -157,7 +157,7 @@ infix 2 @>, @-, @~
 
 type (@>)   = Sem
 type (@-) e = Sem '[e]
-type (@~) m = Sem '[Lift m]
+type (@~) m = Sem '[Embed m]
 
 -- $MemberOperators
 -- Infix equivalents of 'Member'(s) constraint used directly in /return/ type,
@@ -201,7 +201,7 @@ type (@~) m = Sem '[Lift m]
 -- __Exactly__ one, lifted monad as a member:
 --
 -- @
--- foo :: 'Member' ('Lift' 'IO') r => 'Sem' ('Polysemy.Output.Output' ['String'] : r) () -> 'Sem' r ()
+-- foo :: 'Member' ('Embed' 'IO') r => 'Sem' ('Polysemy.Output.Output' ['String'] : r) () -> 'Sem' r ()
 -- @
 --
 -- can be written simply as:
@@ -213,7 +213,7 @@ infix 1 >@, -@, ~@
 
 type (>@) es s = Members es       (SemList s) => s
 type (-@) e  s = Member  e        (SemList s) => s
-type (~@) m  s = Member  (Lift m) (SemList s) => s
+type (~@) m  s = Member  (Embed m) (SemList s) => s
 
 -- $CombinedOperators
 -- Joined versions of one of ('>@'), ('-@'), ('~@') and ('@>') with implicit,
@@ -255,7 +255,7 @@ type (~@) m  s = Member  (Lift m) (SemList s) => s
 -- __Exactly__ one, lifted monad as a member:
 --
 -- @
--- foo :: 'Member' ('Lift' 'IO') r => 'Sem' r ()
+-- foo :: 'Member' ('Embed' 'IO') r => 'Sem' r ()
 -- @
 --
 -- can be written simply as:
@@ -267,4 +267,4 @@ infix 1 >@>, -@>, ~@>
 
 type (>@>) es a = forall r. Members es       r => Sem r a
 type (-@>) e  a = forall r. Member  e        r => Sem r a
-type (~@>) m  a = forall r. Member  (Lift m) r => Sem r a
+type (~@>) m  a = forall r. Member  (Embed m) r => Sem r a

@@ -77,7 +77,7 @@ test5 = do
 
   r <-  runM
       . runContM
-      . runStateInIORef ref
+      . runStateIORef ref
       $ stateTest
   s' <- readIORef ref
   return (r, s')
@@ -93,7 +93,7 @@ test7 :: ([String], String)
 test7 =
     (`C.runCont` id)
   . runFinal
-  . runTraceAsList
+  . runTraceList
   . runReader ""
   . runContFinal
   $ do

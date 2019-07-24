@@ -10,10 +10,10 @@ import Polysemy.Resource
 import Test.Hspec
 
 
-runStateInIO :: Member (Lift IO) r => s -> IO (∀ x. Sem (State s ': r) x -> Sem r x)
+runStateInIO :: Member (Embed IO) r => s -> IO (∀ x. Sem (State s ': r) x -> Sem r x)
 runStateInIO s = do
   ref <- newIORef s
-  nat $ runStateInIORef ref
+  nat $ runStateIORef ref
 
 
 test
@@ -32,7 +32,7 @@ test = do
 spec :: Spec
 spec = describe "Idempotent Lowering" $ do
   it "should persist an IORef through a bracket" $ do
-    runIt <- nat runM .@! const (runStateInIO 0) .@! liftNat runResourceInIO
+    runIt <- nat runM .@! const (runStateInIO 0) .@! liftNat lowerResource
     result <- runIt test
     result `shouldBe` (3 :: Int)
 

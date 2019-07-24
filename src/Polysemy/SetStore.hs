@@ -42,7 +42,7 @@ runSetStoreAsKVStore = interpret $ \case
 
 
 runSetStoreInRedis
-    :: ( Member (Lift R.Redis) r
+    :: ( Member (Embed R.Redis) r
        , Member (Error R.Reply) r
        , Binary k
        , Binary v
