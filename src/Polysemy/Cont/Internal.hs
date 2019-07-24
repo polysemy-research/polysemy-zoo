@@ -16,7 +16,7 @@ data Cont ref m a where
   Jump    :: ref a -> a -> Cont ref m b
   Subst   :: (ref a -> m b) -> (a -> m b) -> Cont ref m b
 
-makeSem_ ''Cont
+makeSem ''Cont
 
 -----------------------------------------------------------------------------
 -- | Provide an answer to a prompt, jumping to its reified continuation,
@@ -34,22 +34,22 @@ makeSem_ ''Cont
 -- The only exception to this is if you interpret such effects /and/ 'Cont'
 -- in terms of the final monad, and the final monad can perform such interactions
 -- in a meaningful manner.
-jump :: forall ref x a r.
-        Member (Cont ref) r
-     => ref x
-     -> x
-     -> Sem r a
+-- jump :: forall ref x a r.
+--         Member (Cont ref) r
+--      => ref x
+--      -> x
+--      -> Sem r a
 
 -----------------------------------------------------------------------------
 -- | Reifies the current continuation in the form of a prompt, and passes it to
 -- the first argument. If the prompt becomes invoked via 'jump', then the
 -- second argument will be run before the reified continuation, and otherwise
 -- will not be called at all.
-subst :: forall ref x a r.
-         Member (Cont ref) r
-      => (ref x -> Sem r a)
-      -> (x -> Sem r a)
-      -> Sem r a
+-- subst :: forall ref x a r.
+--          Member (Cont ref) r
+--       => (ref x -> Sem r a)
+--       -> (x -> Sem r a)
+--       -> Sem r a
 
 -----------------------------------------------------------------------------
 -- | Runs a 'Cont' effect by providing a final continuation.
