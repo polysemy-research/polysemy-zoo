@@ -8,7 +8,11 @@ import Control.Monad
 import Control.Monad.Cont (ContT(..))
 
 -----------------------------------------------------------------------------
--- | An effect for abortive continuations, formulated a là BLABLA
+-- | An effect for abortive continuations.
+--
+-- Formulated à la Tom Schrijvers et al.
+-- "Monad Transformers and Modular Algebraic Effects: What Binds Them Together"
+-- (2016). <http://www.cs.kuleuven.be/publicaties/rapporten/cw/CW699.pdf>
 --
 -- Activating polysemy-plugin is highly recommended when using this effect
 -- in order to avoid ambiguous types.
