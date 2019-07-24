@@ -1,5 +1,10 @@
 # Changelog for polysemy-zoo
 
+## 0.5.0.0 (2019-07-24)
+
+- Added Continuation effects (thanks to @KingoftheHomeless)
+- Update to `polysemy-1.0.0.0`'s new names
+
 ## 0.4.0.1 (2019-07-10)
 
 - Fixed an erroneous lower bound in the tests

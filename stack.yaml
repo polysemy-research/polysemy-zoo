@@ -4,7 +4,8 @@ packages:
 - .
 
 extra-deps:
-- polysemy-0.7.0.0
+- polysemy-1.0.0.0
+- polysemy-plugin-0.2.1.0
 - type-errors-0.2.0.0
 - type-errors-pretty-0.0.0.0
 - th-abstraction-0.3.1.0
