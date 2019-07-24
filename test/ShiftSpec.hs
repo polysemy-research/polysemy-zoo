@@ -57,7 +57,7 @@ test4 = do
   ref <- newIORef 1
   runM
    . runShiftM
-   . runStateInIORef ref
+   . runStateIORef ref
    $ do
     shift $ \c -> do
       _ <- c ()

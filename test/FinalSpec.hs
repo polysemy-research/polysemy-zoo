@@ -25,34 +25,34 @@ import Polysemy.Final.MTL
 
 data Node a = Node a (IORef (Node a))
 
-mkNode :: (Member (Lift IO) r, Member Fixpoint r)
+mkNode :: (Member (Embed IO) r, Member Fixpoint r)
        => a
        -> Sem r (Node a)
 mkNode a = mdo
   let nd = Node a p
-  p <- sendM $ newIORef nd
+  p <- embed $ newIORef nd
   return nd
 
-linkNode :: Member (Lift IO) r
+linkNode :: Member (Embed IO) r
          => Node a
          -> Node a
          -> Sem r ()
 linkNode (Node _ r) b =
-  sendM $ writeIORef r b
+  embed $ writeIORef r b
 
 readNode :: Node a -> a
 readNode (Node a _) = a
 
-follow :: Member (Lift IO) r
+follow :: Member (Embed IO) r
        => Node a
        -> Sem r (Node a)
-follow (Node _ ref) = sendM $ readIORef ref
+follow (Node _ ref) = embed $ readIORef ref
 
 test1 :: IO (Either Int (String, Int, Maybe Int))
 test1 = do
   ref <- newIORef "abra"
   runFinal
-    . runStateInIORef ref -- Order of these interpreters don't matter
+    . runStateIORef ref -- Order of these interpreters don't matter
     . runErrorInIOFinal
     . runFixpointFinal
     . runAsyncFinal
@@ -73,7 +73,7 @@ test1 = do
 test2 :: IO ([String], Either () ())
 test2 =
     runFinal
-  . runTraceAsList
+  . runTraceList
   . runErrorInIOFinal
   . runAsyncFinal
   $ do
@@ -101,7 +101,7 @@ test3 i =
   . runExceptT
   . (`runStateT` 0)
   . runFinal
-  . runTraceAsList -- Order of these interpreters don't matter
+  . runTraceList -- Order of these interpreters don't matter
   . runWriterFinal
   . runStateFinal
   . runErrorFinal

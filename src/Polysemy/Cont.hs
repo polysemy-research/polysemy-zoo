@@ -68,7 +68,7 @@ runContPure = runContUnsafe
 --
 -- This is a safe variant of 'runContUnsafe', as this may only be used
 -- as the final interpreter before 'runM'.
-runContM :: Sem '[Cont (Ref (Sem '[Lift m]) a), Lift m] a -> Sem '[Lift m] a
+runContM :: Sem '[Cont (Ref (Sem '[Embed m]) a), Embed m] a -> Sem '[Embed m] a
 runContM = runContUnsafe
 {-# INLINE runContM #-}
 

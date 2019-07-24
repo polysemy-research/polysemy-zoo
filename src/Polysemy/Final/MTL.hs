@@ -64,12 +64,12 @@ runReaderFinal = interpretFinal $ \case
 -- /Beware/: Effects that aren't interpreted in terms of the final
 -- monad will have local state semantics in regards to 'State' effects
 -- interpreted this way. See 'interpretFinal'.
-runStateFinal :: (Member (Lift m) r, MonadState s m)
+runStateFinal :: (Member (Embed m) r, MonadState s m)
                => Sem (State s ': r) a
                -> Sem r a
 runStateFinal = interpret $ \case
-  Get   -> sendM get
-  Put s -> sendM (put s)
+  Get   -> embed get
+  Put s -> embed (put s)
 {-# INLINE runStateFinal #-}
 
 -----------------------------------------------------------------------------

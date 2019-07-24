@@ -54,7 +54,7 @@ runStates :: HList t -> Sem (TypeConcat (TypeMap State t) r) a -> Sem r a
 runStates = runSeveral (fmap (fmap snd) . runState)
 
 runConstInputs :: HList t -> Sem (TypeConcat (TypeMap Input t) r) a -> Sem r a
-runConstInputs = runSeveral runConstInput
+runConstInputs = runSeveral runInputConst
 
 spec :: Spec
 spec = do
@@ -73,11 +73,11 @@ spec = do
     it "should be equivalent to composed runState" $ do
       run original `shouldBe` run new
 
-  describe "runConstInput" $ do
-    let original = runConstInput 5 . runConstInput "test"
-                                   . runConstInput True $ inputProgram
+  describe "runInputConst" $ do
+    let original = runInputConst 5 . runInputConst "test"
+                                   . runInputConst True $ inputProgram
         new = runConstInputs (True ::: "test" ::: 5 ::: HNil) inputProgram
 
-    it "should be equivalent to composed runConstInput" $ do
+    it "should be equivalent to composed runInputConst" $ do
       run original `shouldBe` run new
 

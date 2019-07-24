@@ -91,8 +91,8 @@ runShiftPure = runShiftUnsafe
 --
 -- This is a safe variant of 'runContUnsafe', as this may only be used
 -- as the final interpreter before 'run'.
-runShiftM :: Sem '[Shift (Ref (Sem '[Lift m]) (Maybe a)) a, Lift m] a
-          -> Sem '[Lift m] (Maybe a)
+runShiftM :: Sem '[Shift (Ref (Sem '[Embed m]) (Maybe a)) a, Embed m] a
+          -> Sem '[Embed m] (Maybe a)
 runShiftM = runShiftUnsafe
 {-# INLINE runShiftM #-}
 
@@ -151,9 +151,9 @@ runShiftWithCPure = runShiftWithCUnsafe
 --
 -- This is a safe variant of 'runShiftWithCUnsafe', as this may only be used
 -- as the final interpreter before 'runM'.
-runShiftWithCM :: (a -> Sem '[Lift m] (Maybe b))
-               -> Sem '[Shift (Ref (Sem '[Lift m]) (Maybe b)) b, Lift m] a
-               -> Sem '[Lift m] (Maybe b)
+runShiftWithCM :: (a -> Sem '[Embed m] (Maybe b))
+               -> Sem '[Shift (Ref (Sem '[Embed m]) (Maybe b)) b, Embed m] a
+               -> Sem '[Embed m] (Maybe b)
 runShiftWithCM = runShiftWithCUnsafe
 {-# INLINE runShiftWithCM #-}
 
@@ -182,11 +182,11 @@ runContShiftPure = runContShiftUnsafe
 --
 -- This is a safe variant of 'runContShiftUnsafe', as this may only be used
 -- as the final interpreter before 'runM'.
-runContShiftM :: Sem [ Cont (Ref (Sem '[Lift m]) (Maybe a))
-                     , Shift (Ref (Sem '[Lift m]) (Maybe a)) a
-                     , Lift m
+runContShiftM :: Sem [ Cont (Ref (Sem '[Embed m]) (Maybe a))
+                     , Shift (Ref (Sem '[Embed m]) (Maybe a)) a
+                     , Embed m
                      ] a
-              -> Sem '[Lift m] (Maybe a)
+              -> Sem '[Embed m] (Maybe a)
 runContShiftM = runContShiftUnsafe
 {-# INLINE runContShiftM #-}
 
@@ -216,12 +216,12 @@ runContShiftWithCPure = runContShiftWithCUnsafe
 --
 -- This is a safe variant of 'runContShiftWithCUnsafe', as this may only be used
 -- as the final interpreter before 'runM'.
-runContShiftWithCM :: (a -> Sem '[Lift m] (Maybe s))
-                   -> Sem [ Cont (Ref (Sem '[Lift m]) (Maybe s))
-                          , Shift (Ref (Sem '[Lift m]) (Maybe s)) s
-                          , Lift m
+runContShiftWithCM :: (a -> Sem '[Embed m] (Maybe s))
+                   -> Sem [ Cont (Ref (Sem '[Embed m]) (Maybe s))
+                          , Shift (Ref (Sem '[Embed m]) (Maybe s)) s
+                          , Embed m
                           ] a
-                   -> Sem '[Lift m] (Maybe s)
+                   -> Sem '[Embed m] (Maybe s)
 runContShiftWithCM = runContShiftWithCUnsafe
 {-# INLINE runContShiftWithCM #-}
 

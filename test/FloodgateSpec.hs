@@ -8,7 +8,7 @@ import Polysemy.Trace
 spec :: Spec
 spec = describe "Floodgate" $ do
   it "should delay held traces until release" $ do
-    let (ts, n) = run . runTraceAsList . runFloodgate $ do
+    let (ts, n) = run . runTraceList . runFloodgate $ do
           hold $ trace "first1"
           hold $ trace "first2"
           trace "not held"

@@ -96,7 +96,7 @@ infixl 8 .@!
 
 ------------------------------------------------------------------------------
 -- | Like '.@!', but for interpreters which change the resulting type --- eg.
--- 'Polysemy.Error.runErrorInIO'.
+-- 'Polysemy.Error.lowerError.
 --
 -- @since 0.1.1.0
 (.@@!)

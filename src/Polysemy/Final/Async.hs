@@ -14,18 +14,18 @@ import Polysemy.Final
 ------------------------------------------------------------------------------
 -- | Run an 'Async' effect through final 'IO'
 --
--- This can be used as an alternative to 'runAsyncInIO'.
+-- This can be used as an alternative to 'lowerAsync'.
 --
 -- /Beware/: Effects that aren't interpreted in terms of 'IO'
 -- will have local state semantics in regards to 'Async' effects
 -- interpreted this way. See 'interpretFinal'.
 --
--- Notably, unlike 'runAsync', this is not consistent with
+-- Notably, unlike 'asyncToIO', this is not consistent with
 -- 'Polysemy.State.State' unless 'Polysemy.State.runStateInIORef' is used.
 -- State that seems like it should be threaded globally throughout the `Async`
 -- /will not be./
 --
--- Prefer 'runAsync' unless its unsafe or inefficient in the context of your
+-- Prefer 'asyncToIO' unless its unsafe or inefficient in the context of your
 -- application.
 runAsyncFinal :: Member (Final IO) r
               => Sem (Async ': r) a
