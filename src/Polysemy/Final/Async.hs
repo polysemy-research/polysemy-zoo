@@ -25,7 +25,7 @@ import Polysemy.Final
 -- State that seems like it should be threaded globally throughout the `Async`
 -- /will not be./
 --
--- Prefer 'runAsync' unless its unsafe or inefficient in the context of your
+-- Prefer 'runAsync' unless it's unsafe or inefficient in the context of your
 -- application.
 runAsyncFinal :: Member (Final IO) r
               => Sem (Async ': r) a
