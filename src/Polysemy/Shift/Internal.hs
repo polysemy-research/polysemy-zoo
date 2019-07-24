@@ -20,16 +20,16 @@ data Shift ref s m a where
   Reset   :: m s -> Shift ref s m s
   Reset'  :: m s -> Shift ref s m (Maybe s)
 
-makeSem ''Shift
+makeSem_ ''Shift
 
 -----------------------------------------------------------------------------
 -- | Reifies the current continuation in the form of a prompt, and passes it to
 -- the first argument. Unlike 'subst', control will never return to the current
 -- continuation unless the prompt is invoked via 'release'.
--- trap :: forall ref s a r
---      .  Member (Shift ref s) r
---      => (ref a -> Sem r s)
---      -> Sem r a
+trap :: forall ref s a r
+     .  Member (Shift ref s) r
+     => (ref a -> Sem r s)
+     -> Sem r a
 
 -----------------------------------------------------------------------------
 -- | Provide an answer to a prompt, jumping to its reified continuation.
@@ -49,34 +49,34 @@ makeSem ''Shift
 -- The provided continuation may fail locally in its subcontinuations.
 -- It may sometimes become necessary to handle such cases. To do so,
 -- use 'reset\'' together with 'release'.
--- invoke :: forall ref a x r
---        .  Member (Shift ref a) r
---        => ref x
---        -> x
---        -> Sem r a
+invoke :: forall ref s a r
+       .  Member (Shift ref s) r
+       => ref a
+       -> a
+       -> Sem r s
 
 
 -----------------------------------------------------------------------------
 -- | Aborts the current continuation with a result.
--- abort :: forall ref s a r
---       .  Member (Shift ref s) r
---       => s
---       -> Sem r a
+abort :: forall ref s a r
+      .  Member (Shift ref s) r
+      => s
+      -> Sem r a
 
 -----------------------------------------------------------------------------
 -- | Delimits any continuations and calls to 'abort'.
--- reset :: forall ref a r
---       .  Member (Shift ref a) r
---       => Sem r a
---       -> Sem r a
+reset :: forall ref s r
+      .  Member (Shift ref s) r
+      => Sem r s
+      -> Sem r s
 
 -----------------------------------------------------------------------------
 -- | Delimits any continuations and calls to 'abort', and detects if
 -- any subcontinuation has failed locally.
--- reset' :: forall ref s r
---        .  Member (Shift ref s) r
---        => Sem r s
---        -> Sem r (Maybe s)
+reset' :: forall ref s r
+       .  Member (Shift ref s) r
+       => Sem r s
+       -> Sem r (Maybe s)
 
 runShiftWeaving :: Monad m
                 => (forall x. (x -> m (Maybe s)) -> Sem r x -> m (Maybe s))
