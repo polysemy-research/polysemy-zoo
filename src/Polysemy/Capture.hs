@@ -43,15 +43,15 @@ data Capture ref m a where
   Delimit  :: m a -> Capture ref m a
   Delimit' :: m a -> Capture ref m (Maybe a)
 
-makeSem ''Capture
+makeSem_ ''Capture
 
 -----------------------------------------------------------------------------
 -- | Reifies the current continuation in the form of a prompt, and passes it to
 -- the first argument.
--- reify :: forall ref a r
---       .  Member (Capture ref) r
---       => (forall s. ref s a -> Sem r s)
---       -> Sem r a
+reify :: forall ref a r
+      .  Member (Capture ref) r
+      => (forall s. ref s a -> Sem r s)
+      -> Sem r a
 
 -----------------------------------------------------------------------------
 -- | Provide an answer to a prompt, jumping to its reified continuation.
@@ -62,26 +62,26 @@ makeSem ''Capture
 -- It may sometimes become necessary to handle such cases. To do so,
 -- use 'delimit\'' together with 'reflect' (the reified continuation
 -- is already delimited).
--- reflect :: forall ref a x r
---         .  Member (Capture ref) r
---         => ref a x
---         -> x
---         -> Sem r a
+reflect :: forall ref s a r
+        .  Member (Capture ref) r
+        => ref s a
+        -> a
+        -> Sem r s
 
 -----------------------------------------------------------------------------
 -- | Delimits any continuations
--- delimit :: forall ref a r
---         .  Member (Capture ref) r
---         => Sem r a
---         -> Sem r a
+delimit :: forall ref a r
+        .  Member (Capture ref) r
+        => Sem r a
+        -> Sem r a
 
 -----------------------------------------------------------------------------
 -- | Delimits any continuations, and detects if any subcontinuation
 -- has failed locally.
--- delimit' :: forall ref a r
---          .  Member (Capture ref) r
---          => Sem r a
---          -> Sem r (Maybe a)
+delimit' :: forall ref a r
+         .  Member (Capture ref) r
+         => Sem r a
+         -> Sem r (Maybe a)
 
 -----------------------------------------------------------------------------
 -- | A restricted version of 'Polysemy.Shift.shift'.
