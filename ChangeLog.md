@@ -1,5 +1,9 @@
 # Changelog for polysemy-zoo
 
+## 0.5.0.1 (2019-07-25)
+
+- Fixed some bugs with haddock
+
 ## 0.5.0.0 (2019-07-24)
 
 - Added Continuation effects (thanks to @KingoftheHomeless)
