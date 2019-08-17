@@ -3,6 +3,9 @@ module FinalSpec where
 
 import Test.Hspec
 
+import qualified Control.Concurrent.Async as A
+import Control.Concurrent.MVar
+import Control.Concurrent.STM.TVar
 import Control.Monad.State  hiding (MonadState(..), modify)
 import Control.Monad.Except hiding (MonadError(..))
 import Control.Monad.Writer hiding (MonadWriter(..), censor)
@@ -18,6 +21,7 @@ import Polysemy.State
 import Polysemy.Final.Async
 import Polysemy.Final.Fixpoint
 import Polysemy.Final.Error
+import Polysemy.Final.Writer
 
 import Polysemy.Reader
 import Polysemy.Writer
@@ -52,10 +56,11 @@ test1 :: IO (Either Int (String, Int, Maybe Int))
 test1 = do
   ref <- newIORef "abra"
   runFinal
+    . embedToFinal
     . runStateIORef ref -- Order of these interpreters don't matter
-    . runErrorInIOFinal
-    . runFixpointFinal
-    . runAsyncFinal
+    . errorToIOFinal
+    . fixpointToFinal
+    . asyncToIOFinal
      $ do
      n1 <- mkNode 1
      n2 <- mkNode 2
@@ -74,8 +79,8 @@ test2 :: IO ([String], Either () ())
 test2 =
     runFinal
   . runTraceList
-  . runErrorInIOFinal
-  . runAsyncFinal
+  . errorToIOFinal
+  . asyncToIOFinal
   $ do
   fut <- async $ do
     trace "Global state semantics?"
@@ -101,11 +106,12 @@ test3 i =
   . runExceptT
   . (`runStateT` 0)
   . runFinal
+  . embedToFinal
   . runTraceList -- Order of these interpreters don't matter
-  . runWriterFinal
-  . runStateFinal
-  . runErrorFinal
-  . runReaderFinal
+  . writerToFinal
+  . stateToEmbed
+  . errorToFinal
+  . readerToFinal
   $ do
     ask >>= put
     res <-
@@ -116,6 +122,54 @@ test3 i =
     j' <- get
     tell [j']
     return res
+
+test4 :: IO (String, String)
+test4 = do
+  tvar <- newTVarIO ""
+  (listened, _) <- runFinal . asyncToIOFinal . runWriterTVar tvar $ do
+    tell "message "
+    listen $ do
+      tell "has been"
+      a <- async $ tell " received"
+      await a
+  end <- readTVarIO tvar
+  return (end, listened)
+
+test5 :: IO (String, String)
+test5 = do
+  tvar <- newTVarIO ""
+  lock <- newEmptyMVar
+  (listened, a) <- runFinal . asyncToIOFinal . runWriterTVar tvar $ do
+    tell "message "
+    listen $ do
+      tell "has been"
+      a <- async $ do
+        embedFinal $ takeMVar lock
+        tell " received"
+      return a
+  putMVar lock ()
+  _ <- A.wait a
+  end <- readTVarIO tvar
+  return (end, listened)
+
+test6 :: Sem '[Error (A.Async (Maybe ())), Final IO] String
+test6 = do
+  tvar <- embedFinal $ newTVarIO ""
+  lock <- embedFinal $ newEmptyMVar
+  let
+      inner = do
+        tell "message "
+        fmap snd $ listen $ do
+          tell "has been"
+          a <- async $ do
+            embedFinal $ takeMVar lock
+            tell " received"
+          throw a
+  asyncToIOFinal (runWriterTVar tvar inner) `catch` \a ->
+    embedFinal $ do
+      putMVar lock ()
+      _ <- A.wait a
+      readTVarIO tvar
 
 spec :: Spec
 spec = do
@@ -162,3 +216,24 @@ spec = do
           ret `shouldBe` (-1)
           st `shouldBe` 2
         _ -> pure ()
+
+  describe "runWriterTVar" $ do
+    it "should listen and commit asyncs spawned and awaited upon in a listen \
+       \block" $ do
+      (end, listened) <- test4
+      end `shouldBe` "message has been received"
+      listened `shouldBe` "has been received"
+
+    it "should commit writes of asyncs spawned inside a listen block even if \
+       \the block has finished." $ do
+      (end, listened) <- test5
+      end `shouldBe` "message has been received"
+      listened `shouldBe` "has been"
+
+
+    it "should commit writes of asyncs spawned inside a listen block even if \
+       \the block failed for any reason." $ do
+      Right end1 <- runFinal . errorToIOFinal $ test6
+      Right end2 <- runFinal . runError $ test6
+      end1 `shouldBe` "message has been received"
+      end2 `shouldBe` "message has been received"

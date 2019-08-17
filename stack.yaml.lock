@@ -5,12 +5,12 @@
 
 packages:
 - completed:
-    hackage: polysemy-1.0.0.0@sha256:5a4596f7ff06db81fc7e2f121fbe481871c348d3c5481297c6af983b728b075c,5509
+    hackage: polysemy-1.1.0.0@sha256:8b90933dab7a8f0ffd1d072dfc7b2858bb0118417c94f434370df5245cd61847,5675
     pantry-tree:
-      size: 3044
-      sha256: c92228e91a15abba9269484fabb11730fbaa6f0fa308f4f485da28bc1ab0b7a0
+      size: 3356
+      sha256: 5d9d0952238118e424b2ce2e4b9d5575e0a411a83e8e8ae137b26439a4b9751c
   original:
-    hackage: polysemy-1.0.0.0
+    hackage: polysemy-1.1.0.0
 - completed:
     hackage: polysemy-plugin-0.2.1.0@sha256:db5aa30eb9610c6c7aca782f68a128fef4656c867ed29ad328eb1322d8d9b414,2516
     pantry-tree:
@@ -62,7 +62,7 @@ packages:
     hackage: unagi-chan-0.4.1.0
 snapshots:
 - completed:
-    size: 491155
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/13/0.yaml
-    sha256: 8d3c33e0feab8e04b9ed31452e0219a2b827ed1338c809f79d986c71a177e6ba
-  original: lts-13.0
+    size: 500539
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/13/29.yaml
+    sha256: 006398c5e92d1d64737b7e98ae4d63987c36808814504d1451f56ebd98093f75
+  original: lts-13.29

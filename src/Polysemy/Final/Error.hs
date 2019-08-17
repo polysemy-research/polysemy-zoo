@@ -2,7 +2,7 @@ module Polysemy.Final.Error
   (
     module Polysemy.Error
   , module Polysemy.Final
-  , runErrorInIOFinal
+  , errorToIOFinal
   ) where
 
 import           Control.Exception hiding (throw, catch)
@@ -13,28 +13,28 @@ import           Polysemy.Final
 import           Polysemy.Error
 
 ------------------------------------------------------------------------------
--- | Run an 'Error' effect as an 'IO' 'Exception'.
+-- | Run an 'Error' effect as an 'IO' 'Exception' through 'Final' 'IO'.
 --
--- This can be used as an alternative to 'runErrorInIO'
+-- This can be used as an alternative to 'lowerError'
 --
 -- /Beware/: Effects that aren't interpreted in terms of 'IO'
 -- will have local state semantics in regards to 'Error' effects
--- interpreted this way. See 'interpretFinal'.
-runErrorInIOFinal
+-- interpreted this way. See 'Final'.
+errorToIOFinal
     :: ( Typeable e
        , Member (Final IO) r
        )
     => Sem (Error e ': r) a
     -> Sem r (Either e a)
-runErrorInIOFinal sem = withStrategic $ do
+errorToIOFinal sem = withStrategic $ do
   m' <- runS (runErrorAsExcFinal sem)
-  s <- getInitialStateS
+  s  <- getInitialStateS
   pure $
     either
       ((<$ s) . Left . unwrapExc)
       (fmap Right)
     <$> try m'
-{-# INLINE runErrorInIOFinal #-}
+{-# INLINE errorToIOFinal #-}
 
 runErrorAsExcFinal
     :: forall e r a

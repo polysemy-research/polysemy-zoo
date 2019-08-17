@@ -72,9 +72,10 @@ test5 =
   . (`runStateT` 1)
   . (`runContT` (pure . Just))
   . runFinal
-  . runStateFinal
-  . runShiftFinal
-  . runReaderFinal
+  . embedToFinal
+  . stateToEmbed
+  . shiftToFinal
+  . readerToFinal
   $ do
   shift $ \c -> do
     _ <- local (+1) (c ())
@@ -111,11 +112,11 @@ spec = do
       test3 `shouldBe` Just (Right ())
 
   describe "runShiftM" $ do
-    it "should modify multiple times with runStateInIORef" $ do
+    it "should modify multiple times with runStateIORef" $ do
       res <- test4
       res `shouldBe` Just 4
 
-  describe "runShiftFinal" $ do
+  describe "shiftToFinal" $ do
     it "should modify multiple times with runStateFinal\
         \ and should be able to apply local to continuation" $
       test5 `shouldBe` (Just 10, 10)

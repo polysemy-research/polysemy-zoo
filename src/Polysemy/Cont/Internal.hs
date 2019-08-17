@@ -1,11 +1,19 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell, Unsafe #-}
 module Polysemy.Cont.Internal where
+
+import Data.Functor.Contravariant
 
 import Polysemy
 import Polysemy.Internal
 import Polysemy.Internal.Union
+import Polysemy.Fresh
+import Polysemy.Error
+
 import Control.Monad
-import Control.Monad.Cont (ContT(..))
+import Control.Monad.Trans.Cont hiding (Cont)
+
+import Unsafe.Coerce
+import GHC.Exts (Any)
 
 -----------------------------------------------------------------------------
 -- | An effect for abortive continuations.
@@ -63,7 +71,7 @@ subst :: forall ref a b r
 -- 'Polysemy.Writer.censor' will be no-ops, 'Polysemy.Error.catch' will fail
 -- to catch exceptions, and 'Polysemy.Writer.listen' will always return 'mempty'.
 --
--- __You should therefore use 'runContUnsafeWithC' /after/ running all interpreters
+-- __You should therefore use 'runContWithCUnsafe' /after/ running all interpreters
 -- for your higher-order effects.__
 runContWithCUnsafe :: (a -> Sem r s) -> Sem (Cont (Ref (Sem r) s) ': r) a -> Sem r s
 runContWithCUnsafe c (Sem m) = (`runContT` c) $ m $ \u -> case decomp u of
@@ -95,4 +103,155 @@ embedSem = liftSem . weave (pure ()) (pure . join) inspectSem
 {-# INLINE embedSem #-}
 
 newtype Ref m s a = Ref { runRef :: a -> m s }
+
+instance Contravariant (Ref m s) where
+  contramap f ref = Ref (runRef ref . f)
+
 newtype ExitRef m a = ExitRef { enterExit :: forall b. a -> m b }
+
+instance Contravariant (ExitRef m) where
+  contramap f ref = ExitRef $ \a -> enterExit ref (f a)
+
+data ViaFreshRef uniq a = ViaFreshRef { getBacktrackException :: a -> (uniq, Any) }
+
+instance Contravariant (ViaFreshRef uniq) where
+  contramap f ref = ViaFreshRef $ \a -> getBacktrackException ref (f a)
+
+{-
+  KingoftheHomeless: OK, so let's discuss how this works.
+  The idea here is to instead of providing a monadic computation
+  to the call of 'callCC' that simply short-circuits everything like
+  'ContT' does, we fake that behaviour by instead providing an
+  exception to 'callCC', and then try to 'catch' that exception
+  on the continuation. If the exception is caught, then we run the
+  continuation again. This way, we can get abortive continuations
+  without having to scope over a result type variable, avoiding
+  the problem that 'runContUnsafe' has, and making it possible
+  to weave other effects through without breaking everything.
+
+  Even with that solution, weaving effects through have more problems
+  of their own; namely, if we simply lower a
+  'forall s. ContT s (Sem r) a' to 'Sem r a', then we effectively
+  delimit all higher-order computations. This is bad, because
+  if a reified continuation produced within
+  the higher-order computation escapes from it,
+  then nothing can catch the underlying backtrack exception
+  once it is thrown.
+
+  The solution to this is anothor kludge: when weaving other effects through,
+  we instead use 'runContViaFreshInCWeave'; this makes use 'ContFreshState'
+  as its functorial state, which stores /handlers/ for backtrack exceptions.
+  'runContViaFreshInCWeave', in addition to 'catch'ing exceptions on the continuation
+  it is given, /also/ returns the handler it uses for the 'catch'.
+  This handler is then used by 'runContViaFresh' to catch exceptions on the
+  continuation /it/ gets, but can't provide to the higher-order computation.
+
+  I'm astonished that this even remotely works, but it does have some rather
+  weird behaviour I haven't completely figured out yet; especially in the
+  interaction with effects local in regards to the 'Cont'.
+
+  I'm reasonably happy with how 'runContViaFreshInC' looks;
+  I'm a lot less happy with 'runContViaFreshInCWeave', I just kinda threw
+  it haphazardly. I figure most weirdness stem from issues in
+  'runContViaFreshInCWeave', so I need to think it through some more.
+-}
+-- | Intermediary monadic interpretation used for running 'runContViaFresh'.
+-- See source for a discussion on how this works.
+runContViaFreshInC :: forall uniq s r a
+                    . (Member (Fresh uniq) r, Eq uniq)
+                   => Sem (Cont (ViaFreshRef uniq) ': r) a
+                   -> ContT s (Sem (Error (uniq, Any) ': r)) a
+runContViaFreshInC = usingSem $ \u -> ContT $ \c ->
+  case decomp u of
+    Right (Weaving e s wv ex _) ->
+      case e of
+        Subst main cn -> do
+          ref <- fresh
+          let
+            main' = runContViaFreshInC . wv . fmap main . (<$ s)
+            cn'   = runContViaFreshInC . wv . fmap cn . (<$ s)
+            loop act =
+              runContT (ex <$> act) c `catch` \ x@(ref', a') -> do
+                if ref == ref' then
+                  loop (cn' $ unsafeCoerce a')
+                else
+                  throw x
+          loop $ main' $ ViaFreshRef (\a -> (ref, unsafeCoerce a))
+        Jump ref a -> throw (getBacktrackException ref a)
+    Left g -> do
+      ResAndHandler a rc <- liftSem $
+        weave
+          (ResAndHandler @uniq @r () throw)
+          -- TODO(KingoftheHomeless): is this the distributive law we want?
+          (\(ResAndHandler a rc) ->
+            runContT
+              (runContViaFreshInCWeave a)
+              (\x -> pure $
+                ResAndHandler
+                  x
+                  (rc >=> (`runContT` pure) . runContViaFreshInC)
+              )
+          )
+          (Just . getResult)
+          (weaken g)
+      let loop x = c x `catch` (rc >=> loop)
+      loop a
+
+-- | A variant of 'runContViaFreshInC' which it uses when weaving other effects through.
+runContViaFreshInCWeave :: forall uniq s r a
+                         . (Member (Fresh uniq) r, Eq uniq)
+                        => Sem (Cont (ViaFreshRef uniq) ': r) a
+                        -> ContT (ContFreshState uniq r s)
+                            (Sem (Error (uniq, Any) ': r))
+                            a
+runContViaFreshInCWeave = usingSem $ \u -> ContT $ \c ->
+  case decomp u of
+    Right (Weaving e s wv ex _) ->
+      case e of
+        Subst main cn -> do
+          ref <- fresh
+          let
+            -- TODO(KingoftheHomeless): runContViaFreshInC?
+            main' = runContViaFreshInCWeave . wv . fmap main . (<$ s)
+            cn'   = runContViaFreshInCWeave . wv . fmap cn . (<$ s)
+            loop act =
+              runContT (ex <$> act) c `catch` \ x@(ref', a') -> do
+                if ref == ref' then
+                  loop (cn' $ unsafeCoerce a')
+                else
+                  throw x
+          ResAndHandler res h <-
+            loop $ main' $ ViaFreshRef (\a -> (ref, unsafeCoerce a))
+          return $ ResAndHandler res
+              -- TODO(KingoftheHomeless): This handler is dubious.
+            $ \x -> fmap getResult $ loop $ ContT $ \_ -> fmap (`ResAndHandler` h) (h x)
+        Jump ref a -> throw (getBacktrackException ref a)
+    Left g -> do
+      ResAndHandler a h <- liftSem $
+        weave
+          (ResAndHandler @uniq @r () throw)
+          (\(ResAndHandler a rc) ->
+            runContT
+              (runContViaFreshInCWeave a)
+              (\x -> pure $
+                ResAndHandler
+                  x
+                  (rc >=> (`runContT` pure) . runContViaFreshInC)
+              )
+          )
+          (Just . getResult)
+          (weaken g)
+      let loop x = c x `catch` (h >=> loop)
+      ResAndHandler res h' <- loop a
+      -- TODO(KingoftheHomeless): This handler is dubious.
+      return (ResAndHandler res $ \x -> (h' x `catch` (h >=> fmap getResult . loop)))
+
+-- | This is the effectful state used by 'runContViaFreshInC' when weaving through
+-- other effectful actions. The point of it is to avoid delimiting computations
+-- in higher-order effects, by having them return a handler which may be used
+-- to intercept backtrack exceptions of the current continuation.
+data ContFreshState uniq r a = ResAndHandler {
+    getResult :: a
+  , getHandler :: (uniq, Any) -> Sem (Error (uniq, Any) ': r) a
+  }
+  deriving Functor

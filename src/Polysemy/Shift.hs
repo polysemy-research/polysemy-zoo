@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE Trustworthy #-}
 module Polysemy.Shift
   (
     module Polysemy.Cont
@@ -16,7 +16,7 @@ module Polysemy.Shift
     -- * Interpretations
   , runShiftPure
   , runShiftM
-  , runShiftFinal
+  , shiftToFinal
   , runShiftWithCPure
   , runShiftWithCM
 
@@ -75,7 +75,7 @@ shift cc = trap $ \ref -> cc (invoke ref)
 -- The final return type is wrapped in a 'Maybe' due to the fact that
 -- any continuation may fail locally.
 --
--- This is a safe variant of 'runContUnsafe', as this may only be used
+-- This is a safe variant of 'runShiftUnsafe', as this may only be used
 -- as the final interpreter before 'run'.
 runShiftPure :: Sem '[Shift (Ref (Sem '[]) (Maybe a)) a] a
              -> Sem '[] (Maybe a)
@@ -89,8 +89,8 @@ runShiftPure = runShiftUnsafe
 -- The final return type is wrapped in a 'Maybe' due to the fact that
 -- any continuation may fail locally.
 --
--- This is a safe variant of 'runContUnsafe', as this may only be used
--- as the final interpreter before 'run'.
+-- This is a safe variant of 'runShiftUnsafe', as this may only be used
+-- as the final interpreter before 'runM'.
 runShiftM :: Sem '[Shift (Ref (Sem '[Embed m]) (Maybe a)) a, Embed m] a
           -> Sem '[Embed m] (Maybe a)
 runShiftM = runShiftUnsafe
@@ -101,12 +101,12 @@ runShiftM = runShiftUnsafe
 --
 -- /Beware/: Effects that aren't interpreted in terms of the final monad
 -- will have local state semantics in regards to 'Shift' effects
--- interpreted this way. See 'interpretFinal'.
-runShiftFinal :: forall s m a r
+-- interpreted this way. See 'Final'.
+shiftToFinal :: forall s m a r
               .  (Member (Final (ContT (Maybe s) m)) r, Monad m)
               => Sem (Shift (Ref m (Maybe s)) s ': r) a
               -> Sem r a
-runShiftFinal = interpretFinal $ \case
+shiftToFinal = interpretFinal $ \case
   Trap main -> do
     main'         <- bindS main
     s             <- getInitialStateS
@@ -125,7 +125,7 @@ runShiftFinal = interpretFinal $ \case
     Inspector ins <- getInspectorS
     liftS $ ContT $ \c ->
       runContT main' (pure . ins) >>= c
-{-# INLINE runShiftFinal #-}
+{-# INLINE shiftToFinal #-}
 
 -----------------------------------------------------------------------------
 -- | Runs a 'Shift' effect by explicitly providing a final
@@ -238,8 +238,8 @@ runContShiftWithCM = runContShiftWithCUnsafe
 -- 'Polysemy.Writer.censor' will be no-ops, 'Polysemy.Error.catch' will fail
 -- to catch exceptions, and 'Polysemy.Writer.listen' will always return 'mempty'.
 --
--- __You should therefore use 'runShift' /after/ running all interpreters for
--- your higher-order effects.__
+-- __You should therefore use 'runShiftUnsafe' /after/ running all__
+-- __interpreters for your higher-order effects.__
 runShiftUnsafe :: Sem (Shift (Ref (Sem r) (Maybe a)) a ': r) a -> Sem r (Maybe a)
 runShiftUnsafe = runShiftWithCUnsafe (pure . Just)
 {-# INLINE runShiftUnsafe #-}
@@ -255,8 +255,8 @@ runShiftUnsafe = runShiftWithCUnsafe (pure . Just)
 -- 'Polysemy.Writer.censor' will be no-ops, 'Polysemy.Error.catch' will fail
 -- to catch exceptions, and 'Polysemy.Writer.listen' will always return 'mempty'.
 --
--- __You should therefore use 'runShiftWithC' /after/ running all interpreters for
--- your higher-order effects.__
+-- __You should therefore use 'runShiftWithCUnsafe' /after/ running all__
+-- __interpreters for your higher-order effects.__
 runShiftWithCUnsafe :: forall s a r.
                        (a -> Sem r (Maybe s))
                     -> Sem (Shift (Ref (Sem r) (Maybe s)) s ': r) a
@@ -278,8 +278,8 @@ runShiftWithCUnsafe c (Sem sem) = (`runContT` c) $ sem $ \u -> case decomp u of
 -- 'Polysemy.Writer.censor' will be no-ops, 'Polysemy.Error.catch' will fail
 -- to catch exceptions, and 'Polysemy.Writer.listen' will always return 'mempty'.
 --
--- __You should therefore use 'runShift' /after/ running all interpreters for
--- your higher-order effects.__
+-- __You should therefore use 'runContShiftUnsafe' /after/ running all__
+-- __interpreters for your higher-order effects.__
 runContShiftUnsafe :: Sem (   Cont (Ref (Sem r) (Maybe a))
                            ': Shift (Ref (Sem r) (Maybe a)) a
                            ': r) a
@@ -299,8 +299,8 @@ runContShiftUnsafe = runContShiftWithCUnsafe (pure . Just)
 -- 'Polysemy.Writer.censor' will be no-ops, 'Polysemy.Error.catch' will fail
 -- to catch exceptions, and 'Polysemy.Writer.listen' will always return 'mempty'.
 --
--- __You should therefore use 'runShift' /after/ running all interpreters for
--- your higher-order effects.__
+-- __You should therefore use 'runContShiftWithCUnsafe' /after/ running all__
+-- __interpreters for your higher-order effects.__
 runContShiftWithCUnsafe :: forall s a r.
                            (a -> Sem r (Maybe s))
                         -> Sem (   Cont (Ref (Sem r) (Maybe s))
