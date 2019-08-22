@@ -26,7 +26,7 @@ errorToIOFinal
        )
     => Sem (Error e ': r) a
     -> Sem r (Either e a)
-errorToIOFinal sem = withStrategic $ do
+errorToIOFinal sem = withStrategicToFinal $ do
   m' <- runS (runErrorAsExcFinal sem)
   s  <- getInitialStateS
   pure $

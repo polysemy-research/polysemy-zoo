@@ -147,8 +147,7 @@ instance Contravariant (ViaFreshRef uniq) where
   continuation /it/ gets, but can't provide to the higher-order computation.
 
   I'm astonished that this even remotely works, but it does have some rather
-  weird behaviour I haven't completely figured out yet; especially in the
-  interaction with effects local in regards to the 'Cont'.
+  weird behaviour I haven't completely figured out yet.
 
   I'm reasonably happy with how 'runContViaFreshInC' looks;
   I'm a lot less happy with 'runContViaFreshInCWeave', I just kinda threw

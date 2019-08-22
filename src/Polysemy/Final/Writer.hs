@@ -23,7 +23,7 @@ runWriterTVar tvar = runWriterTVarAction $ \o -> do
 -- TODO(KingoftheHomeless): Make this mess more palatable
 --
 -- 'interpretFinal' is too weak for our purposes, so we
--- use 'interpretH' + 'withWeaving'.
+-- use 'interpretH' + 'withWeavingToFInal'.
 runWriterTVarAction :: forall o r a
                           . (Member (Final IO) r, Monoid o)
                          => (o -> STM ())
@@ -35,10 +35,10 @@ runWriterTVarAction write = interpretH $ \case
     pureT t
   Listen m -> do
     m' <- runT m
-    -- Using 'withWeaving' instead of 'withStrategic' here allows us to
-    -- avoid using two additional 'embedFinal's in order to create
-    -- the TVars.
-    raise $ withWeaving $ \s wv _ -> mask $ \restore -> do
+    -- Using 'withWeavingToFinal' instead of 'withStrategicToFinal'
+    -- here allows us to avoid using two additional 'embedFinal's in
+    -- order to create the TVars.
+    raise $ withWeavingToFinal $ \s wv _ -> mask $ \restore -> do
       -- See below to understand how this works
       tvar   <- newTVarIO mempty
       switch <- newTVarIO False
@@ -50,7 +50,7 @@ runWriterTVarAction write = interpretH $ \case
   Pass m -> do
     m'  <- runT m
     ins <- getInspectorT
-    raise $ withWeaving $ \s wv ins' -> mask $ \restore -> do
+    raise $ withWeavingToFinal $ \s wv ins' -> mask $ \restore -> do
       tvar   <- newTVarIO mempty
       switch <- newTVarIO False
       t      <-
@@ -71,7 +71,7 @@ runWriterTVarAction write = interpretH $ \case
       (which is represented by 'write'.)
 
       'commit' is protected by 'mask'+'onException'. Combine this
-      with the fact that the 'withWeaving' can't be interrupted
+      with the fact that the 'withWeavingToFinal' can't be interrupted
       by pure errors emitted by effects (since these will be
       represented as part of the functorial state), and we
       guarantee that no writes will be lost if the argument computation

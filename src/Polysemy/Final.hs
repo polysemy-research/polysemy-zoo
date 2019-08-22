@@ -3,10 +3,11 @@ module Polysemy.Final
   (
     -- * Effect
     Final(..)
+  , ThroughWeavingToFinal
 
     -- * Actions
-  , withWeaving
-  , withStrategic
+  , withWeavingToFinal
+  , withStrategicToFinal
   , embedFinal
 
     -- * Combinators for Interpreting to the Final Monad
@@ -56,43 +57,47 @@ import Polysemy.Internal.Union
 import Control.Monad
 
 -----------------------------------------------------------------------------
--- | 'withWeaving' admits an implementation of 'embed'.
+-- | 'withWeavingToFinal' admits an implementation of 'embed'.
 --
 -- Just like 'embed', you are discouraged from using this in application code.
 embedFinal :: (Member (Final m) r, Functor m) => m a -> Sem r a
-embedFinal m = withWeaving $ \s _ _ -> (<$ s) <$> m
+embedFinal m = withWeavingToFinal $ \s _ _ -> (<$ s) <$> m
 {-# INLINE embedFinal #-}
 
 -----------------------------------------------------------------------------
 -- | Allows for embedding higher-order actions of the final monad
 -- by providing the means of explicitly threading effects through @'Sem' r@
 -- to the final monad. This is done through the use of the 'Strategic'
--- environment, which provides 'runSemS' and 'bindSemS'.
+-- environment, which provides 'runS' and 'bindS'.
 --
--- You are discouraged from using 'withStrategic' in application code,
+-- You are discouraged from using 'withStrategicToFinal' in application code,
 -- as it ties your application code directly to the final monad.
-withStrategic :: (Member (Final m) r, Applicative m) => Strategic m (Sem r) a -> Sem r a
-withStrategic strat = withWeaving $ \s wv ins ->
+withStrategicToFinal :: (Member (Final m) r, Applicative m)
+                     => Strategic m (Sem r) a
+                     -> Sem r a
+withStrategicToFinal strat = withWeavingToFinal $ \s wv ins ->
   runStrategy
     s
     wv
     ins
     strat
-{-# INLINE withStrategic #-}
+{-# INLINE withStrategicToFinal #-}
 
 ------------------------------------------------------------------------------
 -- | Like 'interpretH', but may be used to
 -- interpret higher-order effects in terms of the final monad.
 --
 -- 'interpretFinal' requires less boilerplate than using 'interpretH'
--- together with 'withStrategic'\/'withWeaving', but is also less powerful.
+-- together with 'withStrategicToFinal' \/ 'withWeavingToFinal',
+-- but is also less powerful.
 -- 'interpretFinal' does not provide any means of executing actions
 -- of @'Sem' r@ as you interpret each action, and the provided interpreter
 -- is automatically recursively used to process higher-order occurences of
 -- @'Sem' (e ': r)@ to @'Sem' r@.
 --
 -- If you need greater control of how the effect is interpreted, use
--- use 'interpretH' together with 'withStrategic'\/'withWeaving' instead.
+-- use 'interpretH' together with 'withStrategicToFinal'\/'withWeavingToFinal'
+-- instead.
 --
 -- /Beware/: Effects that aren't interpreted in terms of the final
 -- monad will have local state semantics in regards to effects
@@ -108,7 +113,7 @@ interpretFinal n =
     go :: Sem (e ': r) x -> Sem r x
     go = usingSem $ \u -> case decomp u of
       Right (Weaving e s wv ex ins) ->
-        fmap ex $ withWeaving $ \s' wv' ins'
+        fmap ex $ withWeavingToFinal $ \s' wv' ins'
           -> fmap getCompose $
                 runStrategy
                   (Compose (s <$ s'))
@@ -187,7 +192,7 @@ bindS = send . HoistInterpretation
 -- monad.
 runFinal :: Monad m => Sem '[Final m] a -> m a
 runFinal = usingSem $ \u -> case extract u of
-  Weaving (WithWeaving wav) s wv ex ins ->
+  Weaving (WithWeavingToFinal wav) s wv ex ins ->
     ex <$> wav s (runFinal . wv) ins
 {-# INLINE runFinal #-}
 
@@ -210,8 +215,8 @@ finalToFinal to from =
   let
     go :: Sem (Final m1 ': r) x -> Sem r x
     go = usingSem $ \u -> case decomp u of
-      Right (Weaving (WithWeaving wav) s wv ex ins) ->
-        fmap ex $ withWeaving $ \s' wv' ins'
+      Right (Weaving (WithWeavingToFinal wav) s wv ex ins) ->
+        fmap ex $ withWeavingToFinal $ \s' wv' ins'
           -> fmap getCompose $ to $
                 wav
                   (Compose (s <$ s'))
@@ -230,7 +235,7 @@ finalToFinal to from =
 -- 'reinterpret', 'raiseUnder', or any of their friends.
 runFinalSem :: Sem (Final (Sem r) ': r) a -> Sem r a
 runFinalSem = usingSem $ \u -> case decomp u of
-  Right (Weaving (WithWeaving wav) s wv ex ins) ->
+  Right (Weaving (WithWeavingToFinal wav) s wv ex ins) ->
     ex <$> wav s (runFinalSem . wv) ins
   Left g -> liftSem (hoist runFinalSem g)
 {-# INLINE runFinalSem #-}

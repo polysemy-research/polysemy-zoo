@@ -13,6 +13,28 @@ import Polysemy
 import Polysemy.Internal
 import Polysemy.Internal.Union
 
+-- | This represents a function which produces
+-- an action of the final monad @m@ given:
+--
+--   * The initial effectful state at the moment the action
+--     is to be executed.
+--
+--   * An way to convert @z@ (which is typically @'Sem' r@)to @m@ by
+--     threading the effectful state through.
+--
+--   * An inspector that is able to view some value within the
+--     effectful state if the effectful state contains any values.
+--
+-- A @'Polysemy.Internal.Union.Weaving' 'Final'@ provides these components,
+-- hence the name 'ThroughWeavingToFinal'.
+type ThroughWeavingToFinal m z a =
+     forall f
+   . Functor f
+  => f ()
+  -> (forall x. f (z x) -> m (f x))
+  -> (forall x. f x -> Maybe x)
+  -> m (f a)
+
 -----------------------------------------------------------------------------
 -- | An effect for embedding higher-order effects in the final target monad
 -- of the effect stack.
@@ -46,7 +68,8 @@ import Polysemy.Internal.Union
 --
 -- /Beware/: 'Final' actions are interpreted as actions of the final monad,
 -- and the effectful state visible to
--- 'withWeaving'\/'Polysemy.Final.withStrategic'\/'Polysemy.Final.interpretFinal'
+-- 'withWeavingToFinal' \/ 'Polysemy.Final.withStrategicToFinal'
+-- \/ 'Polysemy.Final.interpretFinal'
 -- is that of /all interpreters run in order to produce the final monad/.
 --
 -- This means that any interpreter built using 'Final' will /not/
@@ -62,14 +85,9 @@ import Polysemy.Internal.Union
 -- depend on the final monad. For example, if the final monad is a monad transformer
 -- stack, then state semantics will depend on the order monad transformers are stacked.
 newtype Final m z a where
-  WithWeaving :: (  forall f
-                  . Functor f
-                 => f ()
-                 -> (forall x. f (z x) -> m (f x))
-                 -> (forall x. f x -> Maybe x)
-                 -> m (f a)
-                 )
-              -> Final m z a
+  WithWeavingToFinal
+    :: ThroughWeavingToFinal m z a
+    -> Final m z a
 
 makeSem_ ''Final
 
@@ -78,21 +96,17 @@ makeSem_ ''Final
 -- by providing the means of explicitly threading effects through @'Sem' r@
 -- to the final monad.
 --
--- Consider using 'Polysemy.Final.withStrategic' instead,
+-- Consider using 'Polysemy.Final.withStrategicToFinal' instead,
 -- which provides a more user-friendly interface, but is also slightly weaker.
 --
--- You are discouraged from using 'withWeaving' directly in application code,
--- as it ties your application code directly to the final monad.
-withWeaving :: forall m a r
-             . Member (Final m) r
-            => (  forall f
-                . Functor f
-               => f ()
-               -> (forall x. f (Sem r x) -> m (f x))
-               -> (forall x. f x -> Maybe x)
-               -> m (f a)
-               )
-            -> Sem r a
+-- You are discouraged from using 'withWeavingToFinal' directly
+-- in application code, as it ties your application code directly to
+-- the final monad.
+withWeavingToFinal
+  :: forall m a r
+   . Member (Final m) r
+  => ThroughWeavingToFinal m (Sem r) a
+  -> Sem r a
 
 data Strategy m f n z a where
   GetInitialState     :: Strategy m f n z (f ())
@@ -109,7 +123,7 @@ type Strategic m n a = forall f. Functor f => Sem (WithStrategy m f n) (m (f a))
 type WithStrategy m f n = '[Strategy m f n]
 
 ------------------------------------------------------------------------------
--- | Internal function to process Strategies in terms of 'withWeaving'.
+-- | Internal function to process Strategies in terms of 'withWeavingToFinal'.
 runStrategy :: Functor f
             => f ()
             -> (forall x. f (n x) -> m (f x))
@@ -150,7 +164,7 @@ interpretFinalGlobal
     => (forall x n. e n x -> Strategic IO n x)
     -> Sem (e ': r) a
     -> Sem r a
-interpretFinalGlobal f sem = withWeaving $ \s wv ins -> do
+interpretFinalGlobal f sem = withWeavingToFinal $ \s wv ins -> do
   st  <- newMVar s
   res <- runMaybeT $ runViaFinalGlobal st wv ins f sem
   s'  <- readMVar st
@@ -183,7 +197,7 @@ runViaFinalGlobal st wv ins f = usingSem $ \u -> case decomp u of
           (getCompose >=> ins')
           (f e)
   Left g -> case prj g of
-      Just (Weaving (WithWeaving wav) s' wv' ex' ins') ->
+      Just (Weaving (WithWeavingToFinal wav) s' wv' ex' ins') ->
         MaybeT $ fmap (fmap ex' . getCompose) $
           wav
             (Compose (Just s'))
