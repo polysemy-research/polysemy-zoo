@@ -37,7 +37,6 @@ module Polysemy.Final
 
     -- * Interpretations
   , runFinal
-  , runFinalPure
   , finalToFinal
   , runFinalSem
   , lowerFinal
@@ -46,8 +45,6 @@ module Polysemy.Final
   , embedToFinal
   ) where
 
-import Data.Coerce
-import Data.Functor.Identity
 import Data.Functor.Compose
 
 import Polysemy
@@ -195,12 +192,6 @@ runFinal = usingSem $ \u -> case extract u of
   Weaving (WithWeavingToFinal wav) s wv ex ins ->
     ex <$> wav s (runFinal . wv) ins
 {-# INLINE runFinal #-}
-
-------------------------------------------------------------------------------
--- | Run a 'Sem' containing only @'Final' 'Identity'@ as a pure value.
-runFinalPure :: forall a. Sem '[Final Identity] a -> a
-runFinalPure = coerce (runFinal @Identity @a)
-{-# INLINE runFinalPure #-}
 
 ------------------------------------------------------------------------------
 -- | Given natural transformations between @m1@ and @m2@, run a @'Final' m1@

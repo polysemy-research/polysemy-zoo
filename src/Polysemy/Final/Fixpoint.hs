@@ -17,7 +17,7 @@ import Control.Monad.Fix
 -----------------------------------------------------------------------------
 -- | Run a 'Fixpoint' effect through a final 'MonadFix'
 --
--- This is a better alternative of 'runFixpoint' and 'runFixpointM'.
+-- This is a better alternative of 'runFixpointM'.
 --
 -- __Note__: 'fixpointToFinal' is subject to the same caveats as 'runFixpoint'.
 fixpointToFinal :: (Member (Final m) r, MonadFix m)
