@@ -13,13 +13,14 @@ import Polysemy
 import Polysemy.Internal
 import Polysemy.Internal.Union
 
+-----------------------------------------------------------------------------
 -- | This represents a function which produces
 -- an action of the final monad @m@ given:
 --
 --   * The initial effectful state at the moment the action
 --     is to be executed.
 --
---   * An way to convert @z@ (which is typically @'Sem' r@)to @m@ by
+--   * A way to convert @z@ (which is typically @'Sem' r@)to @m@ by
 --     threading the effectful state through.
 --
 --   * An inspector that is able to view some value within the
@@ -64,6 +65,7 @@ type ThroughWeavingToFinal m z a =
 --     distribution through the effectful state:
 --     @forall x. f ('Sem' r x) -> m (f x)@,
 --     together with the initial state @f ()@, and an @'Inspector' f@.
+--     (See 'ThroughWeavingToFinal')
 --     This is powerful enough for most purposes.
 --
 -- /Beware/: 'Final' actions are interpreted as actions of the final monad,
