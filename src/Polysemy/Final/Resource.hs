@@ -17,7 +17,7 @@ import           Polysemy.Final.IO
 ------------------------------------------------------------------------------
 -- | Run a 'Resource' effect in terms of 'X.bracket' through final 'IO'
 --
--- This can be used as an alternative to 'lowerResource'
+-- This is a better alternative of 'lowerResource'
 --
 -- /Beware/: Effects that aren't interpreted in terms of 'IO'
 -- will have local state semantics in regards to 'Resource' effects

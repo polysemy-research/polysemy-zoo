@@ -16,7 +16,7 @@ import Polysemy.Final.IO
 ------------------------------------------------------------------------------
 -- | Run an 'Async' effect through final 'IO'
 --
--- This can be used as an alternative to 'lowerAsync'.
+-- This is a better alternative of 'lowerAsync'.
 --
 -- /Beware/: Effects that aren't interpreted in terms of 'IO'
 -- will have local state semantics in regards to 'Async' effects

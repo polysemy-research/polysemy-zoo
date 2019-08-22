@@ -237,6 +237,10 @@ runFinalSem = usingSem $ \u -> case decomp u of
 
 ------------------------------------------------------------------------------
 -- | Run a @'Final' m@ effect by providing an explicit lowering function.
+--
+-- /Beware/: The lowering function may be invoked multiple times, so
+-- __don't do any initialization work inside the lowering function__:
+-- it will be duplicated.
 lowerFinal :: Member (Embed m) r
            => (forall x. Sem r x -> m x)
            -> Sem (Final m ': r) a

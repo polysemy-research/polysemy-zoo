@@ -135,9 +135,14 @@ runStrategy s wv ins = (run .) $ interpret $ \case
 --
 -- 'interpretFinalGlobal' operates under the assumption that any effectful
 -- state which can't be inspected using 'Polysemy.Inspector' can't contain any
--- values. This is true for all interpreters featured in polysemy,
+-- values. For example, the effectful state for 'Polysemy.runError' is
+-- @'Either' e a@. The inspector for this effectful state only fails if the
+-- effectful state is a @'Left'@ value, which therefore doesn't contain any
+-- values of @a@.
+--
+-- The assumption holds true for all interpreters featured in polysemy,
 -- and is presumably always true for any properly implemented interpreter.
--- 'runFixpoint' may throw an exception if it is used together with an
+-- 'interpretFinalGlobal' may throw an exception if it is used together with an
 -- interpreter that uses 'Polysemy.Internal.Union.weave' improperly.
 interpretFinalGlobal
     :: forall e a r

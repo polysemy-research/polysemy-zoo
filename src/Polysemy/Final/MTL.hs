@@ -56,7 +56,7 @@ readerToFinal = interpretFinal $ \case
 -----------------------------------------------------------------------------
 -- | Run a 'State' effect in terms of an underlying 'MonadState' instance
 --
--- Although this is not a 'Final' inrepreeter, as the target monad need not
+-- Although this is not a 'Final' interpreter, as the target monad need not
 -- actually be the final monad, 'stateToEmbed' still possesses the
 -- unusual semantics of interpreters that runs
 -- effects by embedding them into another monad.

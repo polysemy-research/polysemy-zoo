@@ -15,7 +15,7 @@ import           Polysemy.Error
 ------------------------------------------------------------------------------
 -- | Run an 'Error' effect as an 'IO' 'Exception' through 'Final' 'IO'.
 --
--- This can be used as an alternative to 'lowerError'
+-- This is a better alternative of 'lowerError'
 --
 -- /Beware/: Effects that aren't interpreted in terms of 'IO'
 -- will have local state semantics in regards to 'Error' effects
