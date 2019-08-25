@@ -13,7 +13,7 @@ import           Polysemy.Final
 import           Polysemy.Error
 
 ------------------------------------------------------------------------------
--- | Run an 'Error' effect as an 'IO' 'Exception' through 'Final' 'IO'.
+-- | Run an 'Error' effect as an 'IO' 'Exception' through final 'IO'.
 --
 -- This is a better alternative of 'lowerError'
 --

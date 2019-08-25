@@ -26,7 +26,7 @@ import Polysemy.Internal.Union
 --   * An inspector that is able to view some value within the
 --     effectful state if the effectful state contains any values.
 --
--- A @'Polysemy.Internal.Union.Weaving' 'Final'@ provides these components,
+-- A @'Polysemy.Internal.Union.Weaving'@ provides these components,
 -- hence the name 'ThroughWeavingToFinal'.
 type ThroughWeavingToFinal m z a =
      forall f
@@ -58,7 +58,7 @@ type ThroughWeavingToFinal m z a =
 --   * Initialization work of @lower-@ interpreters may be duplicated
 --     when composed together with '.@'. @-'Final'@ interpreters avoid
 --     this issue altogether, as long as the initialization work is performed
---     outside of a 'interpretH'/'interpretFinal'.
+--     outside of a 'interpretH' / 'Polysemy.Final.interpretFinal'.
 --
 --   * Instead of having access to a natural transformation
 --     @forall x. 'Sem' r x -> m x@, @'Final' m@ provides a

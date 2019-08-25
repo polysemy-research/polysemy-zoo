@@ -69,7 +69,7 @@ embedFinal m = withWeavingToFinal $ \s _ _ -> (<$ s) <$> m
 --
 -- You are discouraged from using 'withStrategicToFinal' in application code,
 -- as it ties your application code directly to the final monad.
-withStrategicToFinal :: (Member (Final m) r, Applicative m)
+withStrategicToFinal :: Member (Final m) r
                      => Strategic m (Sem r) a
                      -> Sem r a
 withStrategicToFinal strat = withWeavingToFinal $ \s wv ins ->
@@ -92,9 +92,9 @@ withStrategicToFinal strat = withWeavingToFinal $ \s wv ins ->
 -- is automatically recursively used to process higher-order occurences of
 -- @'Sem' (e ': r)@ to @'Sem' r@.
 --
--- If you need greater control of how the effect is interpreted, use
--- use 'interpretH' together with 'withStrategicToFinal'\/'withWeavingToFinal'
--- instead.
+-- If you need greater control of how the effect is interpreted,
+-- use 'interpretH' together with 'withStrategicToFinal' \/
+-- 'withWeavingToFinal' instead.
 --
 -- /Beware/: Effects that aren't interpreted in terms of the final
 -- monad will have local state semantics in regards to effects
@@ -187,6 +187,9 @@ bindS = send . HoistInterpretation
 ------------------------------------------------------------------------------
 -- | Lower a 'Sem' containing only a single lifted, final 'Monad' into that
 -- monad.
+--
+-- If you also need to process an @'Embed' m@ effect, use this together with
+-- 'embedToFinal'.
 runFinal :: Monad m => Sem '[Final m] a -> m a
 runFinal = usingSem $ \u -> case extract u of
   Weaving (WithWeavingToFinal wav) s wv ex ins ->

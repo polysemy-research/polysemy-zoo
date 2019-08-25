@@ -24,11 +24,8 @@ import Polysemy.Final.IO
 --
 -- Notably, unlike 'asyncToIO', this is not consistent with
 -- 'Polysemy.State.State' unless 'Polysemy.State.runStateIORef' is used.
--- State that seems like it should be threaded globally throughout the `Async`
+-- State that seems like it should be threaded globally throughout 'Async'
 -- /will not be./
---
--- Prefer 'asyncToIO' or 'asyncToIOThreadless' unless these are unsafe or
--- inefficient in the context of your application.
 --
 -- Use 'asyncToIO' or 'asyncToIOFinalGlobal' instead if you need to
 -- run pure, stateful interpreters after the interpreter for 'Async'.

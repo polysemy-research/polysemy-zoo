@@ -1,16 +1,25 @@
 {-# LANGUAGE BangPatterns, TupleSections #-}
-module Polysemy.Final.Writer where
+module Polysemy.Final.Writer
+  (
+    -- * Interpretations
+    runWriterTVar
+  , writerToIOFinal
+  , writerToIOAssocRFinal
+  ) where
 
 import Control.Concurrent.STM
+import Data.Bifunctor
+import Data.Semigroup
 
 import Polysemy
+import Polysemy.Internal (raiseUnder)
 import Polysemy.Final
 import Polysemy.Writer
 import Control.Exception
 
 --------------------------------------------------------------------
--- | Transform a 'Writer' effect to atomic operations
--- over a 'TVar'.
+-- | Transform a 'Writer' effect into atomic operations
+-- over a 'TVar' through final 'IO'.
 runWriterTVar :: (Member (Final IO) r, Monoid o)
               => TVar o
               -> Sem (Writer o ': r) a
@@ -20,10 +29,53 @@ runWriterTVar tvar = runWriterTVarAction $ \o -> do
   writeTVar tvar $! s <> o
 {-# INLINE runWriterTVar #-}
 
+
+--------------------------------------------------------------------
+-- | Run a 'Writer' effect using atomic operations
+-- through final 'IO'.
+--
+-- Internally, this simply creates a new 'TVar', passes it to
+-- 'runWriterTVar', and then returns the result and the final value
+-- of the 'TVar'.
+--
+-- /Beware/: Effects that aren't interpreted in terms of 'IO'
+-- will have local state semantics in regards to 'Writer' effects
+-- interpreted this way. See 'Final'.
+writerToIOFinal :: (Member (Final IO) r, Monoid o)
+                => Sem (Writer o ': r) a
+                -> Sem r (o, a)
+writerToIOFinal sem = do
+  tvar <- embedFinal $ newTVarIO mempty
+  res  <- runWriterTVar tvar sem
+  end  <- embedFinal $ readTVarIO tvar
+  return (end, res)
+{-# INLINE writerToIOFinal #-}
+
+--------------------------------------------------------------------
+-- | Like 'writerToIOFinal'. but right-associates uses of '<>'.
+--
+-- This asymptotically improves performance if the time complexity of '<>'
+-- for the 'Monoid' depends only on the size of the first argument.
+--
+-- You should always use this instead of 'writerToIOFinal' if the monoid
+-- is a list, such as 'String'.
+--
+-- /Beware/: Effects that aren't interpreted in terms of 'IO'
+-- will have local state semantics in regards to 'Writer' effects
+-- interpreted this way. See 'Final'.
+writerToIOAssocRFinal :: (Member (Final IO) r, Monoid o)
+                      => Sem (Writer o ': r) a
+                      -> Sem r (o, a)
+writerToIOAssocRFinal =
+    (fmap . first) (`appEndo` mempty)
+  . writerToIOFinal
+  . writerToEndoWriter
+  . raiseUnder
+
 -- TODO(KingoftheHomeless): Make this mess more palatable
 --
 -- 'interpretFinal' is too weak for our purposes, so we
--- use 'interpretH' + 'withWeavingToFInal'.
+-- use 'interpretH' + 'withWeavingToFinal'.
 runWriterTVarAction :: forall o r a
                           . (Member (Final IO) r, Monoid o)
                          => (o -> STM ())
@@ -112,3 +164,30 @@ runWriterTVarAction write = interpretH $ \case
       writeTVar switch True
       return o'
 {-# INLINE runWriterTVarAction #-}
+
+-- TODO(KingoftheHomeless): This should be moved to polysemy proper
+-- inside an internal module.
+writerToEndoWriter
+    :: (Monoid o, Member (Writer (Endo o)) r)
+    => Sem (Writer o ': r) a
+    -> Sem r a
+writerToEndoWriter = interpretH $ \case
+      Tell o   -> tell (Endo (o <>)) >>= pureT
+      Listen m -> do
+        m' <- writerToEndoWriter <$> runT m
+        raise $ do
+          (o, fa) <- listen m'
+          return $ (,) (appEndo o mempty) <$> fa
+      Pass m -> do
+        ins <- getInspectorT
+        m'  <- writerToEndoWriter <$> runT m
+        raise $ pass $ do
+          t <- m'
+          let
+            f' =
+              maybe
+                id
+                (\(f, _) (Endo oo) -> let !o' = f (oo mempty) in Endo (o' <>))
+                (inspect ins t)
+          return (f', fmap snd t)
+{-# INLINE writerToEndoWriter #-}
