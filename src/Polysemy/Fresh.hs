@@ -10,16 +10,11 @@ module Polysemy.Fresh
   , freshToIO
 
     -- * Unsafe Interpretations
-  , runFreshUnsafe
   , runFreshEnumUnsafe
   , runFreshUnsafePerformIO
-
-    -- * User-facing type for unique objects
-  , UniqueRef
   ) where
 
 import Data.Unique
-import Data.Hashable
 
 import Polysemy.Internal
 import Polysemy.Internal.Union
@@ -49,7 +44,8 @@ freshToIO = interpret $ \Fresh -> embed newUnique
 {-# INLINE freshToIO #-}
 
 -----------------------------------------------------------------------------
--- | Run a 'Fresh' effect purely.
+-- | Run a 'Fresh' effect purely by specifying an 'Enum' to be used as the
+-- type of unique objects.
 --
 -- __Beware:__ This is safe only if:
 --
@@ -65,24 +61,8 @@ freshToIO = interpret $ \Fresh -> embed newUnique
 --      as well as interpreters for 'Polysemy.Async.Async'.
 --
 -- Prefer 'freshToIO' whenever possible.
--- If you can't use 'runFreshUnsafe' safely, nor use 'freshToIO', consider
+-- If you can't use 'runFreshEnumUnsafe' safely, nor use 'freshToIO', consider
 -- 'runFreshUnsafePerformIO'.
-runFreshUnsafe :: Sem (Fresh UniqueRef ': r) a
-               -> Sem r a
-runFreshUnsafe =
-    (fmap snd .)
-  $ (runState (UniqueRef 0) .)
-  $ reinterpret
-  $ \Fresh -> do
-    UniqueRef s <- get
-    put $! UniqueRef (s + 1)
-    return (UniqueRef s)
-{-# INLINE runFreshUnsafe #-}
-
-
------------------------------------------------------------------------------
--- | A variant of 'runFreshUnsafe' where any 'Enum' may be used as the type
--- of unique objects.
 runFreshEnumUnsafe :: forall n a r
                     . Enum n
                    => Sem (Fresh n ': r) a
@@ -136,6 +116,3 @@ runFreshUnsafePerformIO = usingSem $ \u ->
 newUnique' :: Union (Fresh Unique ': r) (Sem (Fresh Unique ': r)) a -> IO Unique
 newUnique' (Union _ _) = newUnique
 {-# NOINLINE newUnique' #-}
-
-newtype UniqueRef = UniqueRef Integer
-  deriving (Eq, Ord, Hashable)
