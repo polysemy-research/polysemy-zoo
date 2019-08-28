@@ -68,7 +68,7 @@ test4 =
     (`S.runState` 1)
   . runM
   . runContM
-  . runStateFinal
+  . stateToEmbed
   $ stateTest
 
 test5 :: IO (Int, Int)
@@ -95,7 +95,7 @@ test7 =
   . runFinal
   . runTraceList
   . runReader ""
-  . runContFinal
+  . contToFinal
   $ do
   j <- local (++".") $ callCC $ \c -> do
     j <- ask
@@ -113,8 +113,8 @@ test8 =
      ($ 1)
    . (`C.runContT` pure)
    . runFinal
-   . runReaderFinal
-   . runContFinal
+   . readerToFinal
+   . contToFinal
    $ do
   callCC $ \c ->
     local (+1) (c ())
@@ -134,14 +134,14 @@ spec = do
       test3 `shouldBe` Right ()
 
   describe "runContM" $ do
-    it "should have global state semantics with runStateFinal" $
+    it "should have global state semantics with stateToEmbed" $
       test4 `shouldBe` (3, 3)
 
-    it "should have global state semantics with runStateInIORef" $ do
+    it "should have global state semantics with runStateIORef" $ do
       r <- test5
       r `shouldBe` (3, 3)
 
-  describe "runContFinal" $ do
+  describe "contToFinal" $ do
     it "should work just like runContPure/M." $
       test7 `shouldBe` (["Nothing", "at", "all."], ".")
 

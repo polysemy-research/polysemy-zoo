@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell, Trustworthy #-}
 module Polysemy.Capture
   (-- * Effect
     Capture(..)
@@ -25,7 +25,7 @@ import Polysemy
 import Polysemy.Internal
 import Polysemy.Internal.Union
 
-import Polysemy.Cont.Internal(Ref(..))
+import Polysemy.Cont.Internal (Ref(..))
 
 -----------------------------------------------------------------------------
 -- | A less powerful variant of 'Polysemy.Shift.Shift' that may always be
@@ -60,7 +60,7 @@ reify :: forall ref a r
 --
 -- The provided continuation may fail locally in its subcontinuations.
 -- It may sometimes become necessary to handle such cases. To do so,
--- use 'delimit\'' together with 'reflect' (the reified continuation
+-- use 'delimit'' together with 'reflect' (the reified continuation
 -- is already delimited).
 reflect :: forall ref s a r
         .  Member (Capture ref) r
@@ -89,7 +89,7 @@ delimit' :: forall ref a r
 --
 -- The provided continuation may fail locally in its subcontinuations.
 -- It may sometimes become necessary to handle such cases, in
--- which case such failure may be detected by using 'delimit\'' together
+-- which case such failure may be detected by using 'delimit'' together
 -- with the provided continuation (the provided continuation
 -- is already delimited).
 capture :: Member (Capture ref) r
@@ -99,7 +99,7 @@ capture cc = reify (\ref -> cc (reflect ref))
 {-# INLINE capture #-}
 
 -----------------------------------------------------------------------------
--- | Runs a 'Capture' effect by providing 'pure '.' Just' as the final
+-- | Runs a 'Capture' effect by providing @'pure' '.' 'Just'@ as the final
 -- continuation.
 --
 -- The final return type is wrapped in a 'Maybe' due to the fact that

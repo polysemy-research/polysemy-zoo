@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c9916a386c633f322272b00c91e9e16e395cf2d02474c4da8e7bd02ed2828c0f
+-- hash: e4fd5fe89cde80183a81afdb2afbbf55447f19a8578658a9d38d88628369472b
 
 name:           polysemy-zoo
 version:        0.5.0.1
@@ -32,6 +32,7 @@ library
       Polysemy.Alias
       Polysemy.Capture
       Polysemy.ConstraintAbsorber
+      Polysemy.ConstraintAbsorber.MonadCont
       Polysemy.ConstraintAbsorber.MonadError
       Polysemy.ConstraintAbsorber.MonadReader
       Polysemy.ConstraintAbsorber.MonadState
@@ -42,9 +43,14 @@ library
       Polysemy.Final.Async
       Polysemy.Final.Error
       Polysemy.Final.Fixpoint
+      Polysemy.Final.Internal
+      Polysemy.Final.IO
       Polysemy.Final.MTL
+      Polysemy.Final.NonDet
       Polysemy.Final.Resource
+      Polysemy.Final.Writer
       Polysemy.Floodgate
+      Polysemy.Fresh
       Polysemy.IdempotentLowering
       Polysemy.KVStore
       Polysemy.Operators
@@ -67,13 +73,16 @@ library
     , bytestring >=0.10.8.2 && <0.11
     , constraints >=0.10.1 && <0.12
     , containers >=0.5 && <0.7
+    , contravariant <2
     , ghc-prim >=0.5.2 && <0.6
     , hedis >=0.10 && <0.13
     , mtl >=2.0.1.0 && <3.0.0.0
-    , polysemy >=1.0.0.0
+    , polysemy >=1.1.0.0
     , polysemy-plugin >=0.2
     , random >=1.1 && <1.2
     , reflection >=2.1.4 && <3.0.0
+    , stm >=2 && <3
+    , transformers >=0.5.2.0 && <0.6
   default-language: Haskell2010
 
 test-suite polysemy-zoo-test
@@ -103,13 +112,16 @@ test-suite polysemy-zoo-test
     , bytestring >=0.10.8.2 && <0.11
     , constraints >=0.10.1 && <0.12
     , containers >=0.5 && <0.7
+    , contravariant <2
     , ghc-prim >=0.5.2 && <0.6
     , hedis >=0.10 && <0.13
     , hspec >=2.6.0 && <3
     , mtl >=2.0.1.0 && <3.0.0.0
-    , polysemy >=0.7.0.0
+    , polysemy >=1.1.0.0
     , polysemy-plugin >=0.2
     , polysemy-zoo
     , random >=1.1 && <1.2
     , reflection >=2.1.4 && <3.0.0
+    , stm >=2 && <3
+    , transformers >=0.5.2.0 && <0.6
   default-language: Haskell2010

@@ -3,10 +3,11 @@ module Polysemy.Final
   (
     -- * Effect
     Final(..)
+  , ThroughWeavingToFinal
 
     -- * Actions
-  , withWeaving
-  , withStrategic
+  , withWeavingToFinal
+  , withStrategicToFinal
   , embedFinal
 
     -- * Combinators for Interpreting to the Final Monad
@@ -22,7 +23,7 @@ module Polysemy.Final
     -- may use 'pureS'. In addition, 'liftS' may be used to
     -- lift actions of the final monad.
     --
-    -- Unlike @Tactics@, the final return value within a `Strategic`
+    -- Unlike @Tactics@, the final return value within a 'Strategic'
     -- must be a monadic value of the target monad
     -- with the functorial state wrapped inside of it.
   , Strategic
@@ -36,109 +37,80 @@ module Polysemy.Final
 
     -- * Interpretations
   , runFinal
-  , runFinalLift
-  , runFinalLiftIO
+  , finalToFinal
+  , runFinalSem
+  , lowerFinal
+
+  -- * Interpretations for Other Effects
+  , embedToFinal
   ) where
 
-import Data.Functor.Identity
+import Data.Functor.Compose
 
 import Polysemy
-import Data.Functor.Compose
+import Polysemy.Final.Internal
 import Polysemy.Internal
-import Polysemy.Internal.Tactics
 import Polysemy.Internal.Union
 import Control.Monad
-import Control.Monad.IO.Class
 
 -----------------------------------------------------------------------------
--- | An effect for embedding higher-order effects in the final target monad
--- of the effect stack.
+-- | 'withWeavingToFinal' admits an implementation of 'embed'.
 --
--- This is very useful for writing interpreters that interpret higher-order
--- effects in terms of the final monad - however, these interpreters
--- are subject to very different semantics than regular ones.
---
--- For more information, see 'interpretFinal'.
-data Final m z a where
-  WithWeaving :: (forall f.
-                      Functor f
-                   => f ()
-                   -> (forall x. f (z x) -> m (f x))
-                   -> (forall x. f x -> Maybe x)
-                   -> m (f a)
-                 )
-              -> Final m z a
-
-makeSem_ ''Final
+-- Just like 'embed', you are discouraged from using this in application code.
+embedFinal :: (Member (Final m) r, Functor m) => m a -> Sem r a
+embedFinal m = withWeavingToFinal $ \s _ _ -> (<$ s) <$> m
+{-# INLINE embedFinal #-}
 
 -----------------------------------------------------------------------------
 -- | Allows for embedding higher-order actions of the final monad
 -- by providing the means of explicitly threading effects through @'Sem' r@
--- to the final monad.
---
--- Consider using 'withStrategic' instead,
--- as it provides a more user-friendly interface to the same power.
---
--- You are discouraged from using 'withWeaving' directly in application code,
--- as it ties your application code directly to the underlying monad.
-withWeaving :: forall m a r
-            .   Member (Final m) r
-            => (forall f.
-                    Functor f
-                 => f ()
-                 -> (forall x. f (Sem r x) -> m (f x))
-                 -> (forall x. f x -> Maybe x)
-                 -> m (f a)
-               )
-            -> Sem r a
-
------------------------------------------------------------------------------
--- | 'withWeaving' admits an implementation of 'sendM'.
---
--- Just like 'sendM', you are discouraged from using this in application code.
-embedFinal :: Functor m => Member (Final m) r => m a -> Sem r a
-embedFinal m = withWeaving $ \s _ _ -> (<$ s) <$> m
-
-
------------------------------------------------------------------------------
--- | Allows for embedding higher-order actions of the final monad
--- by providing the means of explicitly threading effects through 'Sem r'
 -- to the final monad. This is done through the use of the 'Strategic'
--- environment.
+-- environment, which provides 'runS' and 'bindS'.
 --
--- You are discouraged from using 'withStrategic' in application code,
--- as it ties your application code directly to the underlying monad.
-withStrategic :: Member (Final m) r => Strategic m (Sem r) a -> Sem r a
-withStrategic strat = withWeaving $ \s wv ins -> runStrategy s wv ins strat
+-- You are discouraged from using 'withStrategicToFinal' in application code,
+-- as it ties your application code directly to the final monad.
+withStrategicToFinal :: Member (Final m) r
+                     => Strategic m (Sem r) a
+                     -> Sem r a
+withStrategicToFinal strat = withWeavingToFinal $ \s wv ins ->
+  runStrategy
+    s
+    wv
+    ins
+    strat
+{-# INLINE withStrategicToFinal #-}
 
 ------------------------------------------------------------------------------
 -- | Like 'interpretH', but may be used to
 -- interpret higher-order effects in terms of the final monad.
 --
--- /Beware/: Any interpreters built using this (or 'Final' in general)
--- will /not/ respect local/global state semantics based on the order of
--- interpreters run. You should signal interpreters that make use of
--- 'Final' by adding a "-Final" suffix to the names of these.
+-- 'interpretFinal' requires less boilerplate than using 'interpretH'
+-- together with 'withStrategicToFinal' \/ 'withWeavingToFinal',
+-- but is also less powerful.
+-- 'interpretFinal' does not provide any means of executing actions
+-- of @'Sem' r@ as you interpret each action, and the provided interpreter
+-- is automatically recursively used to process higher-order occurences of
+-- @'Sem' (e ': r)@ to @'Sem' r@.
 --
--- State semantics of effects that are /not/
--- interpreted in terms of the final monad will always
--- appear local to effects that are interpreted in terms of the final monad.
+-- If you need greater control of how the effect is interpreted,
+-- use 'interpretH' together with 'withStrategicToFinal' \/
+-- 'withWeavingToFinal' instead.
 --
--- State semantics between effects that are interpreted in terms of the final monad
--- depend on the final monad. I.e. if the final monad is a monad transformer stack,
--- then state semantics will depend on the order monad transformers are stacked.
+-- /Beware/: Effects that aren't interpreted in terms of the final
+-- monad will have local state semantics in regards to effects
+-- interpreted using 'interpretFinal'. See 'Final'.
 interpretFinal
-    :: forall e m r a
-    .  (Member (Final m) r, Functor m)
+    :: forall e m a r
+     . (Member (Final m) r, Functor m)
     => (forall x n. e n x -> Strategic m n x)
     -> Sem (e ': r) a
     -> Sem r a
 interpretFinal n =
   let
     go :: Sem (e ': r) x -> Sem r x
-    go (Sem sem) = sem $ \u -> case decomp u of
+    go = usingSem $ \u -> case decomp u of
       Right (Weaving e s wv ex ins) ->
-        fmap ex $ withWeaving $ \s' wv' ins'
+        fmap ex $ withWeavingToFinal $ \s' wv' ins'
           -> fmap getCompose $
                 runStrategy
                   (Compose (s <$ s'))
@@ -152,15 +124,6 @@ interpretFinal n =
 {-# INLINE interpretFinal #-}
 
 ------------------------------------------------------------------------------
--- | 'Strategic' is an environment in which you're capable of explicitly
--- threading higher-order effect states to the final monad.
--- This is based upon @Tactics@, (see 'Tactical'), and usage
--- is extremely similar.
-type Strategic m n a = forall f. Functor f => Sem (WithStrategy m f n) (m (f a))
-
-type WithStrategy m f n = WithTactics (Embed m) f n '[]
-
-------------------------------------------------------------------------------
 -- | Get a natural transformation capable of potentially inspecting values
 -- inside of @f@. Binding the result of 'getInspectorS' produces a function that
 -- can sometimes peek inside values returned by 'bindS'.
@@ -170,22 +133,22 @@ type WithStrategy m f n = WithTactics (Embed m) f n '[]
 --
 -- See also 'getInspectorT'
 getInspectorS :: Sem (WithStrategy m f n) (Inspector f)
-getInspectorS = getInspectorT
+getInspectorS = send GetInspector
 {-# INLINE getInspectorS #-}
 
 ------------------------------------------------------------------------------
 -- | Get the stateful environment of the world at the moment the
 -- target monad is to be run.
--- Prefer 'pureS', 'runS' or 'bindS' instead of using this function
+-- Prefer 'pureS', 'liftS', 'runS', or 'bindS' instead of using this function
 -- directly.
 getInitialStateS :: Sem (WithStrategy m f n) (f ())
-getInitialStateS = getInitialStateT
+getInitialStateS = send GetInitialState
 {-# INLINE getInitialStateS #-}
 
 ------------------------------------------------------------------------------
 -- | Embed a value into 'Strategic'.
 pureS :: Applicative m => a -> Strategic m n a
-pureS = fmap pure . pureT
+pureS a = pure . (a <$) <$> getInitialStateS
 {-# INLINE pureS #-}
 
 ------------------------------------------------------------------------------
@@ -208,8 +171,8 @@ liftS m = do
 -- The stateful environment will be the same as the one that the target monad
 -- is initially run in.
 -- Use 'bindS'  if you'd prefer to explicitly manage your stateful environment.
-runS :: Monad m => n a -> Sem (WithStrategy m f n) (m (f a))
-runS = fmap runM . runT
+runS :: n a -> Sem (WithStrategy m f n) (m (f a))
+runS na = bindS (const na) <*> getInitialStateS
 {-# INLINE runS #-}
 
 ------------------------------------------------------------------------------
@@ -217,68 +180,78 @@ runS = fmap runM . runT
 -- monad. You can use 'bindS' to get an effect parameter of the form @a -> n b@
 -- into something that can be used after calling 'runS' on an effect parameter
 -- @n a@.
-bindS :: Monad m => (a -> n b) -> Sem (WithStrategy m f n) (f a -> m (f b))
-bindS = fmap (runM .) . bindT
+bindS :: (a -> n b) -> Sem (WithStrategy m f n) (f a -> m (f b))
+bindS = send . HoistInterpretation
 {-# INLINE bindS #-}
 
 ------------------------------------------------------------------------------
--- | Internal function to process Strategies in terms of 'withWeaving'.
-runStrategy :: Functor f
-            => f ()
-            -> (forall x. f (n x) -> m (f x))
-            -> (forall x. f x -> Maybe x)
-            -> Sem (WithStrategy m f n) a
-            -> a
-runStrategy s wv ins (Sem m) = runIdentity $ m $ \u -> case extract u of
-  Weaving e s' _ ex' _ -> Identity $ ex' $ (<$ s') $ case e of
-    GetInitialState -> s
-    HoistInterpretation na -> embed . wv . fmap na
-    GetInspector -> Inspector ins
-{-# INLINE runStrategy #-}
-
-------------------------------------------------------------------------------
--- | Lower a 'Sem' containing only a lifted, final monad into that monad.
--- The appearance of 'Lift' as the final effect
--- is to allow the use of operations that rely on a @'LastMember' ('Lift' m)@
--- constraint.
-runFinal :: Monad m => Sem '[Final m, Embed m] a -> m a
-runFinal = usingSem $ \u -> case decomp u of
-  Right (Weaving (WithWeaving wav) s wv ex ins) ->
+-- | Lower a 'Sem' containing only a single lifted, final 'Monad' into that
+-- monad.
+--
+-- If you also need to process an @'Embed' m@ effect, use this together with
+-- 'embedToFinal'.
+runFinal :: Monad m => Sem '[Final m] a -> m a
+runFinal = usingSem $ \u -> case extract u of
+  Weaving (WithWeavingToFinal wav) s wv ex ins ->
     ex <$> wav s (runFinal . wv) ins
-  Left g -> case extract g of
-    Weaving (Embed m) s _ ex _ -> ex . (<$ s) <$> m
 {-# INLINE runFinal #-}
 
 ------------------------------------------------------------------------------
--- | Lower a 'Sem' containing two lifted monad into the final monad,
--- by interpreting one of the monads in terms of the other one.
---
--- This allows for the use of operations that rely on a @'LastMember' ('Lift' m)@
--- constraint, as long as @m@ can be transformed to the final monad;
--- but be warned, this breaks the implicit contract of @'LastMember' ('Lift' m)@
--- that @m@ /is/ the final monad, so depending on the final monad and operations
--- used, 'runFinalLift' may become /unsafe/.
---
--- For example, 'runFinalLift' is unsafe with 'Polysemy.Async.asyncToIO' if
--- the final monad is non-deterministic, or a continuation
--- monad.
-runFinalLift :: Monad m
-              => (forall x. n x -> m x)
-              -> Sem [Final m, Embed m, Embed n] a
-              -> m a
-runFinalLift nat = usingSem $ \u -> case decomp u of
-  Right (Weaving (WithWeaving wav) s wv ex ins) ->
-    ex <$> wav s (runFinalLift nat . wv) ins
-  Left g -> case decomp g of
-    Right (Weaving (Embed m) s _ ex _) -> ex . (<$ s) <$> m
-    Left g' -> case extract g' of
-      Weaving (Embed n) s _ ex _ -> ex . (<$ s) <$> nat n
-{-# INLINE runFinalLift #-}
+-- | Given natural transformations between @m1@ and @m2@, run a @'Final' m1@
+-- effect by transforming it into a @'Final' m2@ effect.
+finalToFinal :: forall m1 m2 a r
+              . (Member (Final m2) r, Functor m2)
+             => (forall x. m1 x -> m2 x)
+             -> (forall x. m2 x -> m1 x)
+             -> Sem (Final m1 ': r) a
+             -> Sem r a
+finalToFinal to from =
+  let
+    go :: Sem (Final m1 ': r) x -> Sem r x
+    go = usingSem $ \u -> case decomp u of
+      Right (Weaving (WithWeavingToFinal wav) s wv ex ins) ->
+        fmap ex $ withWeavingToFinal $ \s' wv' ins'
+          -> fmap getCompose $ to $
+                wav
+                  (Compose (s <$ s'))
+                  (from . fmap Compose . wv' . fmap (go . wv) . getCompose)
+                  (ins' . getCompose >=> ins)
+      Left g -> liftSem (hoist go g)
+    {-# INLINE go #-}
+  in
+    go
+{-# INLINE finalToFinal #-}
 
 ------------------------------------------------------------------------------
--- | 'runFinalLift', specialized to transform 'IO' to a 'MonadIO'.
-runFinalLiftIO :: MonadIO m
-               => Sem [Final m, Embed m, Embed IO] a
-               -> m a
-runFinalLiftIO = runFinalLift liftIO
-{-# INLINE runFinalLiftIO #-}
+-- | Run a @'Final' ('Sem' r)@ effect if the remaining effect stack is @r@.
+--
+-- This is sometimes useful for interpreters that make use of
+-- 'reinterpret', 'raiseUnder', or any of their friends.
+runFinalSem :: Sem (Final (Sem r) ': r) a -> Sem r a
+runFinalSem = usingSem $ \u -> case decomp u of
+  Right (Weaving (WithWeavingToFinal wav) s wv ex ins) ->
+    ex <$> wav s (runFinalSem . wv) ins
+  Left g -> liftSem (hoist runFinalSem g)
+{-# INLINE runFinalSem #-}
+
+------------------------------------------------------------------------------
+-- | Run a @'Final' m@ effect by providing an explicit lowering function.
+--
+-- /Beware/: The lowering function may be invoked multiple times, so
+-- __don't do any initialization work inside the lowering function__:
+-- it will be duplicated.
+lowerFinal :: Member (Embed m) r
+           => (forall x. Sem r x -> m x)
+           -> Sem (Final m ': r) a
+           -> Sem r a
+-- TODO(KingoftheHomeless): Write everything out for efficiency?
+lowerFinal f = runFinalSem . finalToFinal embed f . raiseUnder
+{-# INLINE lowerFinal #-}
+
+------------------------------------------------------------------------------
+-- | Transform an @'Embed' m@ effect into a @'Final' m@ effect
+embedToFinal :: (Member (Final m) r, Functor m)
+             => Sem (Embed m ': r) a
+             -> Sem r a
+embedToFinal = interpret $ \(Embed m) -> embedFinal m
+{-# INLINE embedToFinal #-}
