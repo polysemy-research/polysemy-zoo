@@ -1,5 +1,5 @@
 {-# LANGUAGE ImpredicativeTypes #-}
-
+-- | =__Unless you absolutely have to use explicit lowering functions, use "Polysemy.Final" instead__
 module Polysemy.IdempotentLowering
   ( (.@!)
   , nat
