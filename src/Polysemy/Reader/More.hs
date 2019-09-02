@@ -15,10 +15,10 @@ import Polysemy.Fixpoint
 -- 'Sem' has completed, and then providing the result to each request
 -- recursively.
 runReaderFixSem :: forall i r a
-                . Member Fixpoint r
-               => Sem r i
-               -> Sem (Reader i ': r) a
-               -> Sem r a
+                 . Member Fixpoint r
+                => Sem r i
+                -> Sem (Reader i ': r) a
+                -> Sem r a
 runReaderFixSem m sem = do
   rec
     a <- runReader i sem

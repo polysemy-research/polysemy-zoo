@@ -33,6 +33,7 @@ test =
    modify (++"is ")
    revModify (++"flat ")
    modify (++"a ")
+
 spec :: Spec
 spec = do
   describe "runRevState" $ do

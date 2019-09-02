@@ -22,9 +22,9 @@ import Polysemy.Internal
 import Polysemy.Internal.Union
 
 ------------------------------------------------------------------------------
--- | A 'Polysemy.State' effect for threading state /backwards/ instead of
--- forwards through a computation.
-data RevState s m a where
+-- | A 'Polysemy.State.State' effect for threading state /backwards/ instead
+-- of forwards through a computation.
+newtype RevState s m a where
   RevState :: (s -> (s, a)) -> RevState s m a
 
 makeSem_ ''RevState
@@ -65,7 +65,7 @@ revModify f = revState $ \s -> (f s, ())
 
 ------------------------------------------------------------------------------
 -- | Run a 'RevState' effect with local state that is propagated /backwards/
--- throughout the computation, from last action to first.
+-- through the computation, from last action to first.
 runRevState :: Member Fixpoint r
             => s
             -> Sem (RevState s ': r) a
@@ -75,8 +75,8 @@ runRevState s =
   . runRevStateInC
 
 ------------------------------------------------------------------------------
--- | Run a 'RevState' effect with local state that is propagated /backwards/
--- throughout the computation, from last action to first.
+-- | Run a 'RevState' effect with local state that is lazily propagated
+-- /backwards/ through the computation, from last action to first.
 runLazyRevState :: Member Fixpoint r
                 => s
                 -> Sem (RevState s ': r) a
