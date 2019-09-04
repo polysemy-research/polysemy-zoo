@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e4fd5fe89cde80183a81afdb2afbbf55447f19a8578658a9d38d88628369472b
+-- hash: 22d9b28f2f7f2dc63e5238a47d332a2eb5021d126c8d5d3c14c0453439fc0f51
 
 name:           polysemy-zoo
 version:        0.5.0.1
@@ -39,16 +39,11 @@ library
       Polysemy.ConstraintAbsorber.MonadWriter
       Polysemy.Cont
       Polysemy.Cont.Internal
-      Polysemy.Final
-      Polysemy.Final.Async
-      Polysemy.Final.Error
-      Polysemy.Final.Fixpoint
-      Polysemy.Final.Internal
       Polysemy.Final.IO
+      Polysemy.Final.IO.Internal
+      Polysemy.Final.More
       Polysemy.Final.MTL
       Polysemy.Final.NonDet
-      Polysemy.Final.Resource
-      Polysemy.Final.Writer
       Polysemy.Floodgate
       Polysemy.Fresh
       Polysemy.IdempotentLowering
@@ -77,11 +72,10 @@ library
     , ghc-prim >=0.5.2 && <0.6
     , hedis >=0.10 && <0.13
     , mtl >=2.0.1.0 && <3.0.0.0
-    , polysemy >=1.1.0.0
+    , polysemy >=1.2.0.0
     , polysemy-plugin >=0.2
     , random >=1.1 && <1.2
     , reflection >=2.1.4 && <3.0.0
-    , stm >=2 && <3
     , transformers >=0.5.2.0 && <0.6
   default-language: Haskell2010
 
@@ -117,11 +111,10 @@ test-suite polysemy-zoo-test
     , hedis >=0.10 && <0.13
     , hspec >=2.6.0 && <3
     , mtl >=2.0.1.0 && <3.0.0.0
-    , polysemy >=1.1.0.0
+    , polysemy >=1.2.0.0
     , polysemy-plugin >=0.2
     , polysemy-zoo
     , random >=1.1 && <1.2
     , reflection >=2.1.4 && <3.0.0
-    , stm >=2 && <3
     , transformers >=0.5.2.0 && <0.6
   default-language: Haskell2010

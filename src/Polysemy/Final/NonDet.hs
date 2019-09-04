@@ -1,7 +1,6 @@
 module Polysemy.Final.NonDet
   (
     module Polysemy.NonDet
-  , module Polysemy.Final
   , nonDetToFinal
   ) where
 

@@ -1,5 +1,5 @@
 {-# LANGUAGE ImpredicativeTypes #-}
-
+{-# OPTIONS_GHC -Wno-deprecations #-}
 module IdempotentLoweringSpec where
 
 import Data.IORef
