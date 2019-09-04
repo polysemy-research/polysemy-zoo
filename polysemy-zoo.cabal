@@ -39,6 +39,7 @@ library
       Polysemy.ConstraintAbsorber.MonadWriter
       Polysemy.Cont
       Polysemy.Cont.Internal
+      Polysemy.EndState
       Polysemy.Final.IO
       Polysemy.Final.IO.Internal
       Polysemy.Final.More
@@ -50,7 +51,9 @@ library
       Polysemy.KVStore
       Polysemy.Operators
       Polysemy.Random
+      Polysemy.Reader.More
       Polysemy.Redis.Utils
+      Polysemy.RevState
       Polysemy.SetStore
       Polysemy.Several
       Polysemy.Shift
@@ -90,6 +93,7 @@ test-suite polysemy-zoo-test
       FloodgateSpec
       IdempotentLoweringSpec
       KVStoreSpec
+      RevStateSpec
       SeveralSpec
       ShiftSpec
       Paths_polysemy_zoo

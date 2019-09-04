@@ -1,5 +1,24 @@
 # Changelog for polysemy-zoo
 
+
+## 0.6.0.0 (2019-09-04)
+
+- `Final` has been migrated to `polysemy` proper.
+    Only `Polysemy.Final.MTL` and experimental features pertaining to
+    `Final` remain in `polysemy-zoo`.
+- Added `Fresh` effect.
+- Added `MonadCont` constraint absorber which operates via the `Cont` effect.
+- Added `runContViaFresh`, which is still under development.
+- Added `runReaderFixSem`
+- Added `EndState` effect
+- Added `RevState` effect
+- Added `lowerFinal`
+- Added `runFinalSem`
+- Added `nonDetToFinal`
+- Added `interpretFinalGlobal`
+- Added `asyncToIOFinalGlobal`
+- Added `resourceToIOFinalGlobal`
+
 ## 0.5.0.1 (2019-07-25)
 
 - Fixed some bugs with haddock
