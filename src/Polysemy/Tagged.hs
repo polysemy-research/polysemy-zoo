@@ -1,4 +1,3 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
 module Polysemy.Tagged
   (
     -- * Effect
@@ -46,8 +45,8 @@ tag :: forall k e r a
     -> Sem r a
 tag = hoistSem $ \u -> case decomp u of
   Right (Weaving e s wv ex ins) ->
-    injWeaving $ Weaving (Tagged @k e) s (tag @k . wv) ex ins
-  Left g -> hoist (tag @k) g
+    injWeaving $ Weaving (Tagged e) s (tag . wv) ex ins
+  Left g -> hoist tag g
 {-# INLINE tag #-}
 
 ------------------------------------------------------------------------------
@@ -72,7 +71,7 @@ retag :: forall k1 k2 e r a
       -> Sem r a
 retag = hoistSem $ \u -> case decomp u of
   Right (Weaving (Tagged e) s wv ex ins) ->
-    injWeaving $ Weaving (Tagged @k2 e) s (retag @_ @k2 . wv) ex ins
-  Left g -> hoist (retag @_ @k2) g
+    injWeaving $ Weaving (Tagged e) s (retag . wv) ex ins
+  Left g -> hoist retag g
 {-# INLINE retag #-}
 
