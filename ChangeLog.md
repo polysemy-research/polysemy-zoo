@@ -1,12 +1,13 @@
 # Changelog for polysemy-zoo
 
 
-## 0.6.0.0 (2019-09-04)
+## 0.6.0.0 (2019-09-05)
 
 - `Final` has been migrated to `polysemy` proper.
     Only `Polysemy.Final.MTL` and experimental features pertaining to
     `Final` remain in `polysemy-zoo`.
 - Added `Fresh` effect.
+- Added `Tagged` effect.
 - Added `MonadCont` constraint absorber which operates via the `Cont` effect.
 - Added `runContViaFresh`, which is still under development.
 - Added `runReaderFixSem`
