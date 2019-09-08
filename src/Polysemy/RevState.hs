@@ -50,8 +50,9 @@ revGet = revState $ \s -> (s, s)
 -- | Sends a new state into the past.
 revPut :: forall s r
         . Member (RevState s) r
-       => Sem r s
-revPut = revState $ \s -> (s, s)
+       => s
+       -> Sem r ()
+revPut s = revState $ \_ -> (s, ())
 
 ------------------------------------------------------------------------------
 -- | Gets the state as sent from the next call to 'revState'
