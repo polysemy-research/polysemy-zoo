@@ -1,5 +1,8 @@
 # Changelog for polysemy-zoo
 
+## 0.6.0.1 (2019-09-12)
+
+- Fixed the implementation of `atomicPut`
 
 ## 0.6.0.0 (2019-09-05)
 
