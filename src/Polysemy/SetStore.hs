@@ -8,7 +8,6 @@ import           Data.Foldable
 import qualified Data.Set as S
 import qualified Database.Redis as R
 import           Polysemy
-import           Polysemy.Alias
 import           Polysemy.Error
 import           Polysemy.KVStore
 import           Polysemy.Redis.Utils
@@ -27,7 +26,7 @@ runSetStoreAsKVStore
     :: ( Member (KVStore k (S.Set v)) r
        , Ord v
        )
-    => InterpreterOf (SetStore k v) r
+    => Sem (SetStore k v ': r) x -> Sem r x
 runSetStoreAsKVStore = interpret $ \case
   AddS k v ->
     lookupKV k >>= \case
@@ -48,7 +47,7 @@ runSetStoreInRedis
        , Binary v
        )
     => (k -> Path)
-    -> InterpreterOf (SetStore k v) r
+    -> Sem (SetStore k v ': r) x -> Sem r x
 runSetStoreInRedis pf = interpret $ \case
   AddS k v -> void
             . fromEitherM
