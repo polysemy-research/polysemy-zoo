@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: aa67117d6d72f06ce1c742de965c10dade2a32975fca9253525f3e63ffb62d59
+-- hash: 7c046b6c3dd1f7ae3dd9b51b7154b8bf5a8a78e654fbb14c0430c2d36684913f
 
 name:           polysemy-zoo
 version:        0.6.0.1
@@ -81,6 +81,7 @@ library
     , polysemy-plugin >=0.2
     , random >=1.1 && <1.2
     , reflection >=2.1.4 && <3.0.0
+    , text >=1.1.0 && <1.3
     , transformers >=0.5.2.0 && <0.6
   default-language: Haskell2010
 
@@ -123,5 +124,6 @@ test-suite polysemy-zoo-test
     , polysemy-zoo
     , random >=1.1 && <1.2
     , reflection >=2.1.4 && <3.0.0
+    , text >=1.1.0 && <1.3
     , transformers >=0.5.2.0 && <0.6
   default-language: Haskell2010

@@ -19,6 +19,7 @@ import           Polysemy.ConstraintAbsorber.MonadCatch
 
 import           Test.Hspec
 import qualified Control.Monad                 as M
+import           Data.Maybe                     ( fromMaybe )
 
 import qualified Control.Monad.Reader.Class    as S
 import qualified Control.Monad.Writer.Class    as S
@@ -51,11 +52,6 @@ throwOnZero n = do
   return n
 
 data MyException = ZeroException | NegativeException | UnknownException deriving (Show, Eq)
-
-toMyException :: S.SomeException -> MyException
-toMyException e = case (S.fromException e) of
-  Nothing -> UnknownException
-  Just e' -> e'
 
 instance S.Exception MyException
 
@@ -124,28 +120,35 @@ spec = describe "ConstraintAbsorber" $ do
   it "should return (Left \"Zero!\")." $ do
     flip shouldBe (Left "Zero!") . run . runError $ absorbError $ throwOnZero 0
 
+  let toMyException = fromMaybe UnknownException
   it "should return (Right 1)." $ do
     flip shouldBe (Right 1)
       . run
-      . runErrorForMonadCatch toMyException
+      . runMonadCatch toMyException
       $ absorbMonadThrow
       $ throwOnZeroAndNegative 1
   it "should return (Left ZeroException)." $ do
     flip shouldBe (Left ZeroException)
       . run
-      . runErrorForMonadCatch toMyException
+      . runMonadCatch toMyException
+      $ absorbMonadThrow
+      $ throwOnZeroAndNegative 0
+  it "should return (Left \"ZeroException\")." $ do
+    flip shouldBe (Left "ZeroException")
+      . run
+      . runMonadCatchAsText
       $ absorbMonadThrow
       $ throwOnZeroAndNegative 0
   it "should return (Right 0)." $ do
     flip shouldBe (Right 0)
       . run
-      . runErrorForMonadCatch toMyException
+      . runMonadCatch toMyException
       $ absorbMonadCatch
       $ S.catch (throwOnZeroAndNegative 0) handleZero
   it "should return (Left NegativeException)." $ do
     flip shouldBe (Left NegativeException)
       . run
-      . runErrorForMonadCatch toMyException
+      . runMonadCatch toMyException
       $ absorbMonadCatch
       $ S.catch (throwOnZeroAndNegative (-1)) handleZero
 

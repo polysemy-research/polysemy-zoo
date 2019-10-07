@@ -13,7 +13,8 @@ module Polysemy.ConstraintAbsorber.MonadCatch
     absorbMonadThrow
   , absorbMonadCatch
   -- * run helper
-  , runErrorForMonadCatch
+  , runMonadCatch
+  , runMonadCatchAsText
     -- * Re-exports
   , Exception(..)
   , SomeException
@@ -25,6 +26,8 @@ import           Control.Monad.Catch            ( Exception(..)
                                                 , SomeException
                                                 , toException
                                                 )
+
+import qualified Data.Text                     as T
 import           Polysemy
 import           Polysemy.ConstraintAbsorber
 import qualified Polysemy.Error                as E
@@ -37,11 +40,18 @@ import qualified Polysemy.Error                as E
 --  @runErrorForMonadCatch C.displayException@
 -- 
 -- @since 0.7.0.0
-runErrorForMonadCatch
-  :: (C.SomeException -> e)
-  -> Sem (E.Error C.SomeException : E.Error e : r) a
-  -> Sem r (Either e a)
-runErrorForMonadCatch f = E.runError . E.mapError f
+runMonadCatch
+  :: Exception e
+  => (Maybe e -> e')
+  -> Sem (E.Error C.SomeException : E.Error e' : r) a
+  -> Sem r (Either e' a)
+runMonadCatch f = E.runError . E.mapError (f . C.fromException)
+
+runMonadCatchAsText
+  :: Sem (E.Error C.SomeException : E.Error T.Text : r) a
+  -> Sem r (Either T.Text a)
+runMonadCatchAsText = E.runError . E.mapError (T.pack . C.displayException)
+
 
 
 -- | Introduce a local 'S.MonadCatch' constraint on 'Sem' --- allowing it to

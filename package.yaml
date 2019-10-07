@@ -31,6 +31,7 @@ dependencies:
 - random >= 1.1 && <1.2
 - reflection >= 2.1.4 && < 3.0.0
 - transformers >= 0.5.2.0 && < 0.6
+- text >= 1.1.0 && < 1.3 
 - ghc-prim >= 0.5.2 && < 0.6
 - hedis >= 0.10 && < 0.13
 - async >= 2.2 && < 3
@@ -76,5 +77,5 @@ tests:
     - hspec-discover  >= 2.0
     dependencies:
     - polysemy >= 1.2.0.0
-    - polysemy-zoo
+    - polysemy-zoo    
     - hspec >= 2.6.0 && < 3
