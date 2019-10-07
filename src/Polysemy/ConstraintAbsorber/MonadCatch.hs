@@ -31,16 +31,15 @@ import qualified Polysemy.Error                as E
 
 
 ------------------------------------------------------------------------------
--- | run function to map something in the Exception hierarchy to SomeException
-{-runErrorForMonadCatch
-  :: forall e r a
-   . (SomeException -> e)
-  -> Sem (E.Error SomeException ': r) a
-  -> Sem r (Either e a)
--}
+-- | Like 'E.runError' but applies a given function from 'SomeException'
+-- to some other type, typically something less opaque.
+-- e.g.:
+--  @runErrorForMonadCatch C.displayException@
+-- 
+-- @since 0.7.0.0
 runErrorForMonadCatch
-  :: (SomeException -> e)
-  -> Sem (E.Error SomeException : E.Error e : r) a
+  :: (C.SomeException -> e)
+  -> Sem (E.Error C.SomeException : E.Error e : r) a
   -> Sem r (Either e a)
 runErrorForMonadCatch f = E.runError . E.mapError f
 
