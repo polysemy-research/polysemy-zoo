@@ -1,5 +1,7 @@
+{-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications    #-}
+
 
 module ConstraintAbsorberSpec where
 
@@ -13,14 +15,17 @@ import           Polysemy.ConstraintAbsorber.MonadReader
 import           Polysemy.ConstraintAbsorber.MonadState
 import           Polysemy.ConstraintAbsorber.MonadWriter
 import           Polysemy.ConstraintAbsorber.MonadError
+import           Polysemy.ConstraintAbsorber.MonadCatch
 
 import           Test.Hspec
-import           Control.Monad                 as M
+import qualified Control.Monad                 as M
+import           Data.Maybe                     ( fromMaybe )
 
 import qualified Control.Monad.Reader.Class    as S
 import qualified Control.Monad.Writer.Class    as S
 import qualified Control.Monad.State.Class     as S
 import qualified Control.Monad.Error.Class     as S
+import qualified Control.Monad.Catch           as S
 
 
 {-
@@ -45,6 +50,23 @@ throwOnZero :: S.MonadError String m => Int -> m Int
 throwOnZero n = do
   M.when (n == 0) $ S.throwError "Zero!"
   return n
+
+data MyException = ZeroException | NegativeException | UnknownException deriving (Show, Eq)
+
+instance S.Exception MyException
+
+-- a different error handling option
+throwOnZeroAndNegative :: S.MonadThrow m => Int -> m Int
+throwOnZeroAndNegative n = do
+  M.when (n == 0) $ S.throwM ZeroException
+  M.when (n < 0) $ S.throwM NegativeException
+  return n
+
+-- this is dumb but it makes the point. 
+handleZero :: S.MonadThrow m => MyException -> m Int
+handleZero ZeroException = return 0
+handleZero e             = S.throwM e
+
 
 someOfAll
   :: (S.MonadReader String m, S.MonadWriter [Int] m, S.MonadState Int m)
@@ -93,8 +115,42 @@ spec = describe "ConstraintAbsorber" $ do
       modify (\m -> m - (n `div` 2))
       return ()
 
+  it "should return (Right 1)." $ do
+    flip shouldBe (Right 1) . run . runError $ absorbError $ throwOnZero 1
   it "should return (Left \"Zero!\")." $ do
     flip shouldBe (Left "Zero!") . run . runError $ absorbError $ throwOnZero 0
+
+  let toMyException = fromMaybe UnknownException
+  it "should return (Right 1)." $ do
+    flip shouldBe (Right 1)
+      . run
+      . runMonadCatch toMyException
+      $ absorbMonadThrow
+      $ throwOnZeroAndNegative 1
+  it "should return (Left ZeroException)." $ do
+    flip shouldBe (Left ZeroException)
+      . run
+      . runMonadCatch toMyException
+      $ absorbMonadThrow
+      $ throwOnZeroAndNegative 0
+  it "should return (Left \"ZeroException\")." $ do
+    flip shouldBe (Left "ZeroException")
+      . run
+      . runMonadCatchAsText
+      $ absorbMonadThrow
+      $ throwOnZeroAndNegative 0
+  it "should return (Right 0)." $ do
+    flip shouldBe (Right 0)
+      . run
+      . runMonadCatch toMyException
+      $ absorbMonadCatch
+      $ S.catch (throwOnZeroAndNegative 0) handleZero
+  it "should return (Left NegativeException)." $ do
+    flip shouldBe (Left NegativeException)
+      . run
+      . runMonadCatch toMyException
+      $ absorbMonadCatch
+      $ S.catch (throwOnZeroAndNegative (-1)) handleZero
 
   let runRWS
         :: String
