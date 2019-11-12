@@ -1,4 +1,16 @@
-module Polysemy.Input.Streaming where
+module Polysemy.Input.Streaming
+  ( -- * Underlying Effect
+    module Polysemy.Input
+
+    -- * Actions
+  , yieldInput
+  , yieldRace
+  , exhaust
+
+    -- * Intepretations
+  , runInputViaStream
+  , runInputViaInfiniteStream
+  ) where
 
 import qualified Control.Concurrent.Async as A
 import           Data.Functor.Of
@@ -8,6 +20,7 @@ import           Polysemy.Input
 import           Polysemy.State
 import qualified Streaming as S
 import qualified Streaming.Prelude as S
+
 
 
 runInputViaStream
