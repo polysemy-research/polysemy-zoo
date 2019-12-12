@@ -38,6 +38,7 @@ dependencies:
 - binary >= 0.8.5.1 && < 0.9
 - bytestring >= 0.10.8.2 && < 0.11
 - streaming
+- compact >= 0.1.0.1
 
 
 ghc-options:
