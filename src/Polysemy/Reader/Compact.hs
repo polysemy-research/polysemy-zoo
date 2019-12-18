@@ -5,7 +5,9 @@ import           Polysemy.Reader
 
 import           Data.Compact
 
--- | Run a 'Reader' effect by compacting a value; otherwise behaves as normal. Useful for 'Reader' effects which provide a large structure.
+-----------------------------------------------------------------------------
+-- | Run a 'Reader' effect by compacting a value; otherwise behaves as normal.
+-- Useful for 'Reader' effects which provide a large structure.
 runReaderWithCompacted
     :: forall r i a
      . Member (Embed IO) r
@@ -17,7 +19,9 @@ runReaderWithCompacted i sem = do
     runReaderWithExistingCompacted compacted sem
 {-# INLINE runReaderWithCompacted #-}
 
--- | Run a 'Reader' effect with a value in a compact region. Will not add 'Local' values to the existing region, but will create a new region for it.
+-----------------------------------------------------------------------------
+-- | Run a 'Reader' effect with a value in a compact region. Will not add 
+-- 'local' values to the existing region, but will create a new region for it.
 runReaderWithExistingCompacted
     :: forall r i a
      . Member (Embed IO) r
