@@ -12,9 +12,12 @@ module Polysemy.Fresh
     -- * Unsafe Interpretations
   , runFreshEnumUnsafe
   , runFreshUnsafePerformIO
+  , runFreshUUIDUnsafeIO
   ) where
 
 import Data.Unique
+import Data.UUID (UUID)
+import Data.UUID.V4
 
 import Polysemy.Internal
 import Polysemy.Internal.Union
@@ -112,6 +115,14 @@ runFreshUnsafePerformIO = usingSem $ \u ->
 -- lambda. This interpreter might even be safe to INLINE, but I'm not taking
 -- any chances.
 {-# NOINLINE runFreshUnsafePerformIO #-}
+
+-----------------------------------------------------------------------------
+-- | Runs a 'Fresh' effect to generate random UUIDs.
+-- As UUIDs are finite, this is theoretically unsafe, but is not
+-- a problem in practice.
+runFreshUUIDUnsafeIO :: Member (Embed IO) r => Sem (Fresh UUID ': r) a -> Sem r a
+runFreshUUIDUnsafeIO = interpret $ \Fresh -> embed nextRandom
+{-# INLINE runFreshUUIDUnsafeIO #-}
 
 newUnique' :: Union (Fresh Unique ': r) (Sem (Fresh Unique ': r)) a -> IO Unique
 newUnique' (Union _ _) = newUnique
