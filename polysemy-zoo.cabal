@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1155a00431aa8ce26b1d65817f45f674929f3c598fd5a5df05cdc053973d3c3c
+-- hash: ecef643514ea53280be8bc107c1838cd2daad659fa9761375f2845ae258cb1cf
 
 name:           polysemy-zoo
 version:        0.6.0.1
@@ -29,7 +29,6 @@ source-repository head
 
 library
   exposed-modules:
-      Polysemy.Alias
       Polysemy.Capture
       Polysemy.ConstraintAbsorber
       Polysemy.ConstraintAbsorber.MonadCatch
@@ -77,7 +76,6 @@ library
     , contravariant <2
     , exceptions >=0.10.0 && <0.11
     , ghc-prim >=0.5.2 && <0.6
-    , hedis >=0.10 && <0.13
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy >=1.2.1.0
     , polysemy-plugin >=0.2
@@ -120,7 +118,6 @@ test-suite polysemy-zoo-test
     , contravariant <2
     , exceptions >=0.10.0 && <0.11
     , ghc-prim >=0.5.2 && <0.6
-    , hedis >=0.10 && <0.13
     , hspec >=2.6.0 && <3
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy >=1.2.0.0
