@@ -1,10 +1,8 @@
-resolver: lts-14.0
+resolver: lts-14.17
 
 packages:
 - .
 
 extra-deps:
-- polysemy-1.2.0.0
-- polysemy-plugin-0.2.1.0
-
+- polysemy-1.2.3.0
 
