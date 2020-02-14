@@ -5,22 +5,15 @@
 
 packages:
 - completed:
-    hackage: polysemy-1.2.0.0@sha256:9313315be0746936c65bc02a5b9bc2abd3bd02bcef9329db272a991939e5b037,5776
+    hackage: polysemy-1.2.3.0@sha256:d9cfa7942940c7c6d07d1f26ae70c4f1170f9bd6c331bdbe586e810fafc25f17,5878
     pantry-tree:
-      size: 3622
-      sha256: d7b017cc60394fd87330c577e8c8e48e0fcff3f72cb6c518a20a7fd5cfc8ddab
+      size: 3625
+      sha256: a54b1b565848944e37a5533bd91e91ecb7cdfa21294ba599c13d015d354c4f39
   original:
-    hackage: polysemy-1.2.0.0
-- completed:
-    hackage: polysemy-plugin-0.2.1.0@sha256:db5aa30eb9610c6c7aca782f68a128fef4656c867ed29ad328eb1322d8d9b414,2516
-    pantry-tree:
-      size: 972
-      sha256: c14ec1162553bd1f74ad9f4282ebf7f549e77afc7df34dc8081a2bbb4d478f01
-  original:
-    hackage: polysemy-plugin-0.2.1.0
+    hackage: polysemy-1.2.3.0
 snapshots:
 - completed:
-    size: 523443
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/14/0.yaml
-    sha256: 283773e7120f5446d961eab35ea95c9af9c24187cc178537bd29273200a05171
-  original: lts-14.0
+    size: 524799
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/14/17.yaml
+    sha256: 1d72b33c0fc048e23f4f18fd76a6ad79dd1d8a3c054644098a71a09855e40c7c
+  original: lts-14.17

@@ -1,5 +1,5 @@
 name:                polysemy-zoo
-version:             0.6.0.1
+version:             0.7.0.0
 github:              "isovector/polysemy-zoo"
 license:             BSD3
 author:              "Sandy Maguire"
@@ -26,17 +26,14 @@ dependencies:
 - contravariant < 2
 - exceptions >= 0.10.0 && < 0.11
 - mtl >= 2.0.1.0 && < 3.0.0.0
-- polysemy >= 1.2.0.0
+- polysemy >= 1.2.1.0
 - polysemy-plugin >= 0.2
 - random >= 1.1 && <1.2
 - reflection >= 2.1.4 && < 3.0.0
 - transformers >= 0.5.2.0 && < 0.6
 - text >= 1.1.0 && < 1.3
 - ghc-prim >= 0.5.2 && < 0.6
-- hedis >= 0.10 && < 0.13
 - async >= 2.2 && < 3
-- binary >= 0.8.5.1 && < 0.9
-- bytestring >= 0.10.8.2 && < 0.11
 - streaming
 - compact >= 0.1.0.1
 

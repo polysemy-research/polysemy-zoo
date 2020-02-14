@@ -1,5 +1,23 @@
 # Changelog for polysemy-zoo
 
+## 0.7.0.0 (2020-02-14)
+### Breaking Changes
+- `Tagged` has been migrated to `polysemy` proper.
+- `Polysemy.Alias` and `InterpreterOf` has been removed in favor of
+    `InterpreterFor`, which is now part of `polysemy` proper
+    (thanks to @bolt12).
+- Removed `runKVStoreInRedis`, `runSetStoreInRedis`, and `Polysemy.Redis.Utils`
+    due to lack of use.
+
+### Other Changes
+- Added `MonadThrow` and `MonadCatch` constraint absorbers which operate
+    via `Error SomeException` (thanks to @adamConnerSax).
+- Added `Polysemy.Input.Streaming`, which offers
+    [streaming](https://hackage.haskell.org/package/streaming) interoperability.
+- Added `Polysemy.Reader.Compact`, which is useful for `Reader` effects
+    which provide a large structure (thanks to @spacekitteh).
+
+
 ## 0.6.0.1 (2019-09-12)
 
 - Fixed the implementation of `atomicPut`

@@ -14,6 +14,7 @@ module Polysemy.Input.Streaming
 
 import qualified Control.Concurrent.Async as A
 import           Data.Functor.Of
+import           Data.Void
 import           Polysemy
 import           Polysemy.Final
 import           Polysemy.Input
@@ -42,14 +43,14 @@ runInputViaStream stream
 
 runInputViaInfiniteStream
     :: forall i r
-     . (forall x. S.Stream (Of i) (Sem r) x)
+     . S.Stream (Of i) (Sem r) Void
     -> InterpreterFor (Input i) r
 runInputViaInfiniteStream stream
-  = evalState (stream :: S.Stream (Of i) (Sem r) ())
+  = evalState stream
   . reinterpret ( \Input -> do
       s <- get
       raise (S.inspect s) >>= \case
-        Left () -> error "runInputViaInfiniteStream: impossible!"
+        Left g -> absurd g
         Right (i :> s') -> do
           put s'
           pure i
