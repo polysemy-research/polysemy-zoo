@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3ca3f0fd7140b4210529e77e057687ebd67bb4477155611458e964afa5cdc192
+-- hash: 05df4607dc46bc5f19eb10f89c396c19fd117ab9a8303ae9a61421557bc31169
 
 name:           polysemy-zoo
 version:        0.7.0.0
@@ -51,6 +51,7 @@ library
       Polysemy.Input.Streaming
       Polysemy.KVStore
       Polysemy.Operators
+      Polysemy.Pool
       Polysemy.Random
       Polysemy.Reader.Compact
       Polysemy.Reader.More
@@ -79,6 +80,7 @@ library
     , polysemy-plugin >=0.2
     , random >=1.1 && <1.2
     , reflection >=2.1.4 && <3.0.0
+    , stm >=2.5.0.0 && <2.6
     , streaming
     , text >=1.1.0 && <1.3
     , transformers >=0.5.2.0 && <0.6
@@ -121,6 +123,7 @@ test-suite polysemy-zoo-test
     , polysemy-zoo
     , random >=1.1 && <1.2
     , reflection >=2.1.4 && <3.0.0
+    , stm >=2.5.0.0 && <2.6
     , streaming
     , text >=1.1.0 && <1.3
     , transformers >=0.5.2.0 && <0.6
