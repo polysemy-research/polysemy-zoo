@@ -174,7 +174,7 @@ runContViaFreshInC = usingSem $ \u -> ContT $ \c ->
                 if ref == ref' then
                   loop (cn' $ unsafeCoerce a')
                 else
-                  throw x
+                  throw @(uniq, Any) x
           loop $ main' $ ViaFreshRef (\a -> (ref, unsafeCoerce a))
         Jump ref a -> throw (getBacktrackException ref a)
     Left g -> do
@@ -218,7 +218,7 @@ runContViaFreshInCWeave = usingSem $ \u -> ContT $ \c ->
                 if ref == ref' then
                   loop (cn' $ unsafeCoerce a')
                 else
-                  throw x
+                  throw @(uniq, Any) x
           ResAndHandler res h <-
             loop $ main' $ ViaFreshRef (\a -> (ref, unsafeCoerce a))
           return $ ResAndHandler res

@@ -30,20 +30,22 @@ makeSem ''EndState
 -----------------------------------------------------------------------------
 -- | Runs an 'EndState' effect by getting the state after the computation
 -- has finished, and providing it recursively back to calls of 'getEndState'.
-runEndState :: (Member (State s) r, Member Fixpoint r)
+runEndState :: forall s r a
+             . (Member (State s) r, Member Fixpoint r)
             => Sem (EndState s ': r) a
             -> Sem r a
 runEndState =
-    runReaderFixSem get
+    runReaderFixSem (get @s)
   . reinterpret (\GetEndState -> ask)
 
 
 -----------------------------------------------------------------------------
 -- | Like 'runEndState', but for 'AtomicState' rather than 'State'.
 runEndAtomicState
-  :: (Member (AtomicState s) r, Member Fixpoint r)
+  :: forall s r a
+   . (Member (AtomicState s) r, Member Fixpoint r)
   => Sem (EndState s ': r) a
   -> Sem r a
 runEndAtomicState =
-    runReaderFixSem atomicGet
+    runReaderFixSem (atomicGet @s)
   . reinterpret (\GetEndState -> ask)

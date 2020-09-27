@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes         #-}
 {-# LANGUAGE FlexibleInstances           #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving  #-}
 {-# LANGUAGE MultiParamTypeClasses       #-}
@@ -20,13 +21,14 @@ import           Polysemy.Cont
 --
 -- @since 0.3.0.0
 absorbCont
-    :: Member (Cont ref) r
+    :: forall ref r a
+     . Member (Cont ref) r
     => (C.MonadCont (Sem r) => Sem r a)
        -- ^ A computation that requires an instance of 'C.MonadCont' for
        -- 'Sem'. This might be something with type @'C.MonadCont' m => m a@.
     -> Sem r a
 absorbCont = absorbWithSem @C.MonadCont @Action
-  (ContDict callCC)
+  (ContDict (callCC @ref))
   (Sub Dict)
 {-# INLINEABLE absorbCont #-}
 

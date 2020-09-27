@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell, Trustworthy #-}
+{-# LANGUAGE AllowAmbiguousTypes, TemplateHaskell, Trustworthy #-}
 module Polysemy.Capture
   (-- * Effect
     Capture(..)
@@ -92,10 +92,11 @@ delimit' :: forall ref a r
 -- which case such failure may be detected by using 'delimit'' together
 -- with the provided continuation (the provided continuation
 -- is already delimited).
-capture :: Member (Capture ref) r
+capture :: forall ref r a
+         . Member (Capture ref) r
         => (forall s. (a -> Sem r s) -> Sem r s)
         -> Sem r a
-capture cc = reify (\ref -> cc (reflect ref))
+capture cc = reify @ref (\ref -> cc (reflect ref))
 {-# INLINE capture #-}
 
 -----------------------------------------------------------------------------

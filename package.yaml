@@ -39,7 +39,6 @@ dependencies:
 
 
 ghc-options:
-  - -fplugin=Polysemy.Plugin
   - -Wall
 
 #   # Enable these when building haddock

@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 module Polysemy.Final.MTL
   (
     module Polysemy.Final
@@ -25,10 +26,11 @@ import Polysemy.Writer hiding (tell, listen, pass)
 -- /Beware/: Effects that aren't interpreted in terms of the final
 -- monad will have local state semantics in regards to 'Error' effects
 -- interpreted this way. See 'Final'.
-errorToFinal :: (Member (Final m) r, MonadError e m)
+errorToFinal :: forall m e r a
+              . (Member (Final m) r, MonadError e m)
              => Sem (Error e ': r) a
              -> Sem r a
-errorToFinal = interpretFinal $ \case
+errorToFinal = interpretFinal @m $ \case
   Throw e   -> pure $ throwError e
   Catch m h -> do
     m' <- runS m
@@ -43,10 +45,11 @@ errorToFinal = interpretFinal $ \case
 -- /Beware/: Effects that aren't interpreted in terms of the final
 -- monad will have local state semantics in regards to 'Reader' effects
 -- interpreted this way. See 'Final'.
-readerToFinal :: (Member (Final m) r, MonadReader i m)
+readerToFinal :: forall m i r a
+               . (Member (Final m) r, MonadReader i m)
               => Sem (Reader i ': r) a
               -> Sem r a
-readerToFinal = interpretFinal $ \case
+readerToFinal = interpretFinal @m $ \case
   Ask       -> liftS ask
   Local f m -> do
     m' <- runS m
@@ -64,12 +67,13 @@ readerToFinal = interpretFinal $ \case
 -- /Beware/: Effects that aren't interpreted in terms of the embedded
 -- monad will have local state semantics in regards to 'State' effects
 -- interpreted this way. See 'Final'.
-stateToEmbed :: (Member (Embed m) r, MonadState s m)
+stateToEmbed :: forall m s r a
+              . (Member (Embed m) r, MonadState s m)
              => Sem (State s ': r) a
              -> Sem r a
 stateToEmbed = interpret $ \case
-  Get   -> embed get
-  Put s -> embed (put s)
+  Get   -> embed @m get
+  Put s -> embed @m (put s)
 {-# INLINE stateToEmbed #-}
 
 -----------------------------------------------------------------------------
@@ -78,10 +82,11 @@ stateToEmbed = interpret $ \case
 -- /Beware/: Effects that aren't interpreted in terms of the final
 -- monad will have local state semantics in regards to 'Writer' effects
 -- interpreted this way. See 'Final'.
-writerToFinal :: (Member (Final m) r, MonadWriter o m)
+writerToFinal :: forall m o r a
+               . (Member (Final m) r, MonadWriter o m)
               => Sem (Writer o ': r) a
               -> Sem r a
-writerToFinal = interpretFinal $ \case
+writerToFinal = interpretFinal @m $ \case
   Tell s    -> liftS (tell s)
   Listen m -> do
     m' <- runS m

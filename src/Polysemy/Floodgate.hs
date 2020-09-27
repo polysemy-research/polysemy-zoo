@@ -46,7 +46,7 @@ runFloodgate = fmap snd . runState @[Any] [] . reinterpretH
         getInitialStateT
 
       Release -> do
-        ms' <- gets (fmap unsafeCoerce . reverse)
+        ms' <- gets @[Any] (fmap unsafeCoerce . reverse)
         sequence_ ms'
         getInitialStateT
   )
