@@ -70,9 +70,12 @@ tests:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -fplugin=Polysemy.Plugin
     build-tools:
     - hspec-discover  >= 2.0
     dependencies:
     - polysemy >= 1.2.0.0
+    - polysemy-plugin >= 0.2
+    - exceptions >= 0.10.0 && < 0.11
     - polysemy-zoo
     - hspec >= 2.6.0 && < 3
