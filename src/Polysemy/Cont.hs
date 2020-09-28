@@ -1,4 +1,4 @@
-{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE AllowAmbiguousTypes, Trustworthy #-}
 module Polysemy.Cont
   (-- * Effect
     Cont(..)
@@ -56,7 +56,7 @@ callCC :: forall ref r a
        .  Member (Cont ref) r
        => ((forall b. a -> Sem r b) -> Sem r a)
        -> Sem r a
-callCC cc = subst (\ref -> cc (jump ref)) pure
+callCC cc = subst @ref (\ref -> cc (jump ref)) pure
 {-# INLINE callCC #-}
 
 -----------------------------------------------------------------------------

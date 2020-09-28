@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 module Polysemy.Final.NonDet
   (
     module Polysemy.NonDet
@@ -16,10 +17,11 @@ import Polysemy.Final
 -- /Beware/: Effects that aren't interpreted in terms of the final
 -- monad will have local state semantics in regards to 'NonDet' effects
 -- interpreted this way. See 'Final'.
-nonDetToFinal :: (Member (Final m) r, Alternative m)
+nonDetToFinal :: forall m r a
+               . (Member (Final m) r, Alternative m)
               => Sem (NonDet ': r) a
               -> Sem r a
-nonDetToFinal = interpretFinal $ \case
+nonDetToFinal = interpretFinal @m $ \case
   Empty -> pure empty
   Choose left right -> do
     left'  <- runS left

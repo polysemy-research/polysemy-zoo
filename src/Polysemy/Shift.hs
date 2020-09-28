@@ -1,4 +1,4 @@
-{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE AllowAmbiguousTypes, Trustworthy #-}
 module Polysemy.Shift
   (
     module Polysemy.Cont
@@ -62,10 +62,11 @@ import Polysemy.Internal.Union
 -- It may sometimes become necessary to handle such cases, in
 -- which case such failure may be detected by using 'reset\'' together
 -- with the provided continuation.
-shift :: Member (Shift ref s) r
+shift :: forall ref s r a
+       . Member (Shift ref s) r
       => ((a -> Sem r s) -> Sem r s)
       -> Sem r a
-shift cc = trap $ \ref -> cc (invoke ref)
+shift cc = trap @ref $ \ref -> cc (invoke ref)
 {-# INLINE shift #-}
 
 -----------------------------------------------------------------------------

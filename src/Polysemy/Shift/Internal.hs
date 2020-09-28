@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE AllowAmbiguousTypes, TemplateHaskell #-}
 module Polysemy.Shift.Internal where
 
 import Polysemy

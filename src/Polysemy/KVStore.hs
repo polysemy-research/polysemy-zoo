@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE AllowAmbiguousTypes, TemplateHaskell #-}
 
 module Polysemy.KVStore
   ( -- * Effect
@@ -40,8 +40,8 @@ writeKV k = updateKV k . Just
 {-# INLINE writeKV #-}
 
 
-deleteKV :: Member (KVStore k v) r => k -> Sem r ()
-deleteKV k = updateKV k Nothing
+deleteKV :: forall k v r. Member (KVStore k v) r => k -> Sem r ()
+deleteKV k = updateKV k (Nothing @v)
 {-# INLINE deleteKV #-}
 
 
@@ -64,8 +64,8 @@ lookupOrThrowKV f k =
 -- |
 --
 -- @since 0.3.1.0
-existsKV :: Member (KVStore k v) r => k -> Sem r Bool
-existsKV = fmap isJust . lookupKV
+existsKV :: forall k v r. Member (KVStore k v) r => k -> Sem r Bool
+existsKV = fmap isJust . lookupKV @k @v
 
 
 ------------------------------------------------------------------------------

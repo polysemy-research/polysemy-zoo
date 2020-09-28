@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3ca3f0fd7140b4210529e77e057687ebd67bb4477155611458e964afa5cdc192
+-- hash: 10effff79a5ce4ecbb0f9ab6f98d553ff063aebf33c62472e65323daa15daca2
 
 name:           polysemy-zoo
 version:        0.7.0.0
@@ -64,22 +64,21 @@ library
   hs-source-dirs:
       src
   default-extensions: DataKinds DeriveFunctor FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables StandaloneDeriving TypeApplications TypeOperators TypeFamilies UnicodeSyntax
-  ghc-options: -fplugin=Polysemy.Plugin -Wall
+  ghc-options: -Wall
   build-depends:
       async >=2.2 && <3
     , base >=4.9 && <5
     , compact >=0.1.0.1
-    , constraints >=0.10.1 && <0.12
+    , constraints >=0.10.1 && <0.13
     , containers >=0.5 && <0.7
     , contravariant <2
     , exceptions >=0.10.0 && <0.11
-    , ghc-prim >=0.5.2 && <0.6
+    , ghc-prim >=0.5.2 && <0.7
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy >=1.2.1.0
-    , polysemy-plugin >=0.2
-    , random >=1.1 && <1.2
+    , random >=1.1 && <1.3
     , reflection >=2.1.4 && <3.0.0
-    , streaming
+    , streaming >=0.2 && <0.3
     , text >=1.1.0 && <1.3
     , transformers >=0.5.2.0 && <0.6
   default-language: Haskell2010
@@ -93,7 +92,6 @@ test-suite polysemy-zoo-test
       ContSpec
       FinalSpec
       FloodgateSpec
-      IdempotentLoweringSpec
       KVStoreSpec
       RevStateSpec
       SeveralSpec
@@ -102,26 +100,26 @@ test-suite polysemy-zoo-test
   hs-source-dirs:
       test
   default-extensions: DataKinds DeriveFunctor FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables StandaloneDeriving TypeApplications TypeOperators TypeFamilies UnicodeSyntax
-  ghc-options: -fplugin=Polysemy.Plugin -Wall -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N -fplugin=Polysemy.Plugin
   build-tool-depends:
       hspec-discover:hspec-discover >=2.0
   build-depends:
       async >=2.2 && <3
     , base >=4.9 && <5
     , compact >=0.1.0.1
-    , constraints >=0.10.1 && <0.12
+    , constraints >=0.10.1 && <0.13
     , containers >=0.5 && <0.7
     , contravariant <2
     , exceptions >=0.10.0 && <0.11
-    , ghc-prim >=0.5.2 && <0.6
+    , ghc-prim >=0.5.2 && <0.7
     , hspec >=2.6.0 && <3
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy >=1.2.0.0
     , polysemy-plugin >=0.2
     , polysemy-zoo
-    , random >=1.1 && <1.2
+    , random >=1.1 && <1.3
     , reflection >=2.1.4 && <3.0.0
-    , streaming
+    , streaming >=0.2 && <0.3
     , text >=1.1.0 && <1.3
     , transformers >=0.5.2.0 && <0.6
   default-language: Haskell2010
