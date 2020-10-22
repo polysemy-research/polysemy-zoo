@@ -35,6 +35,7 @@ dependencies:
 - async >= 2.2 && < 3
 - streaming >= 0.2 && < 0.3
 - compact >= 0.1.0.1
+- optics >= 0.3 && < 0.4
 
 
 ghc-options:

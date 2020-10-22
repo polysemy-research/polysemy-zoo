@@ -16,10 +16,12 @@ module Polysemy.KVStore
     -- * Interpretations
   , runKVStoreAsState
   , runKVStorePurely
+  , runKVStoreAsKVStore
   ) where
 
 import qualified Data.Map as M
 import           Data.Maybe (isJust)
+import           Optics
 import           Polysemy
 import           Polysemy.Error
 import           Polysemy.State
@@ -99,3 +101,8 @@ runKVStorePurely
 runKVStorePurely m = runState m . runKVStoreAsState
 {-# INLINE runKVStorePurely #-}
 
+runKVStoreAsKVStore :: forall k v k' v' r a. Getter k k' -> Iso' v' v -> Sem (KVStore k v ': r) a -> Sem (KVStore k' v' ': r) a
+runKVStoreAsKVStore f g = reinterpret $ \case
+  LookupKV k   -> fmap (view g) <$> lookupKV @k' @v' (view f k)
+  UpdateKV k v -> updateKV @k' @v' (view f k) (fmap (review g) v)
+{-# INLINE runKVStoreAsKVStore #-}

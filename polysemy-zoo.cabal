@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a5563140d5d76f52bdcb2c1def770fca8613155455f2e76e5286d6a5cd6505a3
+-- hash: bc374023f5749c50278598b336e9a3be89e5562b2f9dd843482ebb038795a620
 
 name:           polysemy-zoo
 version:        0.7.0.1
@@ -75,6 +75,7 @@ library
     , exceptions >=0.10.0 && <0.11
     , ghc-prim >=0.5.2 && <0.7
     , mtl >=2.0.1.0 && <3.0.0.0
+    , optics >=0.3 && <0.4
     , polysemy >=1.2.1.0
     , random >=1.1 && <1.3
     , reflection >=2.1.4 && <3.0.0
@@ -114,6 +115,7 @@ test-suite polysemy-zoo-test
     , ghc-prim >=0.5.2 && <0.7
     , hspec >=2.6.0 && <3
     , mtl >=2.0.1.0 && <3.0.0.0
+    , optics >=0.3 && <0.4
     , polysemy >=1.2.0.0
     , polysemy-plugin >=0.2
     , polysemy-zoo
