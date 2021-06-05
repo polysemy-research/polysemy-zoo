@@ -80,7 +80,8 @@ absorbMonadThrow
        -- or 'C.MonadThrow' for
        -- 'Sem'. This might be something with type @'C.MonadCatch' e m => m a@.
   -> Sem r a
-absorbMonadThrow = absorbMonadCatch
+absorbMonadThrow =
+  absorbWithSem @C.MonadThrow @Action (CatchDict E.throw E.catch) (Sub Dict)
 {-# INLINABLE absorbMonadThrow #-}
 
 ------------------------------------------------------------------------------
