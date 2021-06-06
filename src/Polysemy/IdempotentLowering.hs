@@ -89,7 +89,7 @@ nat' f = pure $ coerce $ Nat' f
     -> base (∀ z. Sem (e ': r) z -> m z)
 fi .@! gi = do
   f <- fi
-  g <- gi f
+  g <- gi (\x -> f x)
   nat $ \z -> f $ g z
 infixl 8 .@!
 
@@ -112,7 +112,7 @@ infixl 8 .@!
     -> base (∀ z. Sem (e ': r) z -> m (f z))
 fi .@@! gi = do
   f <- fi
-  g <- gi f
+  g <- gi (\x -> f x)
   nat' $ \z -> f $ g z
 infixl 8 .@@!
 

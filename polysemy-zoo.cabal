@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a5563140d5d76f52bdcb2c1def770fca8613155455f2e76e5286d6a5cd6505a3
+-- hash: 059b2cd3ed165884cb431bf574335de75fffc16b7f2c20755d5cf8881e475352
 
 name:           polysemy-zoo
 version:        0.7.0.1
@@ -63,7 +63,20 @@ library
       Paths_polysemy_zoo
   hs-source-dirs:
       src
-  default-extensions: DataKinds DeriveFunctor FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables StandaloneDeriving TypeApplications TypeOperators TypeFamilies UnicodeSyntax
+  default-extensions:
+      DataKinds
+      DeriveFunctor
+      FlexibleContexts
+      GADTs
+      LambdaCase
+      PolyKinds
+      RankNTypes
+      ScopedTypeVariables
+      StandaloneDeriving
+      TypeApplications
+      TypeOperators
+      TypeFamilies
+      UnicodeSyntax
   ghc-options: -Wall
   build-depends:
       async >=2.2 && <3
@@ -73,12 +86,12 @@ library
     , containers >=0.5 && <0.7
     , contravariant <2
     , exceptions >=0.10.0 && <0.11
-    , ghc-prim >=0.5.2 && <0.7
+    , ghc-prim >=0.5.2 && <0.8
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy >=1.2.1.0
     , random >=1.1 && <1.3
     , reflection >=2.1.4 && <3.0.0
-    , streaming >=0.2 && <0.3
+    , streaming ==0.2.*
     , text >=1.1.0 && <1.3
     , transformers >=0.5.2.0 && <0.6
   default-language: Haskell2010
@@ -99,7 +112,20 @@ test-suite polysemy-zoo-test
       Paths_polysemy_zoo
   hs-source-dirs:
       test
-  default-extensions: DataKinds DeriveFunctor FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables StandaloneDeriving TypeApplications TypeOperators TypeFamilies UnicodeSyntax
+  default-extensions:
+      DataKinds
+      DeriveFunctor
+      FlexibleContexts
+      GADTs
+      LambdaCase
+      PolyKinds
+      RankNTypes
+      ScopedTypeVariables
+      StandaloneDeriving
+      TypeApplications
+      TypeOperators
+      TypeFamilies
+      UnicodeSyntax
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N -fplugin=Polysemy.Plugin
   build-tool-depends:
       hspec-discover:hspec-discover >=2.0
@@ -111,7 +137,7 @@ test-suite polysemy-zoo-test
     , containers >=0.5 && <0.7
     , contravariant <2
     , exceptions >=0.10.0 && <0.11
-    , ghc-prim >=0.5.2 && <0.7
+    , ghc-prim >=0.5.2 && <0.8
     , hspec >=2.6.0 && <3
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy >=1.2.0.0
@@ -119,7 +145,7 @@ test-suite polysemy-zoo-test
     , polysemy-zoo
     , random >=1.1 && <1.3
     , reflection >=2.1.4 && <3.0.0
-    , streaming >=0.2 && <0.3
+    , streaming ==0.2.*
     , text >=1.1.0 && <1.3
     , transformers >=0.5.2.0 && <0.6
   default-language: Haskell2010

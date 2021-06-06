@@ -28,7 +28,7 @@ absorbCont
        -- 'Sem'. This might be something with type @'C.MonadCont' m => m a@.
     -> Sem r a
 absorbCont = absorbWithSem @C.MonadCont @Action
-  (ContDict (callCC @ref))
+  (ContDict (\main -> callCC @ref $ \exit -> main exit))
   (Sub Dict)
 {-# INLINEABLE absorbCont #-}
 
