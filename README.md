@@ -28,4 +28,4 @@ Here is a curated list of other great effects and interops:
 
 * [kowainik/co-log](https://github.com/kowainik/co-log/tree/master/co-log-polysemy)
 * [adamConnerSax/polysemy-RandomFu](https://hackage.haskell.org/package/polysemy-RandomFu)
-
+* [lehmacdj/polysemy-readline](https://hackage.haskell.org/package/polysemy-readline)
