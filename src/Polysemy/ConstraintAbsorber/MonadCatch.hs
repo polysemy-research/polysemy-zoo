@@ -37,7 +37,7 @@ import qualified Polysemy.Error                as E
 -- | Like 'E.runError' but applies a given function from 'SomeException'
 -- to some other type, typically something less opaque.
 -- e.g.:
---  @runErrorForMonadCatch C.displayException@
+--  @runMonadCatch C.displayException@
 -- 
 -- @since 0.7.0.0
 runMonadCatch
