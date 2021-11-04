@@ -1,8 +1,11 @@
 # Changelog for polysemy-zoo
 
+## 0.7.0.2 (2020-11-04)
+- Add support for GHC 9.0
+  ([#70](https://github.com/polysemy-research/polysemy-zoo/pull/70), thanks to @funketh)
 
 ## 0.7.0.1 (2020-10-06)
-* As a stop-gap for [#65](https://github.com/polysemy-research/polysemy-zoo/issues/65), the library has been rewritten to no longer use `polysemy-plugin`. This should allow GHC 8.10 users to use the library.
+- As a stop-gap for [#65](https://github.com/polysemy-research/polysemy-zoo/issues/65), the library has been rewritten to no longer use `polysemy-plugin`. This should allow GHC 8.10 users to use the library.
 
 ## 0.7.0.0 (2020-02-14)
 ### Breaking Changes
