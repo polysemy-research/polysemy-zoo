@@ -7,7 +7,7 @@ cabal-version: 1.12
 -- hash: 21ba8ceb18ae6184f65237f20847dd9e3f23ad2838d46fc1cd6af719dac66eb3
 
 name:           polysemy-zoo
-version:        0.7.0.2
+version:        0.8.0.0
 synopsis:       Experimental, user-contributed effects and interpreters for polysemy
 description:    Please see the README on GitHub at <https://github.com/isovector/polysemy-zoo#readme>
 category:       Polysemy

@@ -1,4 +1,7 @@
 # Changelog for polysemy-zoo
+## 0.8.0.0
+- Removed IdempotentLowering since “IdempotentLowering is old, unreliable, outclassed by Final, and deprecated.”
+  [#74](https://github.com/polysemy-research/polysemy-zoo/issues/74)
 
 ## 0.7.0.2 (2020-11-04)
 - Add support for GHC 9.0
