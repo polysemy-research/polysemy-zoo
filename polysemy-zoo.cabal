@@ -47,7 +47,6 @@ library
       Polysemy.Final.NonDet
       Polysemy.Floodgate
       Polysemy.Fresh
---      Polysemy.IdempotentLowering
       Polysemy.Input.Streaming
       Polysemy.KVStore
       Polysemy.Operators
