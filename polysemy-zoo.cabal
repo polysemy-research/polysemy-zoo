@@ -3,8 +3,6 @@ cabal-version: 1.12
 -- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 21ba8ceb18ae6184f65237f20847dd9e3f23ad2838d46fc1cd6af719dac66eb3
 
 name:           polysemy-zoo
 version:        0.7.0.2
@@ -47,7 +45,6 @@ library
       Polysemy.Final.NonDet
       Polysemy.Floodgate
       Polysemy.Fresh
-      Polysemy.IdempotentLowering
       Polysemy.Input.Streaming
       Polysemy.KVStore
       Polysemy.Operators
