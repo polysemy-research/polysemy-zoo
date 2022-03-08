@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           polysemy-zoo
-version:        0.7.0.2
+version:        0.8.0.0
 synopsis:       Experimental, user-contributed effects and interpreters for polysemy
 description:    Please see the README on GitHub at <https://github.com/isovector/polysemy-zoo#readme>
 category:       Polysemy
@@ -85,7 +85,7 @@ library
     , exceptions >=0.10.0 && <0.11
     , ghc-prim >=0.5.2 && <0.8
     , mtl >=2.0.1.0 && <3.0.0.0
-    , polysemy >=1.2.1.0
+    , polysemy >=1.4.0.0
     , random >=1.1 && <1.3
     , reflection >=2.1.4 && <3.0.0
     , streaming ==0.2.*
