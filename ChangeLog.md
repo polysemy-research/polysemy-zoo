@@ -1,7 +1,10 @@
 # Changelog for polysemy-zoo
-## Unreleased changes
+## 0.8.0.0 (2022-03-08)
 ### Breaking Changes
-- Removed ‘Polysemy.IdempotentLowering`, previously deprecated in favor of `Polysemy.Final`.
+- Removed `Polysemy.IdempotentLowering`, previously deprecated in favor of `Polysemy.Final`.
+
+### Other Changes
+- Updated `asyncToIOFinalGlobal` to support `cancel`.
 
 ## 0.7.0.2 (2020-11-04)
 - Add support for GHC 9.0

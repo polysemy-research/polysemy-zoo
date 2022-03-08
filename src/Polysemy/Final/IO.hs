@@ -32,6 +32,7 @@ asyncToIOFinalGlobal = interpretFinalGlobal $ \case
     m'  <- runS m
     liftS $ A.async (inspect ins <$> m')
   Await a -> liftS (A.wait a)
+  Cancel a -> liftS (A.cancel a)
 {-# INLINE asyncToIOFinalGlobal #-}
 ------------------------------------------------------------------------------
 -- | 'resourceToIOFinal' implemented using 'interpretFinalGlobal'.
