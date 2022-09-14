@@ -3,7 +3,7 @@ module Polysemy.Reader.Compact where
 import           Polysemy
 import           Polysemy.Reader
 
-import           Data.Compact
+import           GHC.Compact
 
 -----------------------------------------------------------------------------
 -- | Run a 'Reader' effect by compacting a value; otherwise behaves as normal.
