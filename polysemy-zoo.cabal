@@ -78,7 +78,7 @@ library
   build-depends:
       async >=2.2 && <3
     , base >=4.9 && <5
-    , compact >=0.1.0.1
+    , ghc-compact >=0.1.0.0
     , constraints >=0.10.1 && <0.14
     , containers >=0.5 && <0.7
     , contravariant <2
