@@ -1,4 +1,9 @@
 # Changelog for polysemy-zoo
+
+## 0.8.1.0 (2022-09-16)
+- Add support for GHC 9.2
+  ([#79](https://github.com/polysemy-research/polysemy-zoo/pull/79), thanks to @spacekitteh)
+
 ## 0.8.0.0 (2022-03-08)
 ### Breaking Changes
 - Removed `Polysemy.IdempotentLowering`, previously deprecated in favor of `Polysemy.Final`.
