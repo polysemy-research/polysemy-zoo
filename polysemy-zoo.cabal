@@ -103,6 +103,7 @@ test-suite polysemy-zoo-test
       FinalSpec
       FloodgateSpec
       KVStoreSpec
+      RandomSpec
       RevStateSpec
       SeveralSpec
       ShiftSpec
