@@ -86,7 +86,7 @@ library
     , ghc-prim >=0.5.2 && <0.9
     , mtl >=2.0.1.0 && <3.0.0.0
     , polysemy >=1.4.0.0
-    , random >=1.1 && <1.3
+    , random >=1.2.0 && <1.3
     , reflection >=2.1.4 && <3.0.0
     , streaming ==0.2.*
     , text >=1.1.0 && <1.3
@@ -141,7 +141,7 @@ test-suite polysemy-zoo-test
     , polysemy >=1.2.0.0
     , polysemy-plugin >=0.2
     , polysemy-zoo
-    , random >=1.1 && <1.3
+    , random >=1.2.0 && <1.3
     , reflection >=2.1.4 && <3.0.0
     , streaming ==0.2.*
     , text >=1.1.0 && <1.3
