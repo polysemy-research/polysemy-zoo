@@ -20,8 +20,8 @@ import qualified System.Random as R
 ------------------------------------------------------------------------------
 -- | An effect capable of providing 'R.Random' values.
 data Random m a where
-  Random :: R.Random x => Random m x
-  RandomR :: R.Random x => (x, x) -> Random m x
+  Random :: R.Uniform x => Random m x
+  RandomR :: R.UniformRange x => (x, x) -> Random m x
 
 makeSem ''Random
 
@@ -36,11 +36,11 @@ runRandom
     -> Sem r (q, a)
 runRandom q = runState q . reinterpret (\case
   Random -> do
-    ~(a, q') <- gets @q R.random
+    ~(a, q') <- gets @q R.uniform
     put q'
     pure a
   RandomR r -> do
-    ~(a, q') <- gets @q $ R.randomR r
+    ~(a, q') <- gets @q $ R.uniformR r
     put q'
     pure a
                                        )
