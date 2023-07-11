@@ -30,13 +30,26 @@ import qualified System.Random as R
 ------------------------------------------------------------------------------
 -- | An effect capable of providing 'R.Random' values.
 data Random m a where
-  -- | Yield a value, randomly sampled from the uniform distribution over all values of the given type.
   Random :: R.Uniform x => Random m x
-  -- | Yield a value, randomly sampled from the uniform distribution over the given inclusive range.
   RandomR :: R.UniformRange x => (x, x) -> Random m x
 
-makeSem ''Random
+makeSem_ ''Random
 
+------------------------------------------------------------------------------
+-- | Yield a value, randomly sampled from the uniform distribution over all values of the given type.
+-- /e.g./ 'p <- random @Bool'
+random :: forall x r.
+          (R.Uniform x
+          ,Member Random r) =>
+          Sem r x
+
+------------------------------------------------------------------------------
+-- | Yield a value, randomly sampled from the uniform distribution over the given inclusive range.
+-- /e.g./ 'p <- random @Int (-10, 10)'
+randomR :: forall x r.
+           (R.UniformRange x
+           ,Member Random r) =>
+           (x, x) -> Sem r x
 
 ------------------------------------------------------------------------------
 -- | Run a 'Random' effect with an explicit 'R.RandomGen'.
@@ -83,16 +96,6 @@ weighted :: forall a r.
             (Member Random r) =>
             NonEmpty (Natural, a) -> Sem r a
 weighted xs = consume xs <$> randomR (0, (sum $ fst <$> xs) - 1)
-{-weighted ((w0, x0) :| xs) = do
-  let weightedXs = scanl1 (\(acc, _) (w, x) -> (t + w, x)) xs
-      total = case weightedXs of
-        _ : _ -> w0 + (fst $ last weightedXs)
-        []    -> w0
-  i <- randomR (0, total)
-  let result = dropWhile (\(w, _) -> w <= i) $ weightedXs
-  return case result of
-    (_, x) : _ -> x
-    _ -> x0-}
 
 ------------------------------------------------------------------------------
 -- | Pick randomly from a non-empty possibly-infinite list, using normalized weight annotations.
@@ -110,15 +113,6 @@ consume :: (Num w, Ord w) => NonEmpty (w, a) -> w -> a
 consume ((_, x) :| []) _ = x
 consume ((weight, x) :| (x' : xs)) threshold | threshold < weight = x
                                              | otherwise          = consume (x' :| xs) (threshold - weight)
-
-  {-let weightedXs = scanl1 (\(acc, _) (w, x) -> (t + w, x)) xs
-      total = case weightedXs of
-        _ : _ -> w0 + (fst $ last weightedXs)
-        []    -> w0
-  let result = dropWhile (\(w, _) -> w <= i) $ weightedXs
-  return case result of
-    (_, x) : _ -> x
-    _ -> x0-}
 
 ------------------------------------------------------------------------------
 -- | Generate n random values.
