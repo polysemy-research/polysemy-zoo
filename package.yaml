@@ -1,9 +1,9 @@
 name:                polysemy-zoo
-version:             0.8.1.0
-github:              "isovector/polysemy-zoo"
+version:             0.8.2.0
+github:              "polysemy-research/polysemy-zoo"
 license:             BSD3
 author:              "Sandy Maguire"
-maintainer:          "sandy@sandymaguire.me"
+maintainer:          "https://funprog.zulipchat.com/#narrow/stream/216942-Polysemy"
 copyright:           "2019 Sandy Maguire"
 
 extra-source-files:
@@ -29,9 +29,9 @@ dependencies:
 - polysemy >= 1.4.0.0
 - random >= 1.1 && < 1.3
 - reflection >= 2.1.4 && < 3.0.0
-- transformers >= 0.5.2.0 && < 0.6
-- text >= 1.1.0 && < 1.3
-- ghc-prim >= 0.5.2 && < 0.9
+- transformers >= 0.5.2.0 && < 0.7
+- text >= 1.1.0 && < 2.1
+- ghc-prim >= 0.5.2 && < 0.10
 - async >= 2.2 && < 3
 - streaming >= 0.2 && < 0.3
 - ghc-compact >=0.1.0.0
