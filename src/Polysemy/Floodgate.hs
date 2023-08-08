@@ -13,6 +13,7 @@ module Polysemy.Floodgate
   ) where
 
 import Control.Monad
+import Data.Sequence (Seq, (|>))
 import GHC.Types
 import Polysemy
 import Polysemy.State
@@ -36,17 +37,17 @@ makeSem ''Floodgate
 runFloodgate
     :: Sem (Floodgate ': r) a
     -> Sem r a
-runFloodgate = fmap snd . runState @[Any] [] . reinterpretH
+runFloodgate = fmap snd . runState @(Seq Any) Seq.empty . reinterpretH
   ( \case
       Hold m -> do
         m' <- fmap void $ runT m
         -- These 'Any's are here because the monadic action references 'r', and
         -- if we exposed that, 'r' would be an infinite type
-        modify (unsafeCoerce @_ @Any (raise $ runFloodgate m') :)
+        modify (unsafeCoerce @_ @Any (raise $ runFloodgate m') |>)
         getInitialStateT
 
       Release -> do
-        ms' <- gets @[Any] (fmap unsafeCoerce . reverse)
+        ms' <- gets @(Seq Any) (fmap unsafeCoerce)
         sequence_ ms'
         getInitialStateT
   )
